@@ -1,0 +1,27 @@
+# ---- La clave de firma de Android NUNCA entra en el repositorio ----
+# Si se pierde, no se puede volver a publicar una actualizacion en Play. Y si se sube a un
+# repositorio publico, cualquiera podria firmar una app haciendose pasar por esta.
+# Va lo primero y desde el primer dia, antes de que exista ninguna clave.
+*.keystore
+*.jks
+keystore.properties
+
+# ---- Dependencias y compilados (se regeneran) ----
+node_modules/
+dist/
+dist-*/
+build/
+.gradle/
+android/app/build/
+android/build/
+android/.idea/
+android/capacitor-cordova-android-plugins/
+android/app/src/main/assets/public/
+
+# ---- Salidas de las herramientas (capturas, versiones montadas) ----
+capturas/
+
+# ---- Basura del sistema ----
+.DS_Store
+Thumbs.db
+desktop.ini

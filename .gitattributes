@@ -1,0 +1,22 @@
+# Finales de linea LF en el texto. El ordenador del autor tiene core.autocrlf=true: sin esta
+# regla, el mismo archivo saldria con finales distintos segun donde se clone (el ordenador o
+# Claude en la nube, desde el movil) y git veria cambios que no existen.
+*.md    text eol=lf
+*.html  text eol=lf
+*.js    text eol=lf
+*.ts    text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.sh    text eol=lf
+*.py    text eol=lf
+
+# Binarios: que git no intente nunca "arreglarles" los finales de linea.
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.mp3   binary
+*.ogg   binary
+*.ttf   binary
+*.woff2 binary
