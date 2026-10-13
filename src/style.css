@@ -1,0 +1,137 @@
+/* Hive Breaker — estilos de la página. El juego entero es un canvas; esto solo coloca el canvas
+   y da forma a la ventana de ajustes. Un solo aspecto oscuro, a propósito (es un juego).
+   Disposición: una columna vertical a pantalla completa; los ajustes flotan encima. */
+:root {
+  --bg: #121519;          /* fondo fuera del juego */
+  --panel: #1c2126;       /* ventanas */
+  --ink: #f1efe8;         /* texto */
+  --muted: #9aa5ab;
+  --accent: #ffd23f;      /* amarillo de seguridad */
+  --danger: #e5484d;
+  --danger-ink: #ffb3b5;
+  --on-accent: #1c2126;
+  --line: rgba(255, 255, 255, 0.12);
+  --row: rgba(255, 255, 255, 0.04);
+  --scrim: rgba(8, 10, 12, 0.6);
+  --err-bg: #5b1215;
+  --font-display: 'Teko', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --font-body: 'Barlow Semi Condensed', 'Roboto Condensed', 'Arial Narrow', sans-serif;
+  color-scheme: dark;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--font-body);
+}
+
+[hidden] { display: none !important; }
+
+#game {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: env(safe-area-inset-top, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+}
+
+#cv { display: block; width: 100%; height: 100%; touch-action: none; }
+
+#menu {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--scrim);
+}
+
+.panel {
+  width: min(360px, 100%);
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 18px 16px 12px;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  touch-action: pan-y;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-align: center;
+  color: var(--accent);
+}
+
+.panel h3 {
+  margin: 14px 4px 2px;
+  font: 600 13px var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.rows { display: flex; flex-direction: column; gap: 8px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--row);
+  color: var(--ink);
+  font: 600 19px var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+.row .lbl { min-width: 0; }
+.row .val { font-family: var(--font-display); font-size: 25px; letter-spacing: 0.04em; color: var(--accent); }
+.row:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.row.danger { color: var(--danger-ink); border-color: var(--danger); }
+.row.danger.armed { background: var(--danger); color: var(--ink); }
+.row.close {
+  justify-content: center;
+  margin-top: 6px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-display);
+  font-size: 27px;
+  letter-spacing: 0.06em;
+}
+
+.ver { margin: 12px 0 0; text-align: center; font-size: 13px; color: var(--muted); }
+
+#err {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 9;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--err-bg);
+  color: var(--ink);
+  font: 13px/1.35 ui-monospace, monospace;
+  white-space: pre-wrap;
+}

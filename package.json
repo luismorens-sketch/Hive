@@ -1,0 +1,11 @@
+{
+  "name": "hive-breaker",
+  "private": true,
+  "description": "Hive Breaker, Arcade Idle para Android. Cómo se trabaja: CLAUDE.md. Diseño: docs/HIVE_Funcional.md.",
+  "scripts": {
+    "build": "node tools/build.js",
+    "check": "node tools/check.js",
+    "sim": "node tools/sim_balance.js",
+    "capture": "node tools/build.js && node tools/capture.js"
+  }
+}
