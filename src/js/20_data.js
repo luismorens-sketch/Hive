@@ -63,6 +63,7 @@
       hideRange: 3,        // los drones se refugian si hay bichos a menos de 3 casillas
       secondChance: true,
       orbitalFrom: 5,      // el Orbital Strike se desbloquea en la noche 5 (funcional 4.4)
+      lootDawn: 30,        // el botín que quedó en el suelo dura 30 s tras el amanecer
     },
 
     orbital: { delay: 1.5, radius: 1.6, dmg: 160 },

@@ -48,6 +48,9 @@
     row(T('autopilot'), onoff(G.autopilot), function () { G.autopilot = !G.autopilot; render(); });
     row(T('speed4'), onoff(G.speed > 1), function () { G.speed = G.speed > 1 ? 1 : 4; render(); });
     row(T('show_fps'), onoff(G.showFps), function () { G.showFps = !G.showFps; render(); });
+    const log = G.st.ads && G.st.ads.log ? G.st.ads.log : {};
+    const total = Object.keys(log).reduce(function (a, k) { return a + log[k]; }, 0);
+    row(T('ads_log'), String(total), function () {}, 'info');
     row(T('add_money'), null, function () {
       const R = G.st.regions[G.st.cur];
       R.credits += 500;

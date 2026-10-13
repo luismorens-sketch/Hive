@@ -19,6 +19,25 @@
     paused: false,
     target: null, showGuide: false,
     acc: 0, last: 0, saveT: 0,
+    hitstop: 0, slow: 0,   // golpes grandes: pausa corta y cámara lenta (funcional 13.1 regla 6)
+  };
+
+  // Vídeo recompensado SIMULADO (funcional 15.3): da la recompensa sin anuncio y lo apunta para
+  // medir cuántos se usarían. El primero de la vida del jugador es gratis («THIS ONE'S ON US»).
+  G.watchAd = function (placement, cb) {
+    const st = G.st;
+    const free = !st.ads.seen;
+    st.ads.seen++;
+    st.ads.log[placement] = (st.ads.log[placement] || 0) + 1;
+    if (free) { cb(); return; }
+    HB.HUD.ad = { t: 0, dur: 2, cb: cb, done: false };
+  };
+
+  // Interruptor de la salida para los drones: DEFENSA → EQUILIBRIO → BENEFICIO (funcional 5.4).
+  G.cyclePrio = function (e) {
+    const order = ['defense', 'balanced', 'profit'];
+    e.prio = order[(order.indexOf(e.prio || 'balanced') + 1) % order.length];
+    G.save();
   };
 
   // ---------- Guardado (localStorage; en Android irá también a Preferences, hito F3) ----------
@@ -60,8 +79,9 @@
   // ---------- Un paso de lógica ----------
   function step(dt) {
     const st = G.st, inp = G.input;
-    if (G.autopilot) HB.Advisor.bot(st, G.botMem, inp);
+    if (G.autopilot) { HB.Advisor.decide(st, G.botMem); HB.Advisor.bot(st, G.botMem, inp); }
     else HB.Input.read(inp);
+    if (HB.HUD.modal(st)) return;   // con una ventana abierta el juego espera
     G.prevX = st.cmd.x; G.prevY = st.cmd.y;
     HB.Logic.step(st, inp, dt);
     if (st.tick % HB.CONFIG.econEvery === 0) HB.Logic.econ(st, dt * HB.CONFIG.econEvery);
@@ -88,6 +108,8 @@
     let vdt = 0;
     if (!G.paused) {
       vdt = real * G.speed;
+      if (G.hitstop > 0) { G.hitstop -= real; vdt = 0; }
+      else if (G.slow > 0) { G.slow -= real; vdt *= HB.FX.slowmoScale; }
       G.acc += vdt;
       let n = 0;
       while (G.acc >= dt && n < 40) { step(dt); G.acc -= dt; n++; }
@@ -99,7 +121,8 @@
     const idle = performance.now() - HB.Input.lastInput > 6000 && !st.cmd.moving;
     G.showGuide = G.target && (G.target.kind === 'pay' || st.stats.zones < 2 || idle || G.autopilot);
 
-    HB.Render.frame(G, G.acc / dt, vdt || real * 0.0001);
+    HB.Audio.music(st.regions[st.cur].phase);
+    HB.Render.frame(G, G.acc / dt, vdt || (HB.HUD.modal(st) ? real : real * 0.0001));
 
     G.saveT += real;
     if (st.needSave || G.saveT > HB.CONFIG.save.every) G.save();
@@ -122,11 +145,6 @@
     HB.View.init(cv);
     HB.Input.attach(cv);
     HB.Menu.init();
-    HB.Input.onTap = function (x, y) {
-      const gb = HB.HUD.gear;
-      if (HB.dist(x, y, gb.x, gb.y) < 32) { HB.Menu.open(); return true; }
-      return false;
-    };
 
     let st = null;
     if (hotData && hotData.save) st = HB.State.deserialize(hotData.save);

@@ -9,7 +9,7 @@
   let streak = 0, streakT = -10;
 
   // Separación mínima entre dos sonidos iguales, para que no se amontonen.
-  const GAP = { tic: 0.028, drop: 0.03, cling: 0.024, chunk: 0.09, payTick: 0.055, clunk: 0.25 };
+  const GAP = { tic: 0.028, drop: 0.03, cling: 0.024, chunk: 0.09, payTick: 0.055, clunk: 0.25, gun: 0.05, blaster: 0.06, splat: 0.04, thwip: 0.03, bite: 0.08, hurt: 0.2, click: 0.4, cannon: 0.1 };
 
   function now() { return ac ? ac.currentTime : 0; }
 
@@ -81,7 +81,45 @@
     },
     up: function (t, o) { [784, 988, 1175, 1568].forEach(function (f, i) { tone('triangle', f, 0, t + i * 0.05, 0.14, 0.12 * o.vol); }); },
     pop: function (t, o) { tone('sine', 420 * jit(), 900, t, 0.08, 0.14 * o.vol); },
+    // combate (funcional 13.2)
+    gun: function (t, o) { noise(t, 0.04, 0.09 * o.vol, 'bandpass', 2200 * jit(), 0, 1.5); tone('square', 180 * jit(), 90, t, 0.03, 0.03 * o.vol); },
+    blaster: function (t, o) { tone('square', 1100 * jit(), 500, t, 0.05, 0.05 * o.vol); },
+    cannon: function (t, o) { tone('sine', 120, 45, t, 0.25, 0.3 * o.vol); noise(t, 0.12, 0.15 * o.vol, 'lowpass', 900); },
+    boom: function (t, o) { noise(t, 0.4, 0.28 * o.vol, 'lowpass', 1400, 120); tone('sine', 80, 35, t, 0.35, 0.3 * o.vol); },
+    splat: function (t, o) { noise(t, 0.08, 0.12 * o.vol, 'bandpass', 600 * jit(), 220, 2); tone('sine', 300 * jit(), 120, t, 0.07, 0.06 * o.vol); },
+    thwip: function (t, o) { tone('triangle', 900 * jit(), 400, t, 0.04, 0.05 * o.vol); },
+    bite: function (t, o) { noise(t, 0.05, 0.1 * o.vol, 'highpass', 1800); },
+    click: function (t, o) { tone('square', 1400, 0, t, 0.02, 0.06 * o.vol); tone('square', 900, 0, t + 0.06, 0.02, 0.05 * o.vol); },
+    zap: function (t, o) { tone('sawtooth', 220, 140, t, 0.35, 0.07 * o.vol); noise(t, 0.3, 0.05 * o.vol, 'bandpass', 3000, 0, 4); },
+    siren: function (t, o) {
+      const os = ac.createOscillator(); os.type = 'sawtooth';
+      os.frequency.setValueAtTime(420, t); os.frequency.linearRampToValueAtTime(760, t + 0.6); os.frequency.linearRampToValueAtTime(420, t + 1.2);
+      os.frequency.linearRampToValueAtTime(760, t + 1.8);
+      os.connect(gainEnv(t, 0.1, 1.9, 0.07 * o.vol)); os.start(t); os.stop(t + 2.1);
+    },
+    roar: function (t, o) { noise(t, 0.9, 0.22 * o.vol, 'lowpass', 500, 180, 3); tone('sawtooth', 70, 45, t, 0.9, 0.12 * o.vol); },
+    hurt: function (t, o) { tone('square', 220, 110, t, 0.12, 0.08 * o.vol); },
+    fanfare: function (t, o) { [523, 659, 784, 1046, 1318].forEach(function (f, i) { tone('triangle', f, 0, t + i * 0.09, 0.25, 0.13 * o.vol); }); },
+    lose: function (t, o) { [392, 330, 262].forEach(function (f, i) { tone('triangle', f, f * 0.97, t + i * 0.18, 0.3, 0.12 * o.vol); }); },
   };
+
+  // ---------- Música de la noche: percusión tensa (funcional 13.4) ----------
+  // De día, silencio (de momento). La percusión entra y sale con 1 s de transición.
+  let mus = null;
+  function drum(kind, t) {
+    if (kind === 'k') { const o = ac.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.18); o.connect(gainEnvTo(t, 0.005, 0.2, 0.5, mus.gain)); o.start(t); o.stop(t + 0.3); }
+    else if (kind === 's') { const s2 = ac.createBufferSource(); s2.buffer = noiseBuf; const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; s2.connect(f); f.connect(gainEnvTo(t, 0.003, 0.12, 0.25, mus.gain)); s2.start(t, Math.random() * 0.3); s2.stop(t + 0.2); }
+    else { const s3 = ac.createBufferSource(); s3.buffer = noiseBuf; const f = ac.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000; s3.connect(f); f.connect(gainEnvTo(t, 0.002, 0.04, 0.12, mus.gain)); s3.start(t, Math.random() * 0.3); s3.stop(t + 0.08); }
+  }
+  function gainEnvTo(t0, a, d, peak, dest) {
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+    g.connect(dest);
+    return g;
+  }
+  const PATTERN = ['k', 'h', 'h', 'h', 's', 'h', 'k', 'h', 'k', 'h', 'h', 'h', 's', 'h', 'h', 's'];
 
   HB.Audio = {
     enabled: true,
@@ -113,6 +151,33 @@
       if (g && !o.delay && last[name] !== undefined && t - last[name] < g) return;
       last[name] = t;
       try { SFX[name](t, o); } catch (e) { /* un sonido que falla no para el juego */ }
+    },
+
+    // Llamar cada fotograma con la fase del día ('day', 'warn', 'night').
+    music: function (phase) {
+      if (!ac || ac.state !== 'running') return;
+      const want = this.enabled && phase === 'night';
+      if (!mus) {
+        if (!want) return;
+        mus = { gain: ac.createGain(), next: 0, step: 0, on: false };
+        mus.gain.gain.value = 0.0001;
+        mus.gain.connect(master);
+      }
+      const t = ac.currentTime;
+      if (want !== mus.on) {
+        mus.on = want;
+        mus.gain.gain.cancelScheduledValues(t);
+        mus.gain.gain.setValueAtTime(want ? 0.0001 : 0.5, t);
+        mus.gain.gain.exponentialRampToValueAtTime(want ? 0.5 : 0.0001, t + 1.0);
+        if (want) mus.next = t + 0.1;
+      }
+      if (!mus.on) return;
+      const beat = 60 / 112 / 4;   // semicorcheas a 112 por minuto
+      while (mus.next < t + 0.2) {
+        drum(PATTERN[mus.step % PATTERN.length], mus.next);
+        mus.step++;
+        mus.next += beat;
+      }
     },
 
     // Para las pruebas automáticas (tools/capture.js): hace sonar todo y devuelve los fallos.

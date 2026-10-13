@@ -460,6 +460,7 @@
     for (let i = R._loot.length - 1; i >= 0; i--) {
       const l = R._loot[i];
       l.t += dt;
+      if (l.dawn && l.t > C().night.lootDawn) { R._loot.splice(i, 1); continue; }
       if (c.deadT > 0 || l.t < 0.4 || HB.dist(c.x, c.y, l.x, l.y) > mag) continue;
       R._loot.splice(i, 1);
       if (R.phase === 'night') R.nightLoot += l.v; else R.credits += Math.round(l.v);
@@ -480,7 +481,9 @@
   function endNight(st, R, won) {
     const N = R._night, Cn = C().night;
     const lost = R._loot.length;
-    R._loot = [];
+    // Lo que quedó en el suelo se puede recoger un rato tras el amanecer (si se gana la noche).
+    if (won) for (const l of R._loot) { l.dawn = true; l.t = 0.4; }
+    else R._loot = [];
     const loot = Math.round(R.nightLoot);
     let bonus = 0;
     if (won) {

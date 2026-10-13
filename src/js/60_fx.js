@@ -50,7 +50,7 @@
     const p = parts[i];
     p.on = true; p.kind = kind; p.x = x; p.y = y; p.z = z || 0;
     p.vx = 0; p.vy = 0; p.vz = 0; p.grav = 0; p.drag = 0;
-    p.t = 0; p.life = 0.5; p.size = 0.2; p.grow = 0; p.col = '#fff'; p.rot = 0; p.vr = 0; p.a = 1;
+    p.t = 0; p.life = 0.5; p.size = 0.2; p.grow = 0; p.col = '#fff'; p.rot = 0; p.vr = 0; p.a = 1; p.round = false;
     return p;
   }
 
@@ -85,6 +85,19 @@
         p.vx = Math.cos(a) * s; p.vy = Math.sin(a) * s * 0.55; p.vz = 3 + Math.random() * 4;
         p.grav = -12; p.drag = 1.2; p.life = 1.1 + Math.random() * 0.6; p.size = 0.09 + Math.random() * 0.06;
         p.col = CONF_COL[i % CONF_COL.length]; p.rot = Math.random() * 6; p.vr = (Math.random() - 0.5) * 18;
+      }
+    },
+
+    // gotas de baba de colores al morir un bicho (violeta, rosa ácido; dorado para el raro)
+    goo: function (x, y, n, gold) {
+      if (lowfx()) n = Math.ceil(n / 2);
+      const cols = gold ? [P.yellow, '#fff2b0', '#ffffff'] : [P.bug, P.acid, '#c27cf2', '#ff9ccf'];
+      for (let i = 0; i < n; i++) {
+        const p = part(K.CONF, x, y, 0.3);
+        const a = Math.random() * Math.PI * 2, s = 0.8 + Math.random() * 2.4;
+        p.vx = Math.cos(a) * s; p.vy = Math.sin(a) * s * 0.55; p.vz = 2 + Math.random() * 3;
+        p.grav = -11; p.drag = 1.5; p.life = 0.7 + Math.random() * 0.5; p.size = 0.06 + Math.random() * 0.06;
+        p.col = cols[i % cols.length]; p.rot = 0; p.vr = 0; p.round = true;
       }
     },
 
@@ -177,6 +190,10 @@
         } else if (p.kind === K.DUST || p.kind === K.SMOKE) {
           g.globalAlpha = (1 - k) * (p.a || 0.8);
           V.blit(puff(p.col), p.x, y, p.size * (1 + p.grow * k * 2));
+        } else if (p.kind === K.CONF && p.round) {
+          g.globalAlpha = k > 0.7 ? (1 - k) / 0.3 : 1;
+          g.fillStyle = p.col;
+          g.beginPath(); g.ellipse(p.x, y, p.size * 1.3, p.size, 0, 0, Math.PI * 2); g.fill();
         } else if (p.kind === K.CONF) {
           g.globalAlpha = k > 0.8 ? (1 - k) * 5 : 1;
           g.save(); g.translate(p.x, y); g.rotate(p.rot); g.scale(1, Math.cos(p.rot * 1.7));

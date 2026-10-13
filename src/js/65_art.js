@@ -104,97 +104,174 @@
       });
     },
 
-    // ---------- Veta ----------
+    // ---------- Veta: un montón del MISMO mineral que se recoge (se entiende sin explicarlo) ----------
     vein: function () {
-      return V.sprite('vein', 1.5, 1.5, 0.75, 1.0, function (g) {
-        shadow(g, 0.05, 0.34, 0.6, 0.14, 0.25);
-        // roca base
+      return V.sprite('vein', 1.9, 1.7, 0.95, 1.15, function (g) {
+        shadow(g, 0.05, 0.36, 0.78, 0.2, 0.28);
+        // suelo removido alrededor
+        g.fillStyle = 'rgba(120,90,55,0.45)';
+        D.ellipse(g, 0, 0.3, 0.86, 0.26); g.fill();
+        // roca madre oscura
         g.beginPath();
-        g.moveTo(-0.62, 0.35); g.lineTo(-0.55, 0.0); g.lineTo(-0.3, -0.18); g.lineTo(0.25, -0.2);
-        g.lineTo(0.58, 0.02); g.lineTo(0.62, 0.35); g.closePath();
-        D.fillStroke(g, '#6b6f78', LW);
-        g.beginPath(); g.moveTo(-0.5, 0.05); g.lineTo(-0.28, -0.12); g.lineTo(0.2, -0.14); g.lineTo(0.0, 0.08); g.closePath();
-        g.fillStyle = '#868b94'; g.fill();
-        // cristales
-        const cr = [[-0.28, 0.12, 0.17, 0.55], [0.05, 0.1, 0.22, 0.78], [0.33, 0.16, 0.15, 0.45]];
-        for (const c of cr) {
-          const x = c[0], y = c[1], w = c[2], h = c[3];
-          g.beginPath();
-          g.moveTo(x - w, y); g.lineTo(x - w * 0.8, y - h * 0.8); g.lineTo(x, y - h); g.lineTo(x + w * 0.8, y - h * 0.8);
-          g.lineTo(x + w, y); g.closePath();
-          D.fillStroke(g, P.ore, LW);
-          g.beginPath(); g.moveTo(x - w * 0.8, y - h * 0.8); g.lineTo(x, y - h); g.lineTo(x, y); g.lineTo(x - w * 0.6, y);
-          g.closePath(); g.fillStyle = P.oreL; g.fill();
-          g.fillStyle = P.glint; g.fillRect(x - w * 0.35, y - h * 0.7, w * 0.22, h * 0.18);
+        g.moveTo(-0.72, 0.36); g.lineTo(-0.62, 0.02); g.lineTo(-0.34, -0.2); g.lineTo(0.3, -0.22);
+        g.lineTo(0.66, 0.02); g.lineTo(0.74, 0.36); g.closePath();
+        D.fillStroke(g, '#5d5a5e', LW);
+        // trozos de mineral (la misma forma que el objeto Ore, en grande)
+        const rocks = [[-0.38, 0.28, 1.25], [0.34, 0.3, 1.2], [-0.02, 0.18, 1.6], [-0.22, -0.06, 1.15], [0.22, -0.08, 1.2], [0.0, -0.3, 1.25]];
+        for (const r of rocks) {
+          g.save(); g.translate(r[0], r[1]); g.scale(r[2], r[2]);
+          ITEM_ART.ore(g);
+          g.restore();
+        }
+        // chispas de mineral
+        g.fillStyle = P.glint;
+        for (const q of [[-0.45, 0.1], [0.5, 0.12], [0.1, -0.42], [-0.1, 0.32]]) g.fillRect(q[0], q[1], 0.06, 0.06);
+        // pedazos sueltos por el suelo
+        for (const q of [[-0.85, 0.42, 0.55], [0.82, 0.44, 0.5], [0.55, 0.55, 0.45]]) {
+          g.save(); g.translate(q[0], q[1]); g.scale(q[2], q[2]); ITEM_ART.ore(g); g.restore();
         }
       });
     },
 
-    // ---------- Fundición ----------
+    // ---------- Fundición: un horno (puerta en arco al rojo, ladrillo y chimenea) ----------
     smelter: function (flip, lvl) {
       const m = HB.MACHINES.smelter, w = m.w, h = m.h, z = m.z;
-      return V.sprite('smelter:' + (flip ? 1 : 0) + ':' + lvl, w + 1.2, z + h * 0.75 + 2.0, (w + 1.2) / 2, z + h * 0.75 + 1.4 - h / 2, function (g) {
+      return V.sprite('smelter:' + (flip ? 1 : 0) + ':' + lvl, w + 1.2, z + h * 0.75 + 2.2, (w + 1.2) / 2, z + h * 0.75 + 1.6 - h / 2, function (g) {
         if (flip) g.scale(-1, 1);
         const fy = h / 2;
-        shadow(g, 0.15, fy + 0.02, w / 2 + 0.3, 0.28, 0.25);
+        shadow(g, 0.15, fy + 0.02, w / 2 + 0.3, 0.28, 0.28);
         D.rr(g, -w / 2 - 0.1, fy - 0.3, w + 0.2, 0.36, 0.06); D.fillStroke(g, P.conc, LW);
-        D.box(g, 0, fy - 0.12, w - 0.1, h, z, P.oliveL, P.olive, LW);
-        const top = fy - 0.12 - z;
-        hazard(g, -w / 2 + 0.12, fy - 0.36, w - 0.34, 0.16);
-        // boca del horno
-        D.rr(g, -0.42, top + 0.2, 0.84, 0.5, 0.12); D.fillStroke(g, '#2a1a10', LW);
-        const gr = g.createLinearGradient(0, top + 0.25, 0, top + 0.68);
-        gr.addColorStop(0, '#ffe08a'); gr.addColorStop(0.5, P.orange); gr.addColorStop(1, '#c2410c');
-        D.rr(g, -0.34, top + 0.28, 0.68, 0.36, 0.08); g.fillStyle = gr; g.fill();
-        // tolva de entrada (lado izquierdo del tejado)
+        D.box(g, 0, fy - 0.12, w - 0.1, h, z, '#8d99a3', '#5b6670', LW);
+        const top = fy - 0.12 - z, x0 = -w / 2 + 0.05, x1 = w / 2 - 0.05;
+        // ladrillo en la parte baja de la fachada
+        g.save(); D.rr(g, x0, fy - 0.12 - 0.42, x1 - x0, 0.42, 0.06); g.clip();
+        g.fillStyle = '#9a4f33'; g.fillRect(x0, fy - 0.6, x1 - x0, 0.5);
+        g.strokeStyle = '#6b3320'; g.lineWidth = 0.025;
+        for (let r = 0; r < 3; r++) {
+          const yy = fy - 0.54 + r * 0.14;
+          g.beginPath(); g.moveTo(x0, yy); g.lineTo(x1, yy); g.stroke();
+          for (let xx = x0 + (r % 2) * 0.12; xx < x1; xx += 0.24) { g.beginPath(); g.moveTo(xx, yy); g.lineTo(xx, yy + 0.14); g.stroke(); }
+        }
+        g.restore();
+        // puerta del horno en arco, al rojo
+        const dw = 0.5, db = fy - 0.2, dt = top + 0.18;
         g.beginPath();
-        g.moveTo(-w / 2 + 0.05, top - 0.95); g.lineTo(-w / 2 + 0.85, top - 0.95); g.lineTo(-w / 2 + 0.75, top - 0.3); g.lineTo(-w / 2 + 0.15, top - 0.3);
+        g.moveTo(-dw, db); g.lineTo(-dw, dt + dw * 0.6); g.quadraticCurveTo(-dw, dt, 0, dt); g.quadraticCurveTo(dw, dt, dw, dt + dw * 0.6); g.lineTo(dw, db); g.closePath();
+        D.fillStroke(g, '#2a1a10', LW);
+        const gr = g.createLinearGradient(0, dt + 0.05, 0, db);
+        gr.addColorStop(0, '#fff2a8'); gr.addColorStop(0.35, '#ffb02e'); gr.addColorStop(0.8, '#e2531a'); gr.addColorStop(1, '#8c2a0e');
+        g.beginPath();
+        g.moveTo(-dw + 0.08, db - 0.04); g.lineTo(-dw + 0.08, dt + dw * 0.6); g.quadraticCurveTo(-dw + 0.08, dt + 0.08, 0, dt + 0.08);
+        g.quadraticCurveTo(dw - 0.08, dt + 0.08, dw - 0.08, dt + dw * 0.6); g.lineTo(dw - 0.08, db - 0.04); g.closePath();
+        g.fillStyle = gr; g.fill();
+        // rejilla de la puerta
+        g.strokeStyle = 'rgba(42,26,16,0.7)'; g.lineWidth = 0.035;
+        for (const xx of [-0.22, 0, 0.22]) { g.beginPath(); g.moveTo(xx, dt + 0.12); g.lineTo(xx, db - 0.04); g.stroke(); }
+        // cúpula en el tejado
+        g.beginPath(); g.ellipse(-0.25, top - 0.42, 0.62, 0.42, 0, Math.PI, 0); g.lineTo(0.37, top - 0.3); g.lineTo(-0.87, top - 0.3); g.closePath();
+        D.fillStroke(g, '#a3aeb7', LW);
+        g.fillStyle = 'rgba(255,255,255,0.35)'; D.ellipse(g, -0.45, top - 0.62, 0.18, 0.08); g.fill();
+        // tolva de entrada (lado de la entrada)
+        g.beginPath();
+        g.moveTo(-w / 2 + 0.02, top - 1.0); g.lineTo(-w / 2 + 0.8, top - 1.0); g.lineTo(-w / 2 + 0.7, top - 0.45); g.lineTo(-w / 2 + 0.12, top - 0.45);
         g.closePath(); D.fillStroke(g, P.steelD, LW);
-        g.fillStyle = '#4f5a60'; g.fillRect(-w / 2 + 0.14, top - 0.9, 0.62, 0.14);
-        // chimenea
-        D.rr(g, 0.38, top - 1.25, 0.42, 0.95, 0.06); D.fillStroke(g, P.teal, LW);
-        D.ellipse(g, 0.59, top - 1.25, 0.21, 0.08); D.fillStroke(g, '#24302f', LW);
-        g.fillStyle = P.tealL; g.fillRect(0.44, top - 1.1, 0.07, 0.7);
-        // franja turquesa y remaches
-        g.fillStyle = P.teal; g.fillRect(-w / 2 + 0.08, top + 0.02, w - 0.26, 0.07);
+        g.fillStyle = '#3f474c'; g.fillRect(-w / 2 + 0.1, top - 0.95, 0.62, 0.14);
+        // chimenea con boca al rojo
+        D.rr(g, 0.45, top - 1.45, 0.42, 1.15, 0.06); D.fillStroke(g, '#4a545b', LW);
+        g.fillStyle = P.orange; g.fillRect(0.45, top - 1.2, 0.42, 0.08);
+        D.ellipse(g, 0.66, top - 1.45, 0.21, 0.08); D.fillStroke(g, '#ff9a3d', LW);
+        // franja oliva (militar) y remaches
+        g.fillStyle = P.olive; g.fillRect(-w / 2 + 0.08, top + 0.02, w - 0.26, 0.08);
         g.fillStyle = P.ink;
-        for (const rx of [-w / 2 + 0.2, w / 2 - 0.3]) { D.ellipse(g, rx, top + 0.85, 0.035, 0.035); g.fill(); }
+        for (const rx of [-w / 2 + 0.2, w / 2 - 0.3]) { D.ellipse(g, rx, top + 0.3, 0.035, 0.035); g.fill(); }
         // conducto de salida
         g.beginPath(); g.moveTo(w / 2 - 0.12, fy - 0.75); g.lineTo(w / 2 + 0.42, fy - 0.45); g.lineTo(w / 2 + 0.42, fy - 0.25); g.lineTo(w / 2 - 0.12, fy - 0.5); g.closePath();
         D.fillStroke(g, P.steelD, LW);
-        levelPips(g, flip, lvl, w / 2 - 0.55, fy - 0.62);
+        levelPips(g, flip, lvl, w / 2 - 0.6, top + 0.3);
       });
     },
 
-    // ---------- Fábrica de munición ----------
+    // ---------- Fábrica de munición: una prensa con el emblema de las balas ----------
     ammo_fab: function (flip, lvl) {
       const m = HB.MACHINES.ammo_fab, w = m.w, h = m.h, z = m.z;
-      return V.sprite('ammo:' + (flip ? 1 : 0) + ':' + lvl, w + 1.2, z + h * 0.75 + 2.0, (w + 1.2) / 2, z + h * 0.75 + 1.4 - h / 2, function (g) {
+      return V.sprite('ammo:' + (flip ? 1 : 0) + ':' + lvl, w + 1.2, z + h * 0.75 + 2.2, (w + 1.2) / 2, z + h * 0.75 + 1.6 - h / 2, function (g) {
         if (flip) g.scale(-1, 1);
         const fy = h / 2;
-        shadow(g, 0.15, fy + 0.02, w / 2 + 0.3, 0.28, 0.25);
+        shadow(g, 0.15, fy + 0.02, w / 2 + 0.3, 0.28, 0.28);
         D.rr(g, -w / 2 - 0.1, fy - 0.3, w + 0.2, 0.36, 0.06); D.fillStroke(g, P.conc, LW);
-        D.box(g, 0, fy - 0.12, w - 0.1, h, z, P.tealL, P.teal, LW);
+        D.box(g, 0, fy - 0.12, w - 0.1, h, z, P.oliveL, P.olive, LW);
         const top = fy - 0.12 - z;
-        g.fillStyle = P.yellow; g.fillRect(-w / 2 + 0.06, top + 0.12, w - 0.22, 0.12);
-        g.strokeStyle = P.ink; g.lineWidth = 0.03; g.strokeRect(-w / 2 + 0.06, top + 0.12, w - 0.22, 0.12);
-        // tres balas
+        hazard(g, -w / 2 + 0.1, fy - 0.36, w - 0.3, 0.16);
+        // emblema: círculo amarillo con tres balas
+        D.ellipse(g, 0, top + 0.45, 0.4, 0.34); D.fillStroke(g, P.yellow, LW);
         for (let i = 0; i < 3; i++) {
-          const bx = -0.32 + i * 0.3, by = top + 0.42;
-          D.rr(g, bx - 0.08, by, 0.16, 0.45, 0.03); D.fillStroke(g, '#d9a33a', 0.035);
-          g.beginPath(); g.moveTo(bx - 0.08, by + 0.02); g.quadraticCurveTo(bx, by - 0.22, bx + 0.08, by + 0.02); g.closePath();
-          D.fillStroke(g, '#b8743a', 0.035);
+          const bx = -0.17 + i * 0.17, by = top + 0.32;
+          D.rr(g, bx - 0.055, by + 0.06, 0.11, 0.3, 0.02); D.fillStroke(g, '#d9a33a', 0.03);
+          g.beginPath(); g.moveTo(bx - 0.055, by + 0.08); g.quadraticCurveTo(bx, by - 0.1, bx + 0.055, by + 0.08); g.closePath();
+          D.fillStroke(g, '#b8743a', 0.03);
         }
-        // tolva
+        // tolva de entrada
         g.beginPath();
-        g.moveTo(-w / 2 + 0.05, top - 0.95); g.lineTo(-w / 2 + 0.85, top - 0.95); g.lineTo(-w / 2 + 0.75, top - 0.3); g.lineTo(-w / 2 + 0.15, top - 0.3);
+        g.moveTo(-w / 2 + 0.02, top - 1.0); g.lineTo(-w / 2 + 0.8, top - 1.0); g.lineTo(-w / 2 + 0.7, top - 0.45); g.lineTo(-w / 2 + 0.12, top - 0.45);
         g.closePath(); D.fillStroke(g, P.steelD, LW);
-        g.fillStyle = '#4f5a60'; g.fillRect(-w / 2 + 0.14, top - 0.9, 0.62, 0.14);
-        // prensa en el tejado
-        D.rr(g, 0.25, top - 1.0, 0.6, 0.7, 0.08); D.fillStroke(g, P.oliveD, LW);
-        D.rr(g, 0.33, top - 0.92, 0.44, 0.16, 0.04); D.fillStroke(g, P.orange, 0.03);
-        D.ellipse(g, w / 2 - 0.25, top + 0.08, 0.07, 0.07); D.fillStroke(g, P.orangeL, 0.03);
-        levelPips(g, flip, lvl, w / 2 - 0.55, fy - 0.62);
+        g.fillStyle = '#3f474c'; g.fillRect(-w / 2 + 0.1, top - 0.95, 0.62, 0.14);
+        // pórtico de la prensa (el martillo se mueve: lo dibuja 70_render.js)
+        g.fillStyle = '#3d4a50';
+        D.rr(g, 0.12, top - 1.5, 0.12, 1.15, 0.03); D.fillStroke(g, '#3d4a50', 0.04);
+        D.rr(g, 0.86, top - 1.5, 0.12, 1.15, 0.03); D.fillStroke(g, '#3d4a50', 0.04);
+        D.rr(g, 0.05, top - 1.58, 1.0, 0.16, 0.04); D.fillStroke(g, P.orange, 0.04);
+        D.rr(g, 0.2, top - 0.42, 0.7, 0.12, 0.03); D.fillStroke(g, P.steelD, 0.04);
+        // rodillos de salida
+        for (let i = 0; i < 3; i++) { D.ellipse(g, w / 2 - 0.15 + i * 0.16, fy - 0.42, 0.06, 0.06); D.fillStroke(g, P.steel, 0.03); }
+        levelPips(g, flip, lvl, -w / 2 + 0.25, top + 0.12);
+      });
+    },
+
+    // ---------- Panel solar: placas azules en su soporte ----------
+    solar: function () {
+      const m = HB.MACHINES.solar, w = m.w, h = m.h;
+      return V.sprite('solar', w + 1.0, h + 1.8, (w + 1.0) / 2, h / 2 + 1.3, function (g) {
+        const fy = h / 2;
+        shadow(g, 0.1, fy, w / 2 + 0.15, 0.22, 0.25);
+        g.strokeStyle = P.ink; g.lineWidth = 0.07;
+        for (const x of [-w / 2 + 0.2, w / 2 - 0.2]) { g.beginPath(); g.moveTo(x, fy - 0.05); g.lineTo(x, fy - 0.55); g.stroke(); }
+        // panel inclinado
+        const px0 = -w / 2 - 0.05, px1 = w / 2 + 0.05, ty = fy - 1.25, by = fy - 0.45;
+        g.beginPath(); g.moveTo(px0 + 0.15, ty); g.lineTo(px1 - 0.15, ty); g.lineTo(px1, by); g.lineTo(px0, by); g.closePath();
+        D.fillStroke(g, '#2a5aa6', LW);
+        g.save(); g.clip();
+        g.strokeStyle = '#a6c8ff'; g.lineWidth = 0.025;
+        for (let i = 1; i < 4; i++) { const t = i / 4; g.beginPath(); g.moveTo(px0 + 0.15 + (px1 - px0 - 0.3) * t, ty); g.lineTo(px0 + (px1 - px0) * t, by); g.stroke(); }
+        for (let i = 1; i < 3; i++) { const yy = HB.lerp(ty, by, i / 3); g.beginPath(); g.moveTo(px0, yy); g.lineTo(px1, yy); g.stroke(); }
+        g.fillStyle = 'rgba(255,255,255,0.28)';
+        g.beginPath(); g.moveTo(px0 + 0.3, ty); g.lineTo(px0 + 0.6, ty); g.lineTo(px0 + 0.25, by); g.lineTo(px0 - 0.05, by); g.closePath(); g.fill();
+        g.restore();
+        // caja de baterías con rayo
+        D.rr(g, w / 2 - 0.35, fy - 0.42, 0.4, 0.38, 0.05); D.fillStroke(g, P.olive, 0.05);
+        g.fillStyle = P.yellow;
+        g.beginPath(); g.moveTo(w / 2 - 0.12, fy - 0.38); g.lineTo(w / 2 - 0.24, fy - 0.2); g.lineTo(w / 2 - 0.15, fy - 0.2); g.lineTo(w / 2 - 0.2, fy - 0.07); g.lineTo(w / 2 - 0.05, fy - 0.26); g.lineTo(w / 2 - 0.14, fy - 0.26); g.closePath(); g.fill();
+      });
+    },
+
+    // ---------- Disipador: aletas plateadas y ventilador (frío, azul) ----------
+    dissipator: function () {
+      const m = HB.MACHINES.dissipator, w = m.w, h = m.h, z = m.z;
+      return V.sprite('dissipator', w + 1.0, z + h * 0.75 + 1.4, (w + 1.0) / 2, z + h * 0.75 + 0.9 - h / 2, function (g) {
+        const fy = h / 2;
+        shadow(g, 0.1, fy, w / 2 + 0.2, 0.24, 0.25);
+        D.box(g, 0, fy - 0.05, w - 0.1, h, z, '#cfd8dc', '#8796a0', LW);
+        const top = fy - 0.05 - z;
+        // aletas
+        g.save(); D.rr(g, -w / 2 + 0.12, top + 0.12, w - 0.34, z - 0.3, 0.04); g.clip();
+        g.fillStyle = '#5d6b74'; g.fillRect(-w / 2, top, w, z);
+        g.fillStyle = '#e8eef1';
+        for (let x = -w / 2 + 0.16; x < w / 2 - 0.2; x += 0.16) g.fillRect(x, top + 0.12, 0.09, z);
+        g.restore();
+        // franja azul de frío
+        g.fillStyle = P.tealL; g.fillRect(-w / 2 + 0.06, fy - 0.2, w - 0.22, 0.08);
+        // carcasa del ventilador en el tejado (las aspas giran: 70_render.js)
+        D.ellipse(g, 0, top - 0.48, 0.48, 0.3); D.fillStroke(g, '#3d4a50', LW);
+        D.ellipse(g, 0, top - 0.48, 0.38, 0.22); g.fillStyle = '#1f2a30'; g.fill();
       });
     },
 
@@ -291,8 +368,8 @@
     // dir: hacia dónde apunta la flecha (1 derecha, -1 izquierda).
     pad: function (kind, dir, item) {
       return V.sprite('pad:' + kind + ':' + dir + ':' + (item || ''), 1.6, 1.4, 0.8, 0.7, function (g) {
-        const col = kind === 'in' ? 'rgba(255,210,63,' : (kind === 'out' ? 'rgba(39,179,164,' : 'rgba(79,199,104,');
-        const solid = kind === 'in' ? P.yellow : (kind === 'out' ? P.tealL : P.cashL);
+        const col = kind === 'in' ? 'rgba(255,210,63,' : (kind === 'out' ? 'rgba(39,179,164,' : (kind === 'box' ? 'rgba(255,138,31,' : 'rgba(79,199,104,'));
+        const solid = kind === 'in' ? P.yellow : (kind === 'out' ? P.tealL : (kind === 'box' ? P.orange : P.cashL));
         D.rr(g, -0.62, -0.5, 1.24, 1.0, 0.18);
         g.fillStyle = col + '0.25)'; g.fill();
         g.lineWidth = 0.08; g.strokeStyle = solid; g.stroke();
@@ -313,6 +390,8 @@
     // Icono en el centro de una zona de pago.
     zoneIcon: function (z) {
       const key = z.kind === 'machine' ? 'm:' + z.type : z.kind;
+      const custom = ZONE_ICONS[z.kind === 'machine' ? z.type : z.kind];
+      if (custom) return V.sprite('zicon:' + key, 1.0, 1.0, 0.5, 0.5, custom);
       return V.sprite('zicon:' + key, 1.0, 1.0, 0.5, 0.5, function (g) {
         g.fillStyle = '#ffffff'; g.strokeStyle = P.ink; g.lineWidth = 0.05;
         if (z.kind === 'vein') {
@@ -393,6 +472,90 @@
         stackFn(x + sx, by - 0.3);
       }
     },
+  };
+
+  // Iconos de las zonas de pago de lo nuevo (blanco con contorno, como los demás).
+  function icoStyle(g) { g.fillStyle = '#ffffff'; g.strokeStyle = P.ink; g.lineWidth = 0.05; g.lineJoin = 'round'; }
+  const ZONE_ICONS = {
+    turret: function (g) {
+      icoStyle(g);
+      D.rr(g, -0.28, 0.06, 0.56, 0.2, 0.05); g.fill(); g.stroke();
+      D.ellipse(g, -0.02, 0.02, 0.2, 0.16); g.fill(); g.stroke();
+      D.rr(g, 0.08, -0.06, 0.32, 0.08, 0.03); g.fillStyle = P.yellow; g.fill(); g.stroke();
+    },
+    wall: function (g) {
+      icoStyle(g);
+      for (let i = 0; i < 3; i++) { D.rr(g, -0.33 + i * 0.22, -0.12, 0.2, 0.3, 0.03); g.fill(); g.stroke(); }
+      g.fillStyle = P.yellow; g.fillRect(-0.33, -0.12, 0.64, 0.07);
+    },
+    drone: function (g) {
+      icoStyle(g);
+      for (const p of [[-0.22, -0.14], [0.22, -0.14], [-0.22, 0.14], [0.22, 0.14]]) { D.ellipse(g, p[0], p[1], 0.12, 0.06); g.fill(); g.stroke(); }
+      D.rr(g, -0.14, -0.08, 0.28, 0.16, 0.05); g.fillStyle = P.tealL; g.fill(); g.stroke();
+    },
+    nest: function (g) {
+      g.strokeStyle = P.ink; g.lineWidth = 0.05;
+      D.ellipse(g, 0, 0.05, 0.3, 0.24); g.fillStyle = P.bug; g.fill(); g.stroke();
+      g.fillStyle = P.acid;
+      for (const p of [[-0.12, 0.02], [0.1, -0.04], [0.02, 0.14]]) { D.ellipse(g, p[0], p[1], 0.06, 0.05); g.fill(); }
+      g.beginPath(); g.moveTo(-0.2, -0.12); g.lineTo(-0.26, -0.34); g.lineTo(-0.08, -0.18); g.moveTo(0.2, -0.12); g.lineTo(0.26, -0.34); g.lineTo(0.08, -0.18);
+      g.stroke();
+    },
+    solar: function (g) {
+      icoStyle(g);
+      g.beginPath(); g.moveTo(-0.24, -0.2); g.lineTo(0.24, -0.2); g.lineTo(0.32, 0.12); g.lineTo(-0.32, 0.12); g.closePath();
+      g.fillStyle = '#7fb2ff'; g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(0, -0.2); g.lineTo(0, 0.12); g.moveTo(-0.28, -0.04); g.lineTo(0.28, -0.04); g.stroke();
+      D.rr(g, -0.04, 0.12, 0.08, 0.16, 0.02); g.fillStyle = '#ffffff'; g.fill(); g.stroke();
+    },
+    dissipator: function (g) {
+      icoStyle(g);
+      D.rr(g, -0.26, -0.2, 0.52, 0.42, 0.05); g.fill(); g.stroke();
+      g.fillStyle = '#5d6b74';
+      for (let x = -0.18; x < 0.2; x += 0.12) g.fillRect(x, -0.14, 0.05, 0.3);
+      g.fillStyle = P.tealL; g.fillRect(-0.26, 0.14, 0.52, 0.06);
+    },
+  };
+
+  // Cartel de receta sobre cada máquina: lo que entra ▸ lo que sale (para que se entienda qué hace).
+  const RECIPES = {
+    smelter: [['ore'], ['plate']],
+    ammo_fab: [['plate', 'plate'], ['ammo']],
+    export: [['ammo', 'plate'], ['$']],
+    solar: [['bolt'], ['+5']],
+    dissipator: [['heat'], ['-2']],
+  };
+  HB.Art.recipe = function (type) {
+    const r = RECIPES[type];
+    if (!r) return null;
+    const n = r[0].length + r[1].length;
+    const w = 0.5 + n * 0.42 + 0.3;
+    return V.sprite('recipe:' + type, w + 0.1, 0.62, (w + 0.1) / 2, 0.31, function (g) {
+      D.rr(g, -w / 2, -0.26, w, 0.52, 0.26);
+      g.fillStyle = 'rgba(20,24,28,0.82)'; g.fill();
+      g.lineWidth = 0.035; g.strokeStyle = 'rgba(255,255,255,0.35)'; g.stroke();
+      let x = -w / 2 + 0.33;
+      const draw = function (it) {
+        if (ITEM_ART[it]) { g.save(); g.translate(x, 0.09); g.scale(0.85, 0.85); ITEM_ART[it](g); g.restore(); }
+        else if (it === '$') { D.ellipse(g, x, 0, 0.15, 0.15); D.fillStroke(g, P.cash, 0.03); spriteText(g, '$', x, 0.01, 0.2, '#ffffff', P.cashD); }
+        else if (it === 'heat') {
+          g.beginPath(); g.moveTo(x, -0.2); g.quadraticCurveTo(x + 0.17, -0.02, x + 0.1, 0.12); g.quadraticCurveTo(x, 0.2, x - 0.1, 0.12);
+          g.quadraticCurveTo(x - 0.15, 0.0, x, -0.2); g.closePath(); D.fillStroke(g, P.orange, 0.03);
+          g.beginPath(); g.moveTo(x, -0.05); g.quadraticCurveTo(x + 0.07, 0.05, x + 0.03, 0.12); g.lineTo(x - 0.04, 0.12); g.quadraticCurveTo(x - 0.06, 0.04, x, -0.05); g.fillStyle = P.yellow; g.fill();
+        } else if (it === 'bolt') {
+          g.beginPath(); g.moveTo(x + 0.05, -0.2); g.lineTo(x - 0.1, 0.03); g.lineTo(x, 0.03); g.lineTo(x - 0.05, 0.2); g.lineTo(x + 0.11, -0.04); g.lineTo(x + 0.01, -0.04); g.closePath();
+          D.fillStroke(g, P.yellow, 0.03);
+        }
+        else spriteText(g, it, x, 0.02, 0.26, it.charAt(0) === '-' ? P.tealL : P.yellow, P.ink);
+        x += 0.42;
+      };
+      for (const it of r[0]) draw(it);
+      // flecha
+      g.fillStyle = '#ffffff';
+      g.beginPath(); g.moveTo(x - 0.12, -0.08); g.lineTo(x + 0.04, 0); g.lineTo(x - 0.12, 0.08); g.closePath(); g.fill();
+      x += 0.3;
+      for (const it of r[1]) draw(it);
+    });
   };
 
   function levelPips(g, flip, lvl, x, y) {

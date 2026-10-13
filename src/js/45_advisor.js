@@ -421,6 +421,12 @@
       }
     }
 
+    // 2b. De día, el botín que quedó en el suelo antes de que desaparezca.
+    if (!night) {
+      const l = nearestLoot(R, c, 9);
+      if (l) return mk('loot', l.x, l.y);
+    }
+
     // 3. Si puedes pagar una zona, eso primero (la más barata).
     const za = cheapest(R, true);
     if (za && !threat) {
