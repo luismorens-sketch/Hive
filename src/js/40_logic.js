@@ -1,10 +1,12 @@
 // Hive Breaker — reglas del juego. Sin DOM: lo usa también el simulador.
 //
-//   HB.Logic.step(st, input, dt)  → 30 Hz: el comandante se mueve, mina, deposita, recoge y paga.
-//   HB.Logic.econ(st, dt)         → 10 Hz: las máquinas fabrican y la nave de exportación compra.
+//   HB.Logic.step(st, input, dt)  → 30 Hz: el comandante se mueve, mina, deposita, recoge, paga,
+//                                    rellena torretas y repara; los drones y la noche avanzan.
+//   HB.Logic.econ(st, dt)         → 10 Hz: energía, máquinas, nave de exportación y Calor.
 //
 // La lógica avisa de lo que pasa metiendo eventos en st.ev ({k: 'mine', a, b, c}). El dibujo y
 // el sonido los leen y los vacían; el simulador los cuenta. La lógica nunca depende de ellos.
+// Los drones viven en 42_drones.js y la noche (bichos, torretas, Calor, jefe) en 43_night.js.
 (function (HB) {
   'use strict';
 
@@ -42,11 +44,39 @@
     return n;
   }
 
+  function def(e) { return HB.MACHINES[e.type]; }
   function level(e) { return HB.MACHINES[e.type].levels[e.level - 1]; }
+  function dims(e) { const d = HB.MACHINES[e.type]; return { w: e.w || d.w, h: e.h || d.h }; }
 
-  // Dónde está cada zona que se pisa de una máquina.
-  function padPos(e, which) {
-    const d = HB.MACHINES[e.type];
+  // Un edificio dañado rinde menos (funcional 9.3): de 100 % sano a 50 % casi roto; roto, nada.
+  function eff(e) { return e.dead ? 0 : 0.5 + 0.5 * e.hp / def(e).hp; }
+
+  // Lado de la base: +1 si la Torre de mando queda más al sur que y, -1 si queda al norte.
+  const sideCache = {};
+  function hqY(rid) {
+    if (sideCache[rid] === undefined) {
+      const d = HB.REGIONS[rid];
+      let y = d.h / 2;
+      for (const s of d.start) if (s.type === 'hq') y = s.y;
+      sideCache[rid] = y;
+    }
+    return sideCache[rid];
+  }
+  function zoneRegion(z) {
+    if (z._rid) return z._rid;
+    for (const rid in HB.REGIONS) if (HB.REGIONS[rid].zones.indexOf(z) >= 0) { z._rid = rid; break; }
+    return z._rid || 'r1';
+  }
+  function sideOf(rid, y) { return hqY(rid) > y ? 1 : -1; }
+
+  // Dónde está cada zona que se pisa de un edificio.
+  function padPos(e, which, rid) {
+    const d = dims(e);
+    if (which === 'box') {
+      // La caja de munición de una torreta queda del lado de la base.
+      const s = sideOf(rid || 'r1', e.y);
+      return { x: e.x, y: e.y + s * 1.5 };
+    }
     const s = e.flip ? -1 : 1;
     const off = d.w / 2 + 0.85;
     if (which === 'in') return { x: e.x - s * off, y: e.y + 0.25 };
@@ -54,15 +84,17 @@
     return { x: e.x - 0.3, y: e.y + d.h / 2 + 0.95 };   // 'pile': el montón de billetes
   }
 
-  // Dónde se pisa una zona de pago. Las de máquina quedan delante de la huella del edificio y
-  // las de veta a su lado, para que al aparecer no salgan encima del comandante.
+  // Dónde se pisa una zona de pago. Las de edificio quedan delante de su huella (del lado de la
+  // base) y las de veta a su lado, para que al aparecer no salgan encima del comandante.
   function zonePadPos(z) {
     if (z.kind === 'machine') return { x: z.x, y: z.y + HB.MACHINES[z.type].h / 2 + 0.55 };
     if (z.kind === 'vein') return { x: z.x + 1.0, y: z.y };
+    if (z.kind === 'turret') return { x: z.x, y: z.y + sideOf(zoneRegion(z), z.y) * 1.5 };
+    if (z.kind === 'wall') return { x: z.x, y: z.y + sideOf(zoneRegion(z), z.y) * 1.0 };
     return { x: z.x, y: z.y };
   }
 
-  // ---------- Cachés que se rehacen al comprar algo ----------
+  // ---------- Cachés que se rehacen al comprar o romper algo ----------
   function rebuild(R) {
     const d = regionDef(R);
     // Zonas a la vista: las primeras de la lista sin comprar que cumplen sus requisitos.
@@ -79,7 +111,7 @@
 
     const pads = [];
     for (const e of R.ents) {
-      const k = HB.MACHINES[e.type].kind;
+      const k = def(e).kind;
       if (k === 'proc') {
         const a = padPos(e, 'in'), b = padPos(e, 'out');
         pads.push({ key: e.id + ':in', kind: 'in', x: a.x, y: a.y, e: e });
@@ -88,18 +120,26 @@
         const a = padPos(e, 'in'), b = padPos(e, 'pile');
         pads.push({ key: e.id + ':in', kind: 'in', x: a.x, y: a.y, e: e });
         pads.push({ key: e.id + ':pile', kind: 'pile', x: b.x, y: b.y, e: e });
+      } else if (k === 'turret') {
+        const a = padPos(e, 'box', R.id);
+        pads.push({ key: e.id + ':box', kind: 'box', x: a.x, y: a.y, e: e });
       }
     }
     for (const z of vis) {
       const p = zonePadPos(z);
       pads.push({ key: 'z:' + z.id, kind: 'zone', x: p.x, y: p.y, z: z });
     }
+    if (R.nestReady && !R.cleared) {
+      const z = d.zones.find(function (q) { return q.kind === 'nest'; });
+      if (z) pads.push({ key: 'nest', kind: 'nest', x: z.x, y: z.y, z: z });
+    }
     R._pads = pads;
 
     const solids = [];
     for (const e of R.ents) {
-      const m = HB.MACHINES[e.type];
-      solids.push({ t: 'r', x0: e.x - m.w / 2, y0: e.y - m.h / 2, x1: e.x + m.w / 2, y1: e.y + m.h / 2 });
+      if (e.dead || def(e).kind === 'dronepad') continue;
+      const m = dims(e);
+      solids.push({ t: 'r', e: e, wall: def(e).kind === 'wall', x0: e.x - m.w / 2, y0: e.y - m.h / 2, x1: e.x + m.w / 2, y1: e.y + m.h / 2 });
     }
     for (const v of R.veins) solids.push({ t: 'c', x: v.x, y: v.y, r: 0.55 });
     R._solids = solids;
@@ -107,11 +147,14 @@
   }
 
   function ensure(R) { if (R._dirty !== false || !R._pads) rebuild(R); }
+  function touch(R) { R._dirty = true; R._solidsVer = (R._solidsVer || 0) + 1; }
 
-  // ---------- Choques del comandante ----------
-  function collide(c, solids, r) {
+  // ---------- Choques (comandante y bichos) ----------
+  function collide(c, solids, r, skipWalls) {
     for (let pass = 0; pass < 2; pass++) {
-      for (const s of solids) {
+      for (let i = 0; i < solids.length; i++) {
+        const s = solids[i];
+        if (skipWalls && s.wall) continue;
         if (s.t === 'r') {
           const cx = c.x < s.x0 ? s.x0 : (c.x > s.x1 ? s.x1 : c.x);
           const cy = c.y < s.y0 ? s.y0 : (c.y > s.y1 ? s.y1 : c.y);
@@ -140,12 +183,26 @@
     }
   }
 
+  // Distancia de un punto al borde de un edificio (0 si está dentro).
+  function edgeDist(e, x, y) {
+    const m = dims(e);
+    const cx = HB.clamp(x, e.x - m.w / 2, e.x + m.w / 2), cy = HB.clamp(y, e.y - m.h / 2, e.y + m.h / 2);
+    return HB.dist(x, y, cx, cy);
+  }
+
   // ---------- Acciones por proximidad (funcional 4.1) ----------
   function accepts(e, it) {
-    const d = HB.MACHINES[e.type], L = level(e);
-    if (d.kind === 'proc') return d.inputs[it] !== undefined && e.inBuf[it] < L.inCap;
-    if (d.kind === 'export') return d.accepts.indexOf(it) >= 0 && totalIn(e) < L.inCap;
+    if (e.dead) return false;
+    const d = def(e);
+    if (d.kind === 'proc') return d.inputs[it] !== undefined && e.inBuf[it] < level(e).inCap;
+    if (d.kind === 'export') return d.accepts.indexOf(it) >= 0 && totalIn(e) < level(e).inCap;
     return false;
+  }
+
+  // ¿Cabe otra caja de munición en la torreta?
+  function boxRoom(e) {
+    const d = def(e);
+    return !e.dead && e.ammo + d.shots <= d.box * d.shots;
   }
 
   function depositOne(st, c, e) {
@@ -161,15 +218,35 @@
     return false;
   }
 
+  function refillOne(st, c, e) {
+    if (!boxRoom(e)) return false;
+    for (let i = c.stack.length - 1; i >= 0; i--) {
+      if (c.stack[i] !== 'ammo') continue;
+      c.stack.splice(i, 1);
+      e.ammo += def(e).shots;
+      ev(st, 'refill', e, 'ammo', i);
+      return true;
+    }
+    return false;
+  }
+
   function pickupOne(st, c, e) {
     const cap = HB.CONFIG.cmd.stackCap;
     if (e.out <= 0 || c.stack.length >= cap) return false;
-    const it = HB.MACHINES[e.type].output;
+    const it = def(e).output;
     e.out--;
     c.stack.push(it);
     ev(st, 'pickup', e, it, c.stack.length - 1);
     if (c.stack.length >= cap) ev(st, 'full');
     return true;
+  }
+
+  function buildEntity(st, R, z, type) {
+    const L = HB.State.layout(R.id).ents[z.id];
+    const e = HB.State.machineEntity(z.id, type || L.type, L.x, L.y, L.opts);
+    R.ents.push(e);
+    R._byId[e.id] = e;
+    return e;
   }
 
   function unlock(st, R, z) {
@@ -180,21 +257,38 @@
     if (z.kind === 'vein') {
       res = { id: z.id, x: z.x, y: z.y };
       R.veins.push(res);
-    } else if (z.kind === 'machine') {
-      res = HB.State.machineEntity(z.id, z.type, z.x, z.y, z.flip);
-      R.ents.push(res);
-      R._byId[res.id] = res;
+    } else if (z.kind === 'machine' || z.kind === 'wall' || z.kind === 'drone') {
+      res = buildEntity(st, R, z);
+    } else if (z.kind === 'turret') {
+      if (z.choice) st.choice = { zone: z.id, options: z.choice.slice() };   // el jugador elige
+      else res = buildEntity(st, R, z, z.type);
+      if (!R.heatOn) { R.heatOn = true; ev(st, 'heatOn'); }
     } else if (z.kind === 'upgrade') {
       res = R._byId[z.target];
-      if (res) res.level = Math.min(res.level + 1, HB.MACHINES[res.type].levels.length);
+      if (res) res.level = Math.min(res.level + 1, def(res).levels.length);
     } else if (z.kind === 'expansion') {
       R.fogY = z.fogY;
+    } else if (z.kind === 'nest') {
+      R.nestReady = true;
     }
-    R._dirty = true;
-    R._solidsVer = (R._solidsVer || 0) + 1;
+    touch(R);
     st.cmd.pad = null;
     st.needSave = true;
     ev(st, 'unlock', z, res);
+  }
+
+  // El jugador elige el tipo de torreta de una zona ya pagada (funcional 6.2).
+  function choose(st, type) {
+    const ch = st.choice;
+    if (!ch || ch.options.indexOf(type) < 0) return null;
+    const R = st.regions[st.cur];
+    const z = regionDef(R).zones.find(function (q) { return q.id === ch.zone; });
+    st.choice = null;
+    const e = buildEntity(st, R, z, type);
+    touch(R);
+    st.needSave = true;
+    ev(st, 'unlock', z, e);
+    return e;
   }
 
   function pay(st, R, c, z, dt) {
@@ -226,6 +320,31 @@
     return best;
   }
 
+  // Reparar (funcional 4.1): quieto junto a un edificio dañado, gasta Placas de la pila.
+  function repair(st, R, c, dt) {
+    const K = HB.CONFIG.cmd;
+    if (c.moving) { c.repT = 0; return; }
+    let plates = -1;
+    for (let i = c.stack.length - 1; i >= 0; i--) if (c.stack[i] === 'plate') { plates = i; break; }
+    if (plates < 0) return;
+    let best = null, bd = K.repairReach;
+    for (const e of R.ents) {
+      if (def(e).kind === 'dronepad' || e.hp >= def(e).hp) continue;
+      const d = edgeDist(e, c.x, c.y);
+      if (d <= bd) { bd = d; best = e; }
+    }
+    if (!best) { c.repT = 0; return; }
+    c.repT += dt;
+    if (c.repT < K.repairEvery) return;
+    c.repT -= K.repairEvery;
+    c.stack.splice(plates, 1);
+    const wasDead = best.dead;
+    best.hp = Math.min(def(best).hp, best.hp + K.repairHp);
+    // Un escombro vuelve a funcionar al recuperar la mitad de la vida.
+    if (best.dead && best.hp >= def(best).hp * 0.5) { best.dead = false; touch(R); }
+    ev(st, 'repair', best, plates, wasDead && !best.dead);
+  }
+
   // ---------- Paso del comandante: 30 Hz ----------
   function step(st, input, dt) {
     const R = st.regions[st.cur];
@@ -235,20 +354,39 @@
     st.time += dt;
     st.tick++;
 
-    let ix = input ? input.x || 0 : 0, iy = input ? input.y || 0 : 0;
-    const m = Math.sqrt(ix * ix + iy * iy);
-    if (m > 1) { ix /= m; iy /= m; }
-    c.moving = m > 0.01;
-    c.vx = ix * K.speed; c.vy = iy * K.speed;
-    if (c.moving) {
-      c.face = Math.atan2(iy, ix);
-      if (st.ftue.move === undefined) { st.ftue.move = st.time; ev(st, 'ftue', 'move'); }
+    if (c.deadT > 0) {
+      // Caído: reaparece en la Torre de mando (funcional 4.3). Nunca hay "game over".
+      c.deadT -= dt;
+      c.moving = false; c.vx = 0; c.vy = 0;
+      if (c.deadT <= 0) {
+        c.deadT = 0; c.hp = K.hp;
+        c.x = d.spawn.x; c.y = d.spawn.y;
+        ev(st, 'respawn');
+      }
+    } else {
+      let ix = input ? input.x || 0 : 0, iy = input ? input.y || 0 : 0;
+      const m = Math.sqrt(ix * ix + iy * iy);
+      if (m > 1) { ix /= m; iy /= m; }
+      c.moving = m > 0.01;
+      c.vx = ix * K.speed; c.vy = iy * K.speed;
+      if (c.moving) {
+        c.face = Math.atan2(iy, ix);
+        c.stillT = 0;
+        if (st.ftue.move === undefined) { st.ftue.move = st.time; ev(st, 'ftue', 'move'); }
+      } else c.stillT += dt;
+      c.x += c.vx * dt; c.y += c.vy * dt;
+      collide(c, R._solids, K.radius);
+      c.x = HB.clamp(c.x, K.radius, d.w - K.radius);
+      c.y = HB.clamp(c.y, R.fogY + K.radius, d.h - K.radius);
+      actions(st, R, c, dt);
     }
-    c.x += c.vx * dt; c.y += c.vy * dt;
-    collide(c, R._solids, K.radius);
-    c.x = HB.clamp(c.x, K.radius, d.w - K.radius);
-    c.y = HB.clamp(c.y, R.fogY + K.radius, d.h - K.radius);
 
+    if (HB.Drones) HB.Drones.step(st, R, dt);
+    if (HB.Night) HB.Night.step(st, R, dt);
+  }
+
+  function actions(st, R, c, dt) {
+    const K = HB.CONFIG.cmd;
     // Minar: estar junto a una veta. Cada veta al alcance mina por su cuenta.
     const rr = K.mineRange * K.mineRange;
     for (const v of R.veins) {
@@ -264,6 +402,8 @@
       if (c.stack.length >= K.stackCap) ev(st, 'full');
     }
 
+    repair(st, R, c, dt);
+
     // Zonas que se pisan.
     const p = findPad(R, c.x, c.y);
     const key = p ? p.key : null;
@@ -271,11 +411,12 @@
     else c.padT += dt;
     if (!p) return;
 
-    if (p.kind === 'in') {
+    if (p.kind === 'in' || p.kind === 'box') {
       c.actT += dt;
       while (c.actT >= K.depositInterval) {
         c.actT -= K.depositInterval;
-        if (!depositOne(st, c, p.e)) { c.actT = 0; break; }
+        const ok = p.kind === 'in' ? depositOne(st, c, p.e) : refillOne(st, c, p.e);
+        if (!ok) { c.actT = 0; break; }
       }
     } else if (p.kind === 'out') {
       c.actT += dt;
@@ -292,35 +433,38 @@
       }
     } else if (p.kind === 'zone') {
       pay(st, R, c, p.z, dt);
+    } else if (p.kind === 'nest') {
+      // Quedarse 1,5 s encima lanza la noche del jefe (solo de día).
+      if (R.phase === 'day' && c.padT >= 1.5 && HB.Night) { HB.Night.startBoss(st, R); c.pad = null; }
     }
   }
 
   // ---------- Economía: 10 Hz ----------
-  function hasInputs(e, def) {
-    for (const k in def.inputs) if (e.inBuf[k] < def.inputs[k]) return false;
+  function hasInputs(e, d) {
+    for (const k in d.inputs) if (e.inBuf[k] < d.inputs[k]) return false;
     return true;
   }
 
-  function tryStart(st, e, def, L) {
-    if (e.out >= L.outCap || !hasInputs(e, def)) return false;
-    for (const k in def.inputs) e.inBuf[k] -= def.inputs[k];
+  function tryStart(st, e, d, L) {
+    if (e.dead || e.out >= L.outCap || !hasInputs(e, d)) return false;
+    for (const k in d.inputs) e.inBuf[k] -= d.inputs[k];
     e.busy = true;
     ev(st, 'start', e);
     return true;
   }
 
-  function procStep(st, R, e, def, dt) {
+  function procStep(st, R, e, d, dt) {
     const L = level(e);
     const s = st.stats.m[e.id] || (st.stats.m[e.id] = { busy: 0, full: 0, starve: 0 });
-    if (!e.busy && tryStart(st, e, def, L)) e.prog = 0;
-    if (!e.busy) {
+    if (!e.busy && tryStart(st, e, d, L)) e.prog = 0;
+    if (!e.busy || e.dead) {
       e.idle += dt;
       if (e.out >= L.outCap) s.full += dt; else s.starve += dt;
       return;
     }
     e.idle = 0;
     s.busy += dt;
-    e.prog += dt;
+    e.prog += dt * R.power.f * eff(e);
     // Lo que sobra de un paso pasa a la unidad siguiente: a 10 Hz no se pierde tiempo.
     while (e.busy && e.prog >= L.time) {
       e.prog -= L.time;
@@ -329,15 +473,15 @@
       e.worked = true;
       st.stats.made++;
       ev(st, 'produce', e);
-      if (!tryStart(st, e, def, L)) e.prog = 0;
+      if (!tryStart(st, e, d, L)) e.prog = 0;
     }
   }
 
-  function exportStep(st, R, e, def, dt) {
+  function exportStep(st, R, e, d, dt) {
     const L = level(e), S = HB.CONFIG.ship, sh = e.ship;
     sh.t = Math.max(0, sh.t - dt);
     if (sh.st === 'away') {
-      if (sh.t <= 0 && totalIn(e) > 0 && R.pile < L.vault) {
+      if (sh.t <= 0 && !e.dead && totalIn(e) > 0 && R.pile < L.vault) {
         sh.st = 'land'; sh.t = S.land;
         ev(st, 'shipLand', e);
       }
@@ -347,7 +491,7 @@
         // Compra lo que quepa en la caja fuerte, lo más caro primero.
         let value = 0, count = 0;
         const counts = {};
-        for (const it of def.accepts) {
+        for (const it of d.accepts) {
           const pr = HB.ITEMS[it].price;
           const room = Math.floor((L.vault - R.pile - value) / pr);
           const n = Math.min(e.inBuf[it], Math.max(0, room));
@@ -369,26 +513,49 @@
     }
   }
 
+  // Energía (funcional 5.3): capacidad, no stock. Si la demanda supera a la oferta, todo rinde
+  // proporcionalmente menos (brownout), torretas incluidas.
+  function power(st, R) {
+    let supply = 0, demand = 0;
+    for (const e of R.ents) {
+      if (e.dead) continue;
+      const d = def(e);
+      if (d.supply) supply += d.supply;
+      if (d.power) demand += d.power;
+    }
+    const f = demand > supply ? supply / demand : 1;
+    const was = R.power ? R.power.f : 1;
+    R.power = { supply: supply, demand: demand, f: f };
+    if (f < 1 && was >= 1) ev(st, 'brownout', f);
+    else if (f >= 1 && was < 1) ev(st, 'powerOk');
+  }
+
   function econ(st, dt) {
     const R = st.regions[st.cur];
     ensure(R);
+    power(st, R);
     for (const e of R.ents) {
-      const def = HB.MACHINES[e.type];
-      if (def.kind === 'proc') procStep(st, R, e, def, dt);
-      else if (def.kind === 'export') exportStep(st, R, e, def, dt);
+      const d = def(e);
+      if (d.kind === 'proc') procStep(st, R, e, d, dt);
+      else if (d.kind === 'export') exportStep(st, R, e, d, dt);
     }
+    if (HB.Night) HB.Night.econ(st, R, dt);
   }
 
-  // Para los iconos ámbar de cuello de botella (funcional 18): 'full', 'starve', 'vault' o null.
+  // Para los iconos ámbar de cuello de botella (funcional 18).
   function status(R, e) {
-    const def = HB.MACHINES[e.type];
-    if (def.kind === 'proc') {
+    const d = def(e);
+    if (e.dead) return 'dead';
+    if (d.kind === 'proc') {
       const L = level(e);
       if (e.out >= L.outCap) return 'full';
       if (!e.busy && e.worked && e.idle > 4) return 'starve';
-    } else if (def.kind === 'export') {
+      if (R.power && R.power.f < 1) return 'power';
+    } else if (d.kind === 'export') {
       if (R.pile >= level(e).vault) return 'vault';
-    }
+    } else if (d.kind === 'turret') {
+      if (e.ammo <= 0) return 'noammo';
+    } else if (d.kind === 'cool' && R.power && R.power.f < 1) return 'power';
     return null;
   }
 
@@ -401,15 +568,32 @@
   HB.Logic = {
     step: step,
     econ: econ,
+    ev: ev,
     price: price,
     remaining: remaining,
     totalIn: totalIn,
     level: level,
+    dims: dims,
+    eff: eff,
     padPos: padPos,
     zonePadPos: zonePadPos,
+    sideOf: sideOf,
     status: status,
     allBought: allBought,
     accepts: accepts,
+    boxRoom: boxRoom,
+    choose: choose,
+    collide: collide,
+    edgeDist: edgeDist,
+    touch: touch,
+    ensure: ensure,
+    // Para las herramientas (tools/check.js): compra una zona sin pagarla.
+    forceUnlock: function (st, z) {
+      const R = st.regions[st.cur];
+      ensure(R);
+      unlock(st, R, z);
+      if (st.choice) choose(st, st.choice.options[0]);
+    },
     visibleZones: function (R) { ensure(R); return R._vis; },
     pads: function (R) { ensure(R); return R._pads; },
     solids: function (R) { ensure(R); return R._solids; },

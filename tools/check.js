@@ -96,16 +96,30 @@ if (HB) {
             if (ups[z.target] > HB.MACHINES[type].levels.length - 1) bad(rid + '/' + z.id + ': ' + z.target + ' no tiene tantos niveles');
           }
         }
-        if (!['vein', 'machine', 'upgrade', 'expansion'].includes(z.kind)) bad(rid + '/' + z.id + ': tipo de zona desconocido ' + z.kind);
+        if (!['vein', 'machine', 'upgrade', 'expansion', 'turret', 'wall', 'drone', 'nest'].includes(z.kind)) bad(rid + '/' + z.id + ': tipo de zona desconocido ' + z.kind);
+        if (z.kind === 'turret') built[z.id] = z.type || (z.choice && z.choice[0]);
+        if (z.kind === 'drone') built[z.id] = 'dronepad';
+        if (z.kind === 'turret' && !(z.type || (z.choice && z.choice.length))) bad(rid + '/' + z.id + ': torreta sin tipo ni opciones');
+        if (z.kind === 'drone' && !(z.route && (z.route.kind === 'miner' || z.route.kind === 'cargo'))) bad(rid + '/' + z.id + ': dron sin ruta');
       });
 
       // Mapa con todo comprado: huellas sólidas y zonas que se pisan.
-      const ents = d.start.map(function (s) { return { id: s.id, type: s.type, x: s.x, y: s.y, flip: s.flip, owner: null }; });
-      for (const z of d.zones) if (z.kind === 'machine') ents.push({ id: z.id, type: z.type, x: z.x, y: z.y, flip: z.flip, owner: z.id });
+      const L = HB.State.layout(rid);
+      const ents = [];
+      for (const s of d.start) ents.push({ id: s.id, type: s.type, x: s.x, y: s.y, flip: s.flip, owner: null });
+      for (const z of d.zones) {
+        const p = L.ents[z.id];
+        if (!p) continue;
+        const type = p.type || (z.choice ? z.choice[0] : null);
+        if (!type || !HB.MACHINES[type]) { bad(rid + '/' + z.id + ': tipo desconocido'); continue; }
+        ents.push(Object.assign({ id: z.id, type: type, x: p.x, y: p.y, flip: p.opts.flip, owner: z.id }, p.opts.w ? { w: p.opts.w, h: p.opts.h } : {}));
+      }
       const solids = [];
       for (const e of ents) {
-        const m = HB.MACHINES[e.type];
+        const m = HB.Logic.dims(e);
+        if (HB.MACHINES[e.type].kind === 'dronepad') continue;
         solids.push({ t: 'r', owner: e.owner, id: e.id, x0: e.x - m.w / 2, y0: e.y - m.h / 2, x1: e.x + m.w / 2, y1: e.y + m.h / 2 });
+        if (e.x - m.w / 2 < -0.01 || e.x + m.w / 2 > d.w + 0.01 || e.y - m.h / 2 < 0 || e.y + m.h / 2 > d.h) bad(rid + ': ' + e.id + ' se sale del mapa');
       }
       for (const v of d.veins) solids.push({ t: 'c', owner: null, id: v.id, x: v.x, y: v.y, r: 0.55 });
       for (const z of d.zones) if (z.kind === 'vein') solids.push({ t: 'c', owner: z.id, id: z.id, x: z.x, y: z.y, r: 0.55 });
@@ -113,8 +127,10 @@ if (HB) {
       const pads = [];
       for (const e of ents) {
         const m = HB.MACHINES[e.type];
-        if (m.kind === 'proc') { pads.push(Object.assign({ name: e.id + ':in', owner: e.owner }, HB.Logic.padPos(e, 'in'))); pads.push(Object.assign({ name: e.id + ':out', owner: e.owner }, HB.Logic.padPos(e, 'out'))); }
-        if (m.kind === 'export') { pads.push(Object.assign({ name: e.id + ':in', owner: e.owner }, HB.Logic.padPos(e, 'in'))); pads.push(Object.assign({ name: e.id + ':pile', owner: e.owner }, HB.Logic.padPos(e, 'pile'))); }
+        const add = function (which, name) { pads.push(Object.assign({ name: e.id + ':' + name, owner: e.owner }, HB.Logic.padPos(e, which, rid))); };
+        if (m.kind === 'proc') { add('in', 'in'); add('out', 'out'); }
+        if (m.kind === 'export') { add('in', 'in'); add('pile', 'pile'); }
+        if (m.kind === 'turret') add('box', 'caja');
       }
       for (const z of d.zones) pads.push(Object.assign({ name: 'zona ' + z.id, zone: z.id }, HB.Logic.zonePadPos(z)));
 
@@ -154,18 +170,41 @@ if (HB) {
           if (dd < PR * 2) bad(rid + ': ' + a.name + ' y ' + b.name + ' se pisan (' + dd.toFixed(2) + ' casillas)');
         }
       }
-      if (failed === before) ok(rid + ': ' + d.zones.length + ' zonas, ' + pads.length + ' sitios que se pisan, nada se solapa');
+      // Con todo comprado (muros incluidos), los bichos tienen que poder llegar a la Torre de mando
+      // desde cada flanco: los muros canalizan, no encierran (funcional 9.2).
+      {
+        const st = HB.State.newGame(1);
+        for (const z of d.zones) HB.Logic.forceUnlock(st, z);
+        const R = st.regions[st.cur];
+        HB.Logic.ensure(R);
+        for (const jump of [false, true]) {
+          const F = HB.Night.field(R, jump);
+          for (const fk in d.flanks) {
+            const fl = d.flanks[fk];
+            const y = fl.fromFog ? R.fogY - 0.6 : fl.y;
+            for (let x = fl.x0; x <= fl.x1; x += 1) {
+              const i = Math.floor(x / 0.5), j = Math.floor(y / 0.5);
+              if (!(F.dist[j * F.gw + i] < 1e9)) { bad(rid + ': desde el flanco ' + fk + ' (x=' + x.toFixed(1) + ') los bichos no llegan a la Torre de mando'); break; }
+            }
+          }
+        }
+        // y el comandante tiene que poder llegar a todo lo que se pisa
+        const nestZ = d.zones.find(function (z) { return z.kind === 'nest'; });
+        if (nestZ && !HB.Night.field(R, false)) bad(rid + ': sin campo de flujo');
+      }
+      if (failed === before) ok(rid + ': ' + d.zones.length + ' zonas, ' + pads.length + ' sitios que se pisan, nada se solapa, los bichos llegan desde cada flanco');
     }
   }
 
-  console.log('[check] 5. Prueba de humo (el robot juega 20 minutos)');
+  console.log('[check] 5. Prueba de humo (el robot juega la región entera)');
   {
     try {
       const { run } = require('./sim_balance');
-      const r = run({ minutos: 20, seed: 777 });
+      const r = run({ minutos: 45, seed: 777 });
       if (r.zones.length === 0) bad('el robot no ha comprado ninguna zona');
-      else if (!r.finished) bad('el robot no termina la región en 20 minutos (' + r.zones.length + '/' + r.zonesTotal + ')');
-      else ok('todas las zonas compradas en ' + Math.round(r.total) + ' s de juego');
+      else if (!r.nights.length) bad('no ha llegado ninguna noche');
+      else if (r.cleared === null) bad('el robot no conquista la región en 45 minutos (' + r.zones.length + '/' + r.zonesTotal + ' zonas, ' + r.nights.length + ' noches)');
+      else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos');
     } catch (e) { bad('el simulador ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
   }
 
