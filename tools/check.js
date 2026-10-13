@@ -219,7 +219,20 @@ if (HB) {
   }
 }
 
-console.log('[check] 7. Montaje');
+console.log('[check] 7. Arte hecho con IA (assets/sprites)');
+{
+  const dir = path.join(ROOT, 'assets', 'sprites');
+  const specs = fs.readFileSync(path.join(ROOT, 'src', 'js', '67_art_images.js'), 'utf8');
+  const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter(function (f) { return /\.(webp|png)$/.test(f); }) : [];
+  let n = 0;
+  for (const f of files) {
+    const name = f.replace(/\.(webp|png)$/, '');
+    if (specs.indexOf(name + ':') < 0) { bad('assets/sprites/' + f + ': el juego no sabe dónde usarla (falta en ART_SPECS)'); n++; }
+  }
+  if (!n) ok(files.length ? files.length + ' imágenes, todas con su sitio' : 'todavía ninguna (se usan los dibujos hechos con código)');
+}
+
+console.log('[check] 8. Montaje');
 try {
   const { execFileSync } = require('child_process');
   execFileSync(process.execPath, [path.join(__dirname, 'build.js')], { stdio: 'pipe' });

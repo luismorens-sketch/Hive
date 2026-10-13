@@ -64,8 +64,23 @@ function build() {
     if (/^(<<<<<<< |>>>>>>> )/m.test(text)) fail('marcas de conflicto en src/' + name);
   }
 
+  // Arte hecho con IA (tools/recortar.py → assets/sprites/): va dentro del HTML como datos.
+  const sprites = {};
+  const spDir = path.join(ROOT, 'assets', 'sprites');
+  let spBytes = 0;
+  if (fs.existsSync(spDir)) {
+    for (const f of fs.readdirSync(spDir).sort()) {
+      const m = /^([a-z0-9_]+)\.(webp|png)$/.exec(f);
+      if (!m) continue;
+      const buf = fs.readFileSync(path.join(spDir, f));
+      spBytes += buf.length;
+      sprites[m[1]] = 'data:image/' + m[2] + ';base64,' + buf.toString('base64');
+    }
+  }
+
   const stamp = buildStamp();
-  let js = 'globalThis.HB = globalThis.HB || {}; HB.BUILD = ' + JSON.stringify(stamp) + ';\n' + parts.join('\n');
+  let js = 'globalThis.HB = globalThis.HB || {}; HB.BUILD = ' + JSON.stringify(stamp) + ';\n' +
+    'HB.SPRITES = ' + JSON.stringify(sprites) + ';\n' + parts.join('\n');
   js = js.replace(/<\/script/gi, '<\\/script');
 
   const head = '<title>Hive Breaker</title>' + FONTS + '<style>\n' + css + '</style>\n';
@@ -83,6 +98,8 @@ function build() {
   fs.writeFileSync(outArt, artifact);
   const kb = function (s) { return (Buffer.byteLength(s) / 1024).toFixed(0) + ' KB'; };
   console.log('[build] ' + files.length + ' archivos de src/js · versión ' + stamp);
+  const ns = Object.keys(sprites).length;
+  if (ns) console.log('[build] ' + ns + ' imágenes de assets/sprites (' + (spBytes / 1024).toFixed(0) + ' KB): ' + Object.keys(sprites).join(', '));
   console.log('[build] dist/hive_breaker.html          ' + kb(full) + '  (abrir en el navegador)');
   console.log('[build] dist/hive_breaker_artifact.html ' + kb(artifact) + '  (para publicar como Artifact)');
   return { full: outFull, artifact: outArt, stamp: stamp };

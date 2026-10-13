@@ -37,9 +37,10 @@ ve la configuración del ordenador del autor. Por eso todo lo necesario para tra
 - **Las decisiones de diseño son suyas.** Si el funcional no dice algo y hay que elegir para
   poder programar, elige lo más sencillo, apúntalo en `docs/ESTADO.md` como "decisión
   provisional" y pregúntaselo. No lo escribas en el funcional como si estuviera decidido.
-- **Tú no generas imágenes.** Las genera él en Gemini u otra IA; tú escribes el prompt exacto
-  y después recortas, compones y montas. (Dibujar con código sí puedes: de momento todo el
-  arte del juego está dibujado con código en `src/js/65_art.js`.)
+- **Tú no generas imágenes.** Las genera él en Gemini u otra IA con los prompts de
+  `docs/ARTE_PROMPTS.md`; tú recortas y montas (`tools/recortar.py`, ver "Arte"). Dibujar con
+  código sí puedes: mientras no lleguen imágenes, todo el arte está hecho con código
+  (`src/js/65_art.js` y `66_art_war.js`).
 
 ### Cómo entregar una prueba
 
@@ -67,7 +68,8 @@ Dos reglas que ya costaron disgustos en los otros juegos:
 ## Comandos
 
 Todos desde la carpeta del repositorio: en el ordenador `C:\GitHub\Hive`, en la nube
-`/home/user/Hive`. No hay nada que instalar: solo hace falta Node.
+`/home/user/Hive`. No hay nada que instalar: solo hace falta Node (y Python con Pillow, solo
+para recortar arte).
 
 | Comando | Qué hace |
 |---|---|
@@ -75,6 +77,8 @@ Todos desde la carpeta del repositorio: en el ordenador `C:\GitHub\Hive`, en la 
 | `node tools/build.js` | Monta el juego en un solo HTML: `dist/hive_breaker.html` (doble clic para jugar en el ordenador) y `dist/hive_breaker_artifact.html` (para publicar) |
 | `node tools/sim_balance.js` | Simulador de balance: el robot juega la región y dice cuánto tarda en cada zona frente a los tiempos del funcional 6.3. `--k 1.2 --p0 15` prueba otra curva de precios sin tocar las tablas |
 | `node tools/capture.js` | Solo en la nube: abre el juego en un móvil simulado, lo juega en piloto automático y guarda capturas en `capturas/`. Sirve para que Claude vea lo que dibuja antes de publicar |
+| `node tools/sim_balance.js --partidas 6 --estrategia profit` | Varias partidas seguidas con otra estrategia (`balanced`, `profit`, `defense`); `--anuncios` hace que el robot vea los vídeos |
+| `python3 tools/recortar.py` | Arte con IA: quita el fondo de `arte/originales/` y deja los sprites en `assets/sprites/` (necesita Python con Pillow; en la nube ya está) |
 
 ## Cómo está hecho el código
 
@@ -85,8 +89,8 @@ Los archivos de `src/js/` se pegan en orden de número. La frontera importante e
 
 | Archivos | Qué son | Regla |
 |---|---|---|
-| `00_core` – `45_advisor` | **Lógica**: reglas, tablas, guardado, el consejero | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
-| `50_audio` – `90_main` | **Presentación**: sonido, dibujo, efectos, dedo, menú, arranque | Leen el estado; no deciden reglas |
+| `00_core` – `49` | **Lógica**: reglas, tablas, guardado, drones (`42`), la noche (`43`), el consejero (`45`) | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
+| `50_audio` – `90_main` | **Presentación**: sonido, vista, efectos, arte (`65`, `66`, `67`), mundo (`70`), HUD y ventanas (`72`), sensación (`75`), dedo, menú, arranque | Leen el estado; no deciden reglas |
 
 Dónde se toca cada cosa:
 
@@ -94,13 +98,16 @@ Dónde se toca cada cosa:
   `REGIONS` (con la lista de zonas de cada región) y `FX` (tiempos de la jugosidad). Añadir
   una zona = una fila; `tools/check.js` avisa si pisa algo.
 - **Textos** → `src/js/10_strings.js` (inglés y español, mismas claves).
-- **Reglas** → `src/js/40_logic.js`. La lógica avisa de lo que pasa con eventos (`st.ev`) y
-  no sabe nada del dibujo.
+- **Reglas** → `src/js/40_logic.js` (comandante, máquinas, energía, reparar),
+  `42_drones.js` y `43_night.js` (Calor, oleadas, bichos, torretas, informe, jefe). La lógica
+  avisa de lo que pasa con eventos (`st.ev`) y no sabe nada del dibujo.
 - **Qué toca hacer ahora** (flecha guía, piloto automático y robot del simulador) →
   `src/js/45_advisor.js`. Es el mismo código para los tres.
 - **Sensación** (vuelos, chispas, sonidos, vibración de cada momento) → `src/js/75_juice.js`.
-- **Arte** → `src/js/65_art.js` (dibujado con código; cuando lleguen sprites de IA, se
-  sustituyen ahí).
+- **Arte** → `src/js/65_art.js` y `66_art_war.js` (dibujado con código). Las imágenes de IA
+  las coloca `67_art_images.js` (tabla `ART_SPECS`: tamaño y punto de apoyo de cada una).
+- **HUD y ventanas** (barra de Calor, informe, elegir torreta, segunda oportunidad, vídeo
+  simulado) → `src/js/72_hud.js`.
 
 Reglas del código:
 
@@ -156,9 +163,12 @@ como fuente** y **buscar marcas antes de comprometer**.
 | `CLAUDE.md` | Este archivo: cómo se trabaja aquí |
 | `docs/HIVE_Funcional.md` | El funcional (v0.3). **Fuente única de verdad** del diseño. La versión va dentro del documento; git guarda las anteriores |
 | `docs/ESTADO.md` | Dónde estamos: hito, qué probar, opiniones del autor, decisiones provisionales, lo siguiente |
+| `docs/ARTE_PROMPTS.md` | Los prompts exactos para generar el arte con IA, y qué hacer con cada imagen que llegue |
+| `arte/originales/` | Las imágenes tal como salen de la IA (se suben: son la fuente del arte) |
+| `assets/sprites/` | Las imágenes ya recortadas que usa el juego (las genera `tools/recortar.py`; se suben) |
 | `src/js/` | El código del juego (ver "Cómo está hecho el código") |
 | `src/style.css`, `src/body.html` | La página que envuelve el canvas y la ventana de ajustes |
-| `tools/` | `build.js`, `check.js`, `sim_balance.js`, `capture.js` y `load_logic.js` (carga la lógica en Node) |
+| `tools/` | `build.js`, `check.js`, `sim_balance.js`, `capture.js`, `recortar.py` y `load_logic.js` (carga la lógica en Node) |
 | `package.json` | Solo atajos (`npm run build`, `check`, `sim`); no hay dependencias |
 | `dist/`, `capturas/` | Se generan; **no se suben** |
 | `.claude/` | Los ganchos: trae lo último de GitHub al arrancar y recuerda subir al terminar |
