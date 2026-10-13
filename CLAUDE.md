@@ -47,7 +47,7 @@ El visor de archivos de la app de Claude **enseña el HTML pero no ejecuta el `<
 que mandarle un archivo por el chat no sirve para jugar. Para que pruebe desde el móvil hay
 que **publicar la versión montada como Artifact**, siempre en **el mismo enlace**:
 
-- **Enlace de pruebas:** https://claude.ai/code/artifact/PENDIENTE
+- **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 - Pasos: `node tools/check.js` → `node tools/build.js` → publicar
   `dist/hive_breaker_artifact.html` con la herramienta Artifact **pasando ese enlace como
   `url`** (si la sesión no lo ha publicado antes, primero se lee con `action: "read"`). Así el

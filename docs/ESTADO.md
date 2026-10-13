@@ -4,7 +4,7 @@
 > `HIVE_Funcional.md`, que es quien manda.
 
 **Última actualización:** 13/10/2026 · **Versión publicada:** 0.2.0 ·
-**Enlace de pruebas:** https://claude.ai/code/artifact/PENDIENTE
+**Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
 
