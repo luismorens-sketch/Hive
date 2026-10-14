@@ -79,6 +79,7 @@
       best: 0,        // mejor botín de una noche (récord)
       nestReady: false,
       cleared: false,
+      lossStreak: 0,  // noches perdidas seguidas (la siguiente llega más suave)
     };
     for (const s of d.start) R.ents.push(machineEntity(s.id, s.type, s.x, s.y, { flip: s.flip }));
     for (const v of d.veins) R.veins.push({ id: v.id, x: v.x, y: v.y });

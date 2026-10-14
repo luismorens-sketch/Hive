@@ -214,8 +214,9 @@
 
     repair: function (st, e) {
       const b = e.a, idx = e.b;
-      HB.slot.stack(Math.max(0, idx), tmp);
-      Fx.fly({ spr: A.item('plate'), x: tmp.x, y: tmp.y, z: 0, tx: b.x, ty: b.y - 0.4, tz: 0, dur: 0.22, arc: 0.6,
+      // con Placas vuela una de la pila; sin ellas, un billete (se ha pagado en Créditos)
+      if (idx >= 0) HB.slot.stack(idx, tmp); else { tmp.x = st.cmd.x; tmp.y = st.cmd.y - 0.9; }
+      Fx.fly({ spr: A.item(idx >= 0 ? 'plate' : 'bill'), x: tmp.x, y: tmp.y, z: 0, tx: b.x, ty: b.y - 0.4, tz: 0, dur: 0.22, arc: 0.6,
         land: function () { Fx.sparks(b.x, b.y - 0.4, 0.2, 5, P.yellow); Au.play('tic', { step: Au.step() }); } });
       if (e.c) { HB.entVis(b.id).rise = 0; Au.play('tada'); Fx.dust(b.x, b.y, 10, 1.5); }
     },

@@ -9,11 +9,12 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.3.1',      // sube con cada versión que se publica para probar
+    version: '0.4.0',      // sube con cada versión que se publica para probar
     hito: 5,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
-    viewTiles: 10,         // casillas que caben a lo ancho de la pantalla
+    viewTiles: 10,         // casillas que caben a lo ancho de la pantalla (en un móvil en vertical)
+    viewMinH: 13,          // como mínimo caben 13 casillas a lo alto (pantallas bajas)
 
     cmd: {
       speed: 4,            // casillas/s (funcional 4.1)
@@ -34,6 +35,7 @@
       repairEvery: 0.25,   // reparar: una placa cada 0,25 s...
       repairHp: 30,        // ...arregla 30 puntos de vida
       repairReach: 0.75,   // distancia al edificio para repararlo
+      repairCash: 10,      // sin Placas en la pila, cada tramo de reparación cuesta $10
     },
 
     pay: {
@@ -54,16 +56,20 @@
       capThreat: 0.5,      // ...con la mitad de amenaza
       provokeFrom: 3,      // el botón «provocar» aparece desde la noche 3
       provokeBonus: 0.5,   // botín extra = +50 % × parte vacía de la barra
-      groupGap: 8,         // segundos entre grupos de bichos
-      groupSize: 7,        // puntos de amenaza por grupo (más amenaza = más grupos)
+      groupGap: 10,        // segundos entre grupos de bichos
+      groupSize: 5,        // puntos de amenaza por grupo (más amenaza = más grupos)
       bonusBase: 15,       // premio por aguantar la noche: 15 × (1 + 0,5·n)
-      hpGrow: 0.08,        // los bichos ganan un 8 % de vida por noche (escalan con la amenaza)
+      hpGrow: 0.06,        // los bichos ganan un 6 % de vida por noche (escalan con la amenaza)
       lootGrow: 0.1,
       northFrom: 3,        // el flanco norte se activa desde la noche 3 (tras la Expansión)
       hideRange: 3,        // los drones se refugian si hay bichos a menos de 3 casillas
       secondChance: true,
       orbitalFrom: 5,      // el Orbital Strike se desbloquea en la noche 5 (funcional 4.4)
       lootDawn: 30,        // el botín que quedó en el suelo dura 30 s tras el amanecer
+      firstSwarmers: 12,    // la primera noche, guionizada: solo Swarmers por el sur
+      lostHq: 0.6,  
+      mercy: 0.2,          // cada noche perdida seguida, la repetición trae un 20 % menos de amenaza...
+      mercyMax: 0.6,       // ...hasta un 60 % menos como mucho        // tras perder una noche, la Torre de mando se levanta con esta parte de su vida
     },
 
     orbital: { delay: 1.5, radius: 1.6, dmg: 160 },
@@ -83,24 +89,25 @@
   //       'power' da energía · 'cool' Disipador · 'turret' defiende · 'wall' muro ·
   //       'dronepad' base de drones (no ocupa sitio: se pisa).
   // power: MW que consume; supply: MW que da. heat: Calor por segundo mientras trabaja.
-  // levels: nivel 1, 2 y 3 (funcional 6.2).
+  // levels: nivel 1, 2 y 3 (funcional 6.2). Si un nivel trae `power`, ese nivel consume eso
+  // (mejorar una máquina la hace más rápida, pero pide más energía).
   HB.MACHINES = {
     smelter: {
       kind: 'proc', w: 2.2, h: 1.8, z: 1.1, hp: 200, power: 2,
       inputs: { ore: 1 }, output: 'plate', heat: 1.0,
       levels: [
-        { time: 0.8,  inCap: 20, outCap: 20, heatMul: 1 },
-        { time: 0.6,  inCap: 30, outCap: 30, heatMul: 1 },
-        { time: 0.45, inCap: 40, outCap: 40, heatMul: 0.7 },
+        { time: 0.8,  inCap: 20, outCap: 20, heatMul: 1,   power: 2 },
+        { time: 0.6,  inCap: 30, outCap: 30, heatMul: 1,   power: 3 },
+        { time: 0.45, inCap: 40, outCap: 40, heatMul: 0.7, power: 4 },
       ],
     },
     ammo_fab: {
       kind: 'proc', w: 2.2, h: 1.8, z: 1.0, hp: 200, power: 3,
       inputs: { plate: 2 }, output: 'ammo', heat: 1.5,
       levels: [
-        { time: 1.4,  inCap: 20, outCap: 16, heatMul: 1 },
-        { time: 1.0,  inCap: 30, outCap: 24, heatMul: 1 },
-        { time: 0.75, inCap: 40, outCap: 32, heatMul: 0.7 },
+        { time: 1.4,  inCap: 20, outCap: 16, heatMul: 1,   power: 3 },
+        { time: 1.0,  inCap: 30, outCap: 24, heatMul: 1,   power: 4 },
+        { time: 0.75, inCap: 40, outCap: 32, heatMul: 0.7, power: 5 },
       ],
     },
     export: {
@@ -142,7 +149,7 @@
   // Bichos (funcional 9.5). cost = puntos de amenaza que gasta; loot = Créditos al morir.
   // from = primera noche en la que aparecen en R1. r = radio. dmg por golpe, rate golpes/s.
   HB.ENEMIES = {
-    swarmer: { hp: 22,  speed: 1.5,  dmg: 6,  rate: 1.0, r: 0.28, cost: 1, loot: 3,  weight: 10, from: 1 },
+    swarmer: { hp: 22,  speed: 1.5,  dmg: 8,  rate: 1.0, r: 0.28, cost: 1, loot: 3,  weight: 10, from: 1 },
     leaper:  { hp: 40,  speed: 1.8,  dmg: 8,  rate: 1.0, r: 0.32, cost: 3, loot: 6,  weight: 3,  from: 4, jump: true },
     crusher: { hp: 260, speed: 0.75, dmg: 25, rate: 0.6, r: 0.48, cost: 9, loot: 20, weight: 1.5, from: 6 },
     gilded:  { hp: 30,  speed: 2.4,  dmg: 0,  rate: 0,   r: 0.28, cost: 0, loot: 60, chance: 1 / 150, flee: true },
@@ -168,11 +175,11 @@
       name: 'Dust Flats',
       w: 12, h: 44,
       fogY: 15.4,           // por encima de esta fila hay niebla al empezar
-      p0: 15, k: 1.16,
+      p0: 50, k: 1.15,
       visible: 3,
       spawn: { x: 6.0, y: 26.4 },
       // Amenaza (funcional 8): barra de Calor B(n) = B0·(1 + 0,25·n); amenaza A(n) = A0·(1 + 0,15·n)
-      B0: 120, A0: 10,
+      B0: 140, A0: 16,
       flanks: {
         s: { y: 43.4, x0: 1.5, x1: 10.5 },
         n: { fromFog: true, x0: 1.5, x1: 10.5 },   // sale de la niebla
@@ -192,12 +199,12 @@
         { id: 'drone_miner_1', kind: 'drone',     x: 2.2,  y: 21.4, mult: 1.3, route: { kind: 'miner', veins: ['vein_1', 'vein_2'], to: 'smelter_1' } },
         { id: 'smelter_1_l2',  kind: 'upgrade',   x: 6.0,  y: 24.65, target: 'smelter_1' },
         { id: 'drone_cargo_1', kind: 'drone',     x: 10.2, y: 21.4, req: ['ammo_fab'], route: { kind: 'cargo', from: 'smelter_1', to: 'ammo_fab' } },
+        { id: 'solar_1',       kind: 'machine',   x: 2.4,  y: 28.8, type: 'solar' },
         { id: 'wall_s1',       kind: 'wall',      x: 1.7,  y: 35.2, x0: 0, x1: 3.4 },
         { id: 'vein_3',        kind: 'vein',      x: 1.8,  y: 11.6, req: ['expansion_n'] },
         { id: 'turret_s2',     kind: 'turret',    x: 8.0,  y: 33.4, choice: ['gatling', 'cannon'], mult: 1.2 },
         { id: 'export_l2',     kind: 'upgrade',   x: 11.1, y: 29.2, target: 'export' },
         { id: 'smelter_2',     kind: 'machine',   x: 6.6,  y: 10.6, type: 'smelter', req: ['expansion_n'], mult: 1.3 },
-        { id: 'solar_1',       kind: 'machine',   x: 2.4,  y: 28.8, type: 'solar' },
         { id: 'drone_cargo_2', kind: 'drone',     x: 2.2,  y: 17.4, req: ['ammo_fab'], route: { kind: 'cargo', from: 'ammo_fab', to: 'export' } },
         { id: 'turret_n1',     kind: 'turret',    x: 4.0,  y: 6.6, choice: ['gatling', 'cannon'], req: ['expansion_n'], mult: 1.2 },
         { id: 'ammo_fab_l2',   kind: 'upgrade',   x: 9.9,  y: 18.6, target: 'ammo_fab', req: ['ammo_fab'] },
@@ -207,13 +214,14 @@
         { id: 'wall_s2',       kind: 'wall',      x: 10.3, y: 35.2, x0: 8.6, x1: 12 },
         { id: 'turret_s1_l2',  kind: 'upgrade',   x: 2.4,  y: 31.9, target: 'turret_s1', req: ['turret_s1'] },
         { id: 'smelter_1_l3',  kind: 'upgrade',   x: 6.0,  y: 24.65, target: 'smelter_1', req: ['smelter_1_l2'] },
-        { id: 'turret_n2',     kind: 'turret',    x: 8.0,  y: 6.6, choice: ['gatling', 'cannon'], req: ['expansion_n'], mult: 1.2 },
         { id: 'wall_n1',       kind: 'wall',      x: 1.7,  y: 5.2, x0: 0, x1: 3.4, req: ['expansion_n'] },
+        { id: 'turret_n2',     kind: 'turret',    x: 8.0,  y: 6.6, choice: ['gatling', 'cannon'], req: ['expansion_n'], mult: 1.2 },
         { id: 'drone_miner_1_l2', kind: 'upgrade', x: 2.2, y: 21.4, target: 'drone_miner_1', req: ['drone_miner_1'] },
         { id: 'export_l3',     kind: 'upgrade',   x: 11.1, y: 29.2, target: 'export', req: ['export_l2'] },
         { id: 'turret_s2_l2',  kind: 'upgrade',   x: 9.6,  y: 31.9, target: 'turret_s2', req: ['turret_s2'] },
         { id: 'smelter_2_l2',  kind: 'upgrade',   x: 6.6,  y: 12.45, target: 'smelter_2', req: ['smelter_2'] },
         { id: 'dissipator_1',  kind: 'machine',   x: 11.0, y: 22.8, type: 'dissipator' },
+        { id: 'solar_2',       kind: 'machine',   x: 10.4, y: 9.2,  type: 'solar', req: ['expansion_n'] },
         { id: 'nest',          kind: 'nest',      x: 6.0,  y: 38.8, mult: 1.5 },
       ],
     },

@@ -320,13 +320,15 @@
     return best;
   }
 
-  // Reparar (funcional 4.1): quieto junto a un edificio dañado, gasta Placas de la pila.
+  // Reparar (funcional 4.1): quieto junto a un edificio dañado, gasta Placas de la pila. Sin Placas
+  // cobra Créditos (repairCash por tramo): si los bichos rompen todas las Fundiciones no quedaría
+  // de dónde sacar Placas y la partida se atascaría.
   function repair(st, R, c, dt) {
     const K = HB.CONFIG.cmd;
     if (c.moving) { c.repT = 0; return; }
     let plates = -1;
     for (let i = c.stack.length - 1; i >= 0; i--) if (c.stack[i] === 'plate') { plates = i; break; }
-    if (plates < 0) return;
+    if (plates < 0 && R.credits < K.repairCash) return;
     let best = null, bd = K.repairReach;
     for (const e of R.ents) {
       if (def(e).kind === 'dronepad' || e.hp >= def(e).hp) continue;
@@ -337,7 +339,8 @@
     c.repT += dt;
     if (c.repT < K.repairEvery) return;
     c.repT -= K.repairEvery;
-    c.stack.splice(plates, 1);
+    if (plates >= 0) c.stack.splice(plates, 1);
+    else R.credits -= K.repairCash;
     const wasDead = best.dead;
     best.hp = Math.min(def(best).hp, best.hp + K.repairHp);
     // Un escombro vuelve a funcionar al recuperar la mitad de la vida.
@@ -513,6 +516,12 @@
     }
   }
 
+  // MW que consume un edificio: el de su nivel si la tabla lo dice; si no, el de la máquina.
+  function powerUse(e) {
+    const d = def(e), L = d.levels && d.levels[e.level - 1];
+    return L && L.power !== undefined ? L.power : (d.power || 0);
+  }
+
   // Energía (funcional 5.3): capacidad, no stock. Si la demanda supera a la oferta, todo rinde
   // proporcionalmente menos (brownout), torretas incluidas.
   function power(st, R) {
@@ -521,7 +530,7 @@
       if (e.dead) continue;
       const d = def(e);
       if (d.supply) supply += d.supply;
-      if (d.power) demand += d.power;
+      demand += powerUse(e);
     }
     const f = demand > supply ? supply / demand : 1;
     const was = R.power ? R.power.f : 1;
@@ -575,6 +584,7 @@
     level: level,
     dims: dims,
     eff: eff,
+    powerUse: powerUse,
     padPos: padPos,
     zonePadPos: zonePadPos,
     sideOf: sideOf,

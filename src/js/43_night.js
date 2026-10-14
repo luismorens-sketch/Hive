@@ -125,9 +125,11 @@
     }
     // qué bichos: se gasta la amenaza con los pesos de la tabla ENEMIES
     const list = [];
-    if (first) { for (let i = 0; i < 8; i++) list.push('swarmer'); }   // noche 1 guionizada (funcional 12)
+    if (first) { for (let i = 0; i < N.firstSwarmers; i++) list.push('swarmer'); }   // noche 1 guionizada (funcional 12)
     else {
-      let A = threat(R, n) * (opts.capped ? N.capThreat : 1) * (opts.boss ? 0.6 : 1);
+      // Tras perder, la noche se repite más suave: −mercy por cada derrota seguida (con tope).
+      const mercy = Math.max(1 - N.mercyMax, 1 - N.mercy * (R.lossStreak || 0));
+      let A = threat(R, n) * (opts.capped ? N.capThreat : 1) * (opts.boss ? 0.6 : 1) * mercy;
       for (let guard = 0; guard < 200 && A >= 1; guard++) {
         let tot = 0;
         const cand = [];
@@ -234,6 +236,11 @@
       if (N) N.bossDone = true;
       HB.Logic.touch(R);
       ev(st, 'bossDead', b);
+      // Con la Madre cae su prole: los bichos que quedan mueren (sueltan su botín) y no llegan
+      // más. Así la noche del jefe se gana siempre que caiga ella; antes, si las crías tiraban
+      // después la Torre de mando, la región quedaba conquistada y la noche, perdida.
+      if (N) for (const g of N.groups) g.done = true;
+      for (const o of R._bugs) if (!o.dead) killBug(st, R, o);
     }
   }
 
@@ -498,11 +505,13 @@
     if (N.boss && !won && N.bossRef) rep.bossHp = Math.max(1, Math.round(N.bossRef.hp / N.bossRef.maxHp * 100));
     if (won) {
       R.nights = N.n;
+      R.lossStreak = 0;
       if (rep.loot + rep.bonus > R.best) { rep.record = R.best > 0; R.best = rep.loot + rep.bonus; }
     } else {
-      // Noche perdida: se pierde el botín de esa noche; la Torre de mando se levanta al 35 %.
+      // Noche perdida: se pierde el botín de esa noche; la Torre de mando se levanta (lostHq).
       const H = hq(R);
-      if (H) H.hp = Math.max(H.hp, def(H).hp * 0.35);
+      if (H) H.hp = Math.max(H.hp, def(H).hp * Cn.lostHq);
+      R.lossStreak = (R.lossStreak || 0) + 1;
     }
     R.phase = 'day'; R.heat = 0; R.dayT = 0;
     R._night = null; R._bugs = []; R._shots = []; R._strikes = []; R._orbital = 0;

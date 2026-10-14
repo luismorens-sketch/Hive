@@ -54,11 +54,16 @@
     V.cv.height = Math.round(V.cssH * V.dpr);
     V.cv.style.width = V.cssW + 'px';
     V.cv.style.height = V.cssH + 'px';
-    // En pantallas anchas (ordenador) el juego es una columna vertical en el centro.
-    V.gw = Math.min(V.cssW, Math.round(V.cssH * 0.62));
+    // La casilla se elige para llenar el ancho del móvil (10 casillas) sin bajar de viewMinH
+    // casillas a lo alto: en una pantalla baja (el visor de Claude en el iPhone) caben más
+    // casillas a lo ancho, hasta el ancho entero del mapa. Solo si la pantalla es más ancha que
+    // el mapa entero (ordenador, móvil en horizontal) queda una columna en el centro.
     V.gh = V.cssH;
+    V.tile = Math.min(V.cssW / HB.CONFIG.viewTiles, V.cssH / HB.CONFIG.viewMinH);
+    let mapW = HB.CONFIG.viewTiles;
+    for (const k in HB.REGIONS) mapW = Math.max(mapW, HB.REGIONS[k].w);
+    V.gw = Math.min(V.cssW, Math.round(mapW * V.tile));
     V.gx = Math.round((V.cssW - V.gw) / 2);
-    V.tile = V.gw / HB.CONFIG.viewTiles;
     V.S = V.tile * V.dpr;
     V.cache = {};
     V.gen++;

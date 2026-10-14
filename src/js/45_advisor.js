@@ -304,6 +304,25 @@
 
   // Dónde plantarse de noche: detrás de la torreta más amenazada (quieto dispara un 30 % más).
   function defendSpot(R, c) {
+    // Lo primero, el bicho que ya está encima de la base: plantarse a tiro de él (a 3 casillas,
+    // del lado del comandante), porque puede estar mordiendo por donde no llega ninguna torreta.
+    const H = R.ents.find(function (e) { return def(e).kind === 'hq'; });
+    if (H) {
+      let near = null, nd = 6 * 6;
+      for (const b of R._bugs || []) {
+        if (b.dead || HB.ENEMIES[b.type].flee) continue;
+        const d = HB.dist2(H.x, H.y, b.x, b.y);
+        if (d < nd) { nd = d; near = b; }
+      }
+      if (near) {
+        const N = nav(R);
+        for (const from of [c, H]) {
+          const dx = from.x - near.x, dy = from.y - near.y, l = Math.sqrt(dx * dx + dy * dy) || 1;
+          const p = { x: near.x + dx / l * 3, y: near.y + dy / l * 3 };
+          if (!N.blocked[cellOf(N, p.x, p.y)]) return p;
+        }
+      }
+    }
     let tb = null, tbd = Infinity;
     for (const b of R._bugs || []) {
       if (b.dead) continue;
@@ -318,7 +337,6 @@
       if (d < rd) { rd = d; ref = e; }
     }
     if (ref) return HB.Logic.padPos(ref, 'box', R.id);
-    const H = R.ents.find(function (e) { return def(e).kind === 'hq'; });
     const s = HB.Logic.sideOf(R.id, tb.y);
     return { x: H.x, y: H.y - s * 1.8 };
   }
@@ -435,18 +453,19 @@
       return mk('pay', p.x, p.y, null, za.z);
     }
 
-    // 4. Reparar lo roto (de día), con placas de la pila.
+    // 4. Reparar lo roto (de día), con placas de la pila; si no hay de dónde sacarlas, pagando.
     if (!night) {
       const broken = needsRepair(R);
-      if (broken && count(c.stack, 'plate') > 0) {
+      let plateSrc = null;
+      for (const e of R.ents) if (def(e).output === 'plate' && !e.dead && e.out >= 3 && (!plateSrc || e.out > plateSrc.out)) plateSrc = e;
+      if (broken && (count(c.stack, 'plate') > 0 || (!plateSrc && R.credits >= HB.CONFIG.cmd.repairCash))) {
         if (same(mem.task, 'repair', broken)) return mem.task;
         const p = besideSpot(R, broken, c);
         if (p) return mk('repair', p.x, p.y, broken);
       }
       // sin placas: ir a por ellas a una Fundición
       if (broken && c.stack.length < cap && (broken.dead || def(broken).kind === 'hq')) {
-        let src = null;
-        for (const e of R.ents) if (def(e).output === 'plate' && !e.dead && e.out >= 3 && (!src || e.out > src.out)) src = e;
+        const src = plateSrc;
         if (src) {
           if (same(mem.task, 'pickup', src)) return mem.task;
           const p = HB.Logic.padPos(src, 'out');
