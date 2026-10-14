@@ -3,7 +3,7 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 13/10/2026 · **Versión publicada:** 0.3.0 ·
+**Última actualización:** 14/10/2026 · **Versión publicada:** 0.3.1 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
@@ -36,7 +36,18 @@ Fase 2 del funcional (prototipo jugable): **hitos 4 y 5 hechos, pendientes de tu
   - Drones, torretas, muros, panel solar y disipador.
   - Bichos y noches, y el jefe en el Nido.
 
-## Qué probar ahora (versión 0.3.0)
+## Arreglos de la 0.3.1 (lo que me contaste de la 0.3.0)
+
+- *«A veces el dinero de la plataforma de la nave no se puede coger y se queda ahí.»* → Era
+  dinero **fantasma**: si estabas encima del montón cuando la nave compraba, el dinero se cobraba
+  al momento, pero los billetes que aún caían se seguían dibujando. Ahora el montón dibujado
+  nunca supera al de verdad.
+- *«Con la barrera sur, al ir a la derecha, el borde izquierdo se pone negro y la barrera queda
+  encima.»* → Pasaba en pantallas más anchas que el juego (ordenador, móvil en horizontal): se
+  veía lo de fuera del mapa moverse con la cámara. Ahora el juego se recorta a su columna. En un
+  móvil en vertical no cambia nada.
+
+## Qué probar ahora (versión 0.3.0, con los arreglos de la 0.3.1)
 
 Se abre en el mismo enlace de siempre. **Tu partida anterior se conserva** (dinero y zonas),
 pero el mapa ha cambiado de sitio. Si prefieres empezar de cero: rueda dentada → «Borrar

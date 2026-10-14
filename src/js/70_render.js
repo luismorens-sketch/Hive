@@ -568,6 +568,9 @@
   }
 
   function drawBills(R, e) {
+    // Lo dibujado nunca supera lo que hay de verdad: si el comandante cobra mientras los billetes
+    // de la nave aún caen, los que aterrizan después no pueden dejar un montón fantasma.
+    if (vis.pileShown > R.pile) vis.pileShown = R.pile;
     const n = HB.slot.billCount(vis.pileShown);
     const spr = A.item('bill');
     for (let i = 0; i < n; i++) { HB.slot.bill(e, i, tmpP); V.blit(spr, tmpP.x, tmpP.y); }
@@ -901,6 +904,12 @@
       g.fillStyle = '#121519';
       g.fillRect(0, 0, V.cssW, V.cssH);
 
+      // En pantallas más anchas que el juego (ordenador, móvil en horizontal) el mundo se recorta
+      // a la columna: si no, se veía lo de fuera del mapa moverse con la cámara. En un móvil en
+      // vertical la columna ocupa toda la pantalla y no se recorta nada.
+      const clip = V.gx > 0;
+      if (clip) { g.save(); g.beginPath(); g.rect(V.gx, 0, V.gw, V.gh); g.clip(); }
+
       V.world();
       drawGround(R);
       drawPads(st, R);
@@ -955,6 +964,7 @@
       drawNight(st, R);
       drawFlankArrows(st, R);
       drawLabels(st);
+      if (clip) g.restore();
       drawStackCounter(st);
       drawGuide(st, game.target, game.showGuide);
       HB.Fx.drawScreen();
