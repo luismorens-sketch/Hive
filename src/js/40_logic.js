@@ -12,6 +12,16 @@
 
   function ev(st, k, a, b, c) { st.ev.push({ k: k, a: a, b: b, c: c }); }
 
+  // Pasos del tutorial (funcional 12): se apunta el segundo de juego en que pasa cada cosa por
+  // primera vez. Sirven para las pistas y los avisos de una sola vez, y para ver dónde se atasca
+  // quien juega por primera vez (cada paso es un evento de analítica, funcional 17).
+  function ftue(st, key) {
+    if (st.ftue[key] !== undefined) return false;
+    st.ftue[key] = Math.round(st.time);
+    ev(st, 'ftue', key);
+    return true;
+  }
+
   function regionDef(R) { return HB.REGIONS[R.id]; }
 
   function zoneIndex(rdef, zid) {
@@ -213,6 +223,7 @@
       c.stack.splice(i, 1);
       e.inBuf[it]++;
       ev(st, 'deposit', e, it, i);
+      ftue(st, def(e).kind === 'export' ? 'sell' : 'feed');
       return true;
     }
     return false;
@@ -225,6 +236,7 @@
       c.stack.splice(i, 1);
       e.ammo += def(e).shots;
       ev(st, 'refill', e, 'ammo', i);
+      ftue(st, 'refill');
       return true;
     }
     return false;
@@ -237,6 +249,7 @@
     e.out--;
     c.stack.push(it);
     ev(st, 'pickup', e, it, c.stack.length - 1);
+    ftue(st, 'pickup');
     if (c.stack.length >= cap) ev(st, 'full');
     return true;
   }
@@ -262,7 +275,7 @@
     } else if (z.kind === 'turret') {
       if (z.choice) st.choice = { zone: z.id, options: z.choice.slice() };   // el jugador elige
       else res = buildEntity(st, R, z, z.type);
-      if (!R.heatOn) { R.heatOn = true; ev(st, 'heatOn'); }
+      if (!R.heatOn) { R.heatOn = true; ev(st, 'heatOn'); ftue(st, 'heat'); }
     } else if (z.kind === 'upgrade') {
       res = R._byId[z.target];
       if (res) res.level = Math.min(res.level + 1, def(res).levels.length);
@@ -275,6 +288,8 @@
     st.cmd.pad = null;
     st.needSave = true;
     ev(st, 'unlock', z, res);
+    ftue(st, 'buy');
+    if (z.kind === 'drone') ftue(st, 'drone');
   }
 
   // El jugador elige el tipo de torreta de una zona ya pagada (funcional 6.2).
@@ -288,6 +303,7 @@
     touch(R);
     st.needSave = true;
     ev(st, 'unlock', z, e);
+    ftue(st, 'choice');
     return e;
   }
 
@@ -375,7 +391,7 @@
       if (c.moving) {
         c.face = Math.atan2(iy, ix);
         c.stillT = 0;
-        if (st.ftue.move === undefined) { st.ftue.move = st.time; ev(st, 'ftue', 'move'); }
+        ftue(st, 'move');
       } else c.stillT += dt;
       c.x += c.vx * dt; c.y += c.vy * dt;
       collide(c, R._solids, K.radius);
@@ -402,6 +418,7 @@
       c.stack.push('ore');
       st.stats.mined++;
       ev(st, 'mine', v, c.stack.length - 1);
+      ftue(st, 'mine');
       if (c.stack.length >= K.stackCap) ev(st, 'full');
     }
 
@@ -433,6 +450,7 @@
         R.pile = 0;
         R.credits += n;
         ev(st, 'collect', n, p.e);
+        ftue(st, 'collect');
       }
     } else if (p.kind === 'zone') {
       pay(st, R, c, p.z, dt);
@@ -535,7 +553,7 @@
     const f = demand > supply ? supply / demand : 1;
     const was = R.power ? R.power.f : 1;
     R.power = { supply: supply, demand: demand, f: f };
-    if (f < 1 && was >= 1) ev(st, 'brownout', f);
+    if (f < 1 && was >= 1) { ev(st, 'brownout', f); ftue(st, 'power'); }
     else if (f >= 1 && was < 1) ev(st, 'powerOk');
   }
 
@@ -578,6 +596,7 @@
     step: step,
     econ: econ,
     ev: ev,
+    ftue: ftue,
     price: price,
     remaining: remaining,
     totalIn: totalIn,

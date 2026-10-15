@@ -20,6 +20,15 @@
     target: null, showGuide: false,
     acc: 0, last: 0, saveT: 0,
     hitstop: 0, slow: 0,   // golpes grandes: pausa corta y cámara lenta (funcional 13.1 regla 6)
+    intro: null,           // la entrada de una partida nueva: { t } (70_render.js la dibuja)
+  };
+
+  // Fin de la entrada (o un toque la salta): empieza el juego.
+  G.endIntro = function () {
+    if (!G.intro) return;
+    G.intro = null;
+    HB.Logic.ftue(G.st, 'intro');
+    G.save();
   };
 
   // Vídeo recompensado SIMULADO (funcional 15.3): da la recompensa sin anuncio y lo apunta para
@@ -84,11 +93,14 @@
     G.mem = {}; G.botMem = {};
     HB.resetVis(st);
     HB.View.cam.ready = false;
+    // Partida nueva: la nave aterriza y el comandante salta al suelo (funcional 12, 0:00).
+    G.intro = st.ftue.intro === undefined && st.time < 1 ? { t: 0 } : null;
   }
 
   // ---------- Un paso de lógica ----------
   function step(dt) {
     const st = G.st, inp = G.input;
+    if (G.intro) return;   // durante la entrada el juego espera
     if (G.autopilot) { HB.Advisor.decide(st, G.botMem); HB.Advisor.bot(st, G.botMem, inp); }
     else HB.Input.read(inp);
     if (HB.HUD.modal(st)) return;   // con una ventana abierta el juego espera
@@ -116,6 +128,7 @@
 
     const dt = 1 / HB.CONFIG.tickHz;
     let vdt = 0;
+    if (G.intro && !G.paused) { G.intro.t += real * G.speed; if (G.intro.t >= HB.Render.INTRO_DUR) G.endIntro(); }
     if (!G.paused) {
       vdt = real * G.speed;
       if (G.hitstop > 0) { G.hitstop -= real; vdt = 0; }

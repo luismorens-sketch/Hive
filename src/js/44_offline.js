@@ -168,6 +168,7 @@
       st.away = null;
       st.needSave = true;
       HB.Logic.ev(st, 'awayClaim', amount);
+      HB.Logic.ftue(st, 'away');
     },
   };
 })(globalThis.HB);

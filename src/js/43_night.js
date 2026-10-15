@@ -173,7 +173,17 @@
       const at = rdef(R).nestAt;
       R._night.bossRef = spawn(st, R, 'brood', at.x, at.y);
     }
+    // Noche 2 (funcional 12): una torreta se queda sin munición a propósito, para aprender a
+    // rellenarla. Solo si hay munición a mano (en la pila o en una Fábrica); si no, sería injusto.
+    if (p.n === 2 && !p.boss && st.ftue.refill === undefined) {
+      const T = R.ents.find(function (e) { return def(e).kind === 'turret' && !e.dead; });
+      let handy = st.cmd.stack.indexOf('ammo') >= 0;
+      for (const e of R.ents) if (def(e).kind === 'proc' && def(e).output === 'ammo' && !e.dead && e.out >= 2) handy = true;
+      if (T && handy) T.ammo = Math.min(T.ammo, Math.ceil(def(T).shots * 0.4));
+    }
     ev(st, 'nightStart', p.n, p.flanks);
+    HB.Logic.ftue(st, 'night');
+    if (R._orbital > 0) HB.Logic.ftue(st, 'orbitalReady');
   }
 
   function warn(st, R, opts) {
@@ -195,6 +205,7 @@
     };
     R._bugs.push(b);
     ev(st, 'spawn', b);
+    if (type === 'leaper') HB.Logic.ftue(st, 'leaper');
     return b;
   }
 
@@ -236,6 +247,7 @@
       if (N) N.bossDone = true;
       HB.Logic.touch(R);
       ev(st, 'bossDead', b);
+      HB.Logic.ftue(st, 'cleared');
       // Con la Madre cae su prole: los bichos que quedan mueren (sueltan su botín) y no llegan
       // más. Así la noche del jefe se gana siempre que caiga ella; antes, si las crías tiraban
       // después la Torre de mando, la región quedaba conquistada y la noche, perdida.
@@ -610,6 +622,7 @@
     startBoss: function (st, R) {
       if (R.phase !== 'day' || !R.nestReady || R.cleared) return false;
       startNight(st, R, plan(st, R, { boss: true }));
+      HB.Logic.ftue(st, 'boss');
       return true;
     },
 
@@ -619,6 +632,7 @@
       R._orbital--;
       R._strikes.push({ x: x, y: y, t: C().orbital.delay });
       ev(st, 'orbital', x, y);
+      HB.Logic.ftue(st, 'orbital');
       return true;
     },
 

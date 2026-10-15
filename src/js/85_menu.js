@@ -29,6 +29,7 @@
   }
 
   function onoff(v) { return v ? T('on') : T('off'); }
+  function mmss(t) { t = Math.max(0, Math.round(t)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
 
   function render() {
     const G = HB.Game, s = G.st.settings;
@@ -58,6 +59,12 @@
       G.save();
       close();
     });
+    // Cuándo hizo cada cosa por primera vez (funcional 12 y 17): para ver dónde se atasca alguien.
+    const ft = G.st.ftue, done = HB.FTUE.filter(function (k) { return ft[k] !== undefined; });
+    const ftLog = document.createElement('p');
+    ftLog.className = 'ftue-log';
+    ftLog.textContent = T('tut_log') + ': ' + (done.length ? done.map(function (k) { return T('ft_' + k) + ' ' + mmss(ft[k]); }).join(' · ') : T('tut_none'));
+    rows.appendChild(ftLog);
     row(T('sim_away'), null, function () {
       close();
       if (!G.checkAway(3600)) HB.HUD.showBanner(T('away_none_t'), HB.PAL.amber, 2.6, T('away_none'));

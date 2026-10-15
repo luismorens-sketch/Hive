@@ -106,6 +106,10 @@ Dónde se toca cada cosa:
   `src/js/44_offline.js`. La hora real se la pasa `90_main.js`: la lógica no la lee.
 - **Qué toca hacer ahora** (flecha guía, piloto automático y robot del simulador) →
   `src/js/45_advisor.js`. Es el mismo código para los tres.
+- **Tutorial** (funcional 12): la lista de pasos es `HB.FTUE` (`20_data.js`); la lógica apunta
+  cuándo pasa cada uno con `HB.Logic.ftue(st, 'paso')`; los avisos de una sola vez están en
+  `75_juice.js` (manejador `ftue`), las pistas y la tarjeta final en `72_hud.js` y la entrada
+  (la nave que aterriza) en `70_render.js`.
 - **Sensación** (vuelos, chispas, sonidos, vibración de cada momento) → `src/js/75_juice.js`.
 - **Arte** → `src/js/65_art.js` y `66_art_war.js` (dibujado con código). Las imágenes de IA
   las coloca `67_art_images.js` (tabla `ART_SPECS`: tamaño y punto de apoyo de cada una).

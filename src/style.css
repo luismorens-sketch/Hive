@@ -120,6 +120,8 @@ html, body {
   letter-spacing: 0.06em;
 }
 
+.ftue-log { margin: 2px 4px 2px; font: 500 15px/1.4 var(--font-body); color: var(--muted); }
+
 .ver { margin: 12px 0 0; text-align: center; font-size: 13px; color: var(--muted); }
 
 #err {

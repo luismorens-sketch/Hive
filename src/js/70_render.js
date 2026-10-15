@@ -651,12 +651,17 @@
     else if (sv.st === 'load') alt = 1.15 + Math.sin(vis.clock * 3) * 0.06;
     else if (sv.st === 'leave') alt = 1.15 + HB.easeInCubic(1 - sv.t / S.leave) * 12;
     else return;
+    shipAt(e.x, e.y - 0.12, alt, sv.st === 'load');
+  }
+
+  // La nave a una altura alt sobre el punto (x, gy) del suelo; beam: el rayo de carga.
+  function shipAt(x, gy, alt, beam) {
+    const g = V.ctx;
     vis.shipAlt = alt;
-    const x = e.x, gy = e.y - 0.12;
     const sa = HB.clamp(1 - alt / 10, 0, 1);
     g.fillStyle = 'rgba(20,15,10,' + (0.32 * sa) + ')';
     D.ellipse(g, x, gy + 0.05, 1.1 * (0.6 + sa * 0.4), 0.45 * (0.6 + sa * 0.4)); g.fill();
-    if (sv.st === 'load') {
+    if (beam) {
       g.save(); g.globalCompositeOperation = 'lighter';
       g.globalAlpha = 0.35 + Math.sin(vis.clock * 18) * 0.08;
       const gr = g.createLinearGradient(0, gy - alt, 0, gy);
@@ -672,6 +677,39 @@
     }
     g.restore();
     V.blit(A.ship(), x, gy - alt);
+  }
+
+  // ---------- Entrada (funcional 12, minuto 0:00) ----------
+  // La nave de la flota aterriza en la Plataforma, el comandante salta al suelo y la nave se va.
+  // Mientras dura, el juego espera (90_main.js); un toque la salta (72_hud.js).
+  const INTRO = { land: 1.4, jump: 0.7, wait: 0.35, leave: 1.2 };
+  const INTRO_DUR = INTRO.land + INTRO.jump + INTRO.wait + INTRO.leave;
+
+  function introAt(R, t) {
+    const ex = R.ents.find(function (e) { return HB.MACHINES[e.type].kind === 'export'; });
+    const sp = HB.REGIONS[R.id].spawn;
+    const r = { ex: ex, alt: 0, cmd: null };
+    if (!ex) return r;
+    const t1 = INTRO.land, t2 = t1 + INTRO.jump, t3 = t2 + INTRO.wait;
+    if (t < t1) r.alt = HB.lerp(10, 1.15, HB.easeOutCubic(t / t1));
+    else if (t < t3) r.alt = 1.15 + Math.sin(vis.clock * 3) * 0.06;
+    else r.alt = 1.15 + HB.easeInCubic(Math.min(1, (t - t3) / INTRO.leave)) * 12;
+    if (t >= t1) {
+      const k = Math.min(1, (t - t1) / INTRO.jump);
+      r.cmd = { x: HB.lerp(ex.x, sp.x, k), y: HB.lerp(ex.y - 0.12, sp.y, k), z: (1 - k) * 1.0 + Math.sin(Math.PI * k) * 1.4 };
+    }
+    return r;
+  }
+
+  // Sonidos y polvo de la entrada, cada uno una sola vez.
+  function introFx(I, R) {
+    const t = I.t, Au = HB.Audio, t1 = INTRO.land, t2 = t1 + INTRO.jump, t3 = t2 + INTRO.wait;
+    const ex = R.ents.find(function (e) { return HB.MACHINES[e.type].kind === 'export'; });
+    const sp = HB.REGIONS[R.id].spawn;
+    if (!I.s0) { I.s0 = true; Au.play('whoosh'); }
+    if (t >= t1 && !I.s1) { I.s1 = true; Au.play('thud'); if (ex) HB.Fx.dust(ex.x, ex.y, 12, 2.2); }
+    if (t >= t2 && !I.s2) { I.s2 = true; Au.play('pop'); HB.Fx.dust(sp.x, sp.y, 10, 1); HB.Fx.ring(sp.x, sp.y, 1.6, P.tealL); V.shake(2, 0.12); }
+    if (t >= t3 && !I.s3) { I.s3 = true; Au.play('whooshUp'); }
   }
 
   function drawDrones(R, shadows) {
@@ -870,6 +908,7 @@
   // ---------- Fotograma ----------
   HB.Render = {
     vis: vis,
+    INTRO_DUR: INTRO_DUR,
 
     frame: function (game, alpha, dt) {
       const st = game.st, R = st.regions[st.cur], c = st.cmd, g = V.ctx;
@@ -883,7 +922,9 @@
       if (Math.abs(R.fogY - vis.fogY) < 0.01) vis.fogY = R.fogY;
 
       // posición interpolada del comandante (la lógica va a 30 Hz, el dibujo a 60)
-      const x = HB.lerp(game.prevX, c.x, alpha), y = HB.lerp(game.prevY, c.y, alpha);
+      let x = HB.lerp(game.prevX, c.x, alpha), y = HB.lerp(game.prevY, c.y, alpha);
+      const intro = game.intro ? introAt(R, game.intro.t) : null;
+      if (intro) { introFx(game.intro, R); if (intro.cmd) { x = intro.cmd.x; y = intro.cmd.y; } }
       const hi = vis.histI * 3;
       vis.hist[hi] = vis.clock; vis.hist[hi + 1] = x; vis.hist[hi + 2] = y;
       vis.histI = (vis.histI + 1) % 64; vis.histN = Math.min(64, vis.histN + 1);
@@ -952,9 +993,11 @@
         }
         else if (it.k === 7) drawTurret(st, R, it.o);
         else if (it.k === 8) drawWall(st, R, it.o);
-        else drawCommander(st, x, y, dt);
+        else if (!intro) drawCommander(st, x, y, dt);
+        else if (intro.cmd) drawCommander(st, x, y - intro.cmd.z, dt);
       }
       if (ex) drawShip(R, ex, dt);
+      if (intro && intro.ex) shipAt(intro.ex.x, intro.ex.y - 0.12, intro.alt, false);
       drawDrones(R, false);
       drawShots(R, dt);
       HB.Fx.drawWorld();
@@ -965,8 +1008,8 @@
       drawFlankArrows(st, R);
       drawLabels(st);
       if (clip) g.restore();
-      drawStackCounter(st);
-      drawGuide(st, game.target, game.showGuide);
+      if (!intro) drawStackCounter(st);
+      drawGuide(st, game.target, game.showGuide && !intro);
       HB.Fx.drawScreen();
       HB.HUD.draw(game, dt);
       if (vis.flash > 0) {

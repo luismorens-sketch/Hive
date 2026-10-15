@@ -3,8 +3,9 @@
 // Arriba: dinero y ajustes; debajo, la barra de Calor con «provocar» (de día) o la noche en
 // curso con su botín. Abajo a la derecha, de noche, el Orbital Strike.
 // Ventanas (paran el juego): elegir torreta, informe de la noche, segunda oportunidad, lo producido
-// mientras no jugabas («WHILE YOU WERE AWAY», funcional 14.4) y el vídeo simulado (funcional 15.3:
-// en el prototipo el botón «AD» da la recompensa sin anuncio).
+// mientras no jugabas («WHILE YOU WERE AWAY», funcional 14.4), «tu base nunca duerme» al conquistar
+// la región y el vídeo simulado (funcional 15.3: en el prototipo el botón «AD» da la recompensa
+// sin anuncio). Abajo, los avisos cortos del tutorial (funcional 12), de uno en uno.
 // Cada botón que se dibuja se apunta en `buttons` para que 80_input.js sepa qué se ha tocado.
 (function (HB) {
   'use strict';
@@ -20,6 +21,8 @@
     ad: null,             // vídeo simulado en pantalla: { t, dur, done }
     pop: 0,               // animación de entrada de la ventana abierta
     awayT: 0,             // segundos que lleva abierta la pantalla de regreso (la cifra rueda)
+    tips: [],             // avisos del tutorial en cola: { s, sub, col, t, dur }
+    tipNow: null,
   };
 
   function T(k, a, b) { return HB.T(k, a, b); }
@@ -44,12 +47,26 @@
   }
 
   // Texto que se encoge hasta caber en maxW (las frases largas en pantallas estrechas).
-  function fitText(s, x, y, px, col, maxW, weight) {
+  function fitText(s, x, y, px, col, maxW, weight, stroke) {
     const g = V.ctx;
     g.font = V.font(px, weight);
     const w = g.measureText(s).width;
     if (w > maxW) px = Math.max(12, Math.floor(px * maxW / w));
-    V.text(s, x, y, px, col, null, 'center', weight);
+    V.text(s, x, y, px, col, stroke || null, 'center', weight);
+  }
+
+  // Parte una frase en líneas que caben en maxW.
+  function wrap(s, px, maxW, weight) {
+    const g = V.ctx;
+    g.font = V.font(px, weight);
+    const out = [];
+    let line = '';
+    for (const w of s.split(' ')) {
+      const t = line ? line + ' ' + w : w;
+      if (line && g.measureText(t).width > maxW) { out.push(line); line = w; } else line = t;
+    }
+    if (line) out.push(line);
+    return out;
   }
 
   function panel(x, y, w, h, border) {
@@ -289,6 +306,65 @@
     g.restore();
   }
 
+  // Al conquistar la región (funcional 12, minuto 15-20): lo que hace la base mientras no juegas.
+  function offlineTip(st) {
+    const R = st.regions[st.cur];
+    return R.cleared && !st.report && !st.defeat && st.ftue.offlineTip === undefined;
+  }
+
+  function drawOfflineTip(st, game) {
+    const g = V.ctx;
+    scrim(0.6);
+    const cx = V.gx + V.gw / 2, cy = V.gh * 0.47;
+    const pw = Math.min(V.gw - 24, 380), inner = pw - 48;
+    const l1 = wrap(T('off_l1'), 20, inner, 500), l2 = wrap(T('off_l2', duration(HB.CONFIG.offline.cap)), 20, inner, 500);
+    const ph = 262 + (l1.length + l2.length) * 26;
+    const s = HB.easeOutBack(Math.min(1, H.pop));
+    g.save(); g.translate(cx, cy); g.scale(s, s); g.translate(-cx, -cy);
+    panel(cx, cy, pw, ph, P.cash);
+    let y = cy - ph / 2 + 40;
+    fitText(T('off_title'), cx, y, 32, P.yellow, inner);
+    // un dron con su carga, para que se vea de qué va
+    y += 52;
+    const dr = A.drone(), bill = A.item('bill'), k = 130, bob = Math.sin(vis.clock * 4) * 3;
+    g.drawImage(bill.c, cx - bill.ax * k * 0.6, y + 40 + bob - bill.ay * k * 0.6, bill.w * k * 0.6, bill.h * k * 0.6);
+    g.drawImage(dr.c, cx - dr.ax * k, y + bob - dr.ay * k, dr.w * k, dr.h * k);
+    y += 70;
+    for (const line of l1) { V.text(line, cx, y, 20, '#ffffff', null, 'center', 500); y += 26; }
+    y += 6;
+    for (const line of l2) { V.text(line, cx, y, 20, P.cashL, null, 'center', 500); y += 26; }
+    y += 8;
+    fitText(T('off_l3'), cx, y, 24, P.yellow, inner);
+    button(cx, cy + ph / 2 - 44, pw - 80, 56, T('got_it'), P.yellow, P.ink, function () {
+      HB.Logic.ftue(st, 'offlineTip');
+      game.save();
+    }, { size: 26 });
+    g.restore();
+  }
+
+  // Avisos del tutorial: un concepto cada vez (funcional 12), abajo, sin parar el juego.
+  H.tip = function (s, sub, col) { H.tips.push({ s: s, sub: sub, col: col || P.yellow, t: 0, dur: 4.2 }); };
+
+  function drawTip(dt) {
+    if (!H.tipNow && H.tips.length) H.tipNow = H.tips.shift();
+    const t = H.tipNow;
+    if (!t) return;
+    t.t += dt;
+    if (t.t > t.dur) { H.tipNow = null; return; }
+    const g = V.ctx;
+    const a = t.t < 0.25 ? t.t / 0.25 : (t.t > t.dur - 0.4 ? Math.max(0, (t.dur - t.t) / 0.4) : 1);
+    const sc = t.t < 0.3 ? HB.easeOutBack(t.t / 0.3) : 1;
+    const pw = Math.min(V.gw - 32, 380), ph = t.sub ? 76 : 52;
+    const cx = V.gx + V.gw / 2, cy = V.gh * 0.75;
+    g.save(); g.globalAlpha = a; g.translate(cx, cy); g.scale(sc, sc); g.translate(-cx, -cy);
+    D.rr(g, cx - pw / 2, cy - ph / 2 + 4, pw, ph, 16); g.fillStyle = 'rgba(0,0,0,0.35)'; g.fill();
+    D.rr(g, cx - pw / 2, cy - ph / 2, pw, ph, 16); g.fillStyle = 'rgba(20,24,28,0.92)'; g.fill();
+    g.lineWidth = 3; g.strokeStyle = t.col; g.stroke();
+    fitText(t.s, cx, cy - (t.sub ? 14 : 0), 30, t.col, pw - 28);
+    if (t.sub) fitText(t.sub, cx, cy + 20, 19, '#ffffff', pw - 28, 500);
+    g.restore();
+  }
+
   function drawDefeat(st, game) {
     const g = V.ctx;
     scrim(0.6);
@@ -327,8 +403,8 @@
     const g = V.ctx;
     g.globalAlpha = k > 0.8 ? (1 - k) / 0.2 : 1;
     const cx = V.gx + V.gw / 2, cy = V.gh * 0.36;
-    V.text(b.s, cx, cy, 46 * s, b.col || P.yellow, P.ink);
-    if (b.sub) V.text(b.sub, cx, cy + 40, 22, '#ffffff', P.ink);
+    fitText(b.s, cx, cy, 46 * s, b.col || P.yellow, V.gw - 30, 600, P.ink);
+    if (b.sub) fitText(b.sub, cx, cy + 40, 22, '#ffffff', V.gw - 30, 600, P.ink);
     g.globalAlpha = 1;
   }
 
@@ -354,7 +430,7 @@
     g.fillStyle = 'rgba(255,255,255,0.8)'; g.fill(); g.lineWidth = 3; g.strokeStyle = P.ink; g.stroke();
   }
 
-  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || st.away || H.ad); };
+  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || st.away || H.ad || offlineTip(st)); };
 
   H.showBanner = function (s, col, dur, sub) { H.banner = { s: s, col: col, t: 0, dur: dur || 1.8, sub: sub }; };
 
@@ -396,13 +472,19 @@
     const learning = Object.keys(R.bought).length < 2;
     const tgt = game.target;
     let hint = null;
-    if (st.ftue.move === undefined) hint = 'hint_drag';
+    if (game.intro) hint = null;   // la nave está aterrizando
+    else if (st.ftue.move === undefined) hint = 'hint_drag';
     else if (tgt && tgt.hint && (learning || tgt.kind === 'refill' || (tgt.kind === 'pickup' && tgt.hint === 'hint_ammo') || tgt.kind === 'repair')) hint = tgt.hint;
+    // de noche, lo que enseña el tutorial (funcional 12): quieto se dispara más; el Orbital
+    if (!hint && !game.intro && R.phase === 'night' && R._night) {
+      if (R._orbital > 0 && st.ftue.orbital === undefined && !H.aiming) hint = 'tut_orbital';
+      else if (R._night.n === 1 && !R._night.boss) hint = 'tut_still';
+    }
     if (hint && !H.modal(st)) {
       const hy = yy + 22 + Math.sin(vis.clock * 3) * 3;
-      V.text(T(hint), V.gx + V.gw / 2, hy, 28, hint === 'hint_refill' || hint === 'hint_ammo' ? P.orangeL : P.yellow, P.ink);
+      fitText(T(hint), V.gx + V.gw / 2, hy, 28, hint === 'hint_refill' || hint === 'hint_ammo' ? P.orangeL : P.yellow, V.gw - 24, 600, P.ink);
     }
-    if (st.ftue.move === undefined) drawHand();
+    if (st.ftue.move === undefined && !game.intro) drawHand();
 
     if (R.cleared && !st.report) {
       vis.endT += dt;
@@ -418,6 +500,7 @@
 
     drawOrbital(st, R);
     drawBanner(dt);
+    if (!H.modal(st)) drawTip(dt);
 
     if (game.showFps) {
       const cnt = HB.Fx.counts();
@@ -433,12 +516,14 @@
     else if (st.defeat) drawDefeat(st, game);
     else if (st.report) drawReport(st, game);
     else if (st.away) drawAway(st, game, dt);
+    else if (offlineTip(st)) drawOfflineTip(st, game);
     if (!st.away) H.awayT = 0;
   };
 
   // Un toque corto: primero los botones; luego lo que se puede tocar en el mundo; luego el Orbital.
   H.tap = function (x, y, game) {
     const st = game.st;
+    if (game.intro) { game.endIntro(); return true; }   // un toque salta la entrada
     for (let i = H.buttons.length - 1; i >= 0; i--) {
       const b = H.buttons[i];
       if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) { b.fn(); HB.Audio.play('pop'); return true; }

@@ -391,6 +391,15 @@
     // al cobrar lo producido mientras no jugabas (funcional 14.4), lo mismo
     awayClaim: function (st, e) { rain(e.a); },
 
+    // ---------- Tutorial (funcional 12): un aviso corto la primera vez que pasa algo nuevo ----------
+    ftue: function (st, e) {
+      const k = e.a, T = HB.T, tip = HB.HUD.tip;
+      if (k === 'drone') tip(T('tut_drone'), T('tut_drone_sub'), P.tealL);
+      else if (k === 'heat') tip(T('tut_heat'), T('tut_heat_sub'), P.orangeL);
+      else if (k === 'power') tip(T('tut_power'), T('tut_power_sub'), P.amber);
+      else if (k === 'leaper') tip(T('tut_leaper'), T('tut_leaper_sub'), P.acid);
+    },
+
     // ---------- Drones ----------
     droneNew: function (st, e) {
       const pad = e.b;

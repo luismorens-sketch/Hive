@@ -114,6 +114,7 @@ function run(opts) {
     cmdDowns: cmdDowns, destroyed: destroyed, adsWatched: ads,
     machines: machines,
     tasks: taskTime,
+    ftue: st.ftue,
   };
 }
 
@@ -145,6 +146,11 @@ function print(r) {
   else out.push('Sin conquistar tras ' + mmss(r.total) + ' (' + r.zones.length + '/' + r.zonesTotal + ' zonas).');
   out.push('Ganado vendiendo: $' + r.earned + ' · bichos muertos: ' + r.kills + ' · comandante caído: ' + r.cmdDowns +
     ' veces · edificios destruidos: ' + r.destroyed + (r.ads ? ' · vídeos vistos: ' + r.adsWatched : ''));
+  out.push('');
+  // Pasos del tutorial (funcional 12): cuándo hace el robot cada cosa por primera vez.
+  const HBd = loadLogic();
+  const steps = HBd.FTUE.filter(function (k) { return r.ftue[k] !== undefined; });
+  out.push('Tutorial (robot, primera vez): ' + steps.map(function (k) { return k + ' ' + mmss(r.ftue[k]); }).join(' · '));
   out.push('');
   out.push('Máquinas (porcentaje del tiempo desde que existen):');
   for (const id in r.machines) {

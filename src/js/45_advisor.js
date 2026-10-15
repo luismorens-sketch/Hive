@@ -558,6 +558,8 @@
       HB.Offline.claim(st, mem.ads ? 2 : 1);
       return mem.ads ? 'x2' : 'claim';
     }
+    // la tarjeta de «tu base nunca duerme» al conquistar la región: el robot la da por leída
+    if (R.cleared && !st.report && st.ftue.offlineTip === undefined) { HB.Logic.ftue(st, 'offlineTip'); return 'tip'; }
     if (st.report) {
       const x2 = mem.ads && st.report.won;
       HB.Night.claimReport(st, x2 ? 2 : 1);
