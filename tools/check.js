@@ -200,10 +200,12 @@ if (HB) {
   {
     try {
       const { run } = require('./sim_balance');
-      const r = run({ minutos: 45, seed: 777 });
+      // La región 1 está pensada para unos 55-60 min del robot (0.4.0); 90 deja margen.
+      const LIMIT = 90;
+      const r = run({ minutos: LIMIT, seed: 777 });
       if (r.zones.length === 0) bad('el robot no ha comprado ninguna zona');
       else if (!r.nights.length) bad('no ha llegado ninguna noche');
-      else if (r.cleared === null) bad('el robot no conquista la región en 45 minutos (' + r.zones.length + '/' + r.zonesTotal + ' zonas, ' + r.nights.length + ' noches)');
+      else if (r.cleared === null) bad('el robot no conquista la región en ' + LIMIT + ' minutos (' + r.zones.length + '/' + r.zonesTotal + ' zonas, ' + r.nights.length + ' noches)');
       else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos');
     } catch (e) { bad('el simulador ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
   }

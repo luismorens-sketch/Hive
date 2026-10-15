@@ -3,106 +3,87 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 14/10/2026 · **Versión publicada:** 0.3.1 ·
+**Última actualización:** 15/10/2026 · **Versión publicada:** 0.4.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
 
-Fase 2 del funcional (prototipo jugable): **hitos 4 y 5 hechos, pendientes de tu prueba.**
+Fase 2 del funcional (prototipo jugable): **hitos 4 y 5 hechos; primer pase de ritmo y
+dificultad (0.4.0), pendiente de tu prueba.**
 
 | Hito (funcional 21) | Estado |
 |---|---|
-| 1. Simulador + tablas en Node | Hecho. Ahora juega la región entera, con noches y jefe |
+| 1. Simulador + tablas en Node | Hecho. Juega la región entera, con noches y jefe |
 | 2. Comandante, joystick, pila, minado, Fundición, Exportación, zonas | Hecho y probado por el autor (0.2.0) |
 | 3. Jugosidad de recoger, cobrar y desbloquear | Primer pase hecho; se pule con tu opinión |
-| 4. Drones, torretas, munición, bichos, campo de flujo, noche | **Hecho, esperando tu prueba** |
-| 5. Calor-reloj, energía, brownout, jefe | **Hecho, esperando tu prueba** |
+| 4. Drones, torretas, munición, bichos, campo de flujo, noche | Hecho y probado por el autor (0.3.0) |
+| 5. Calor-reloj, energía, brownout, jefe | Hecho y probado por el autor (0.3.0) |
 | 6. Tutorial, guardado/offline, vídeos simulados | A medias: guardado sí; vídeos simulados del informe (×2) y de la segunda oportunidad sí; tutorial guionizado, offline y los otros 2 vídeos, no |
-| 7. Balance, prueba con 5 personas, vídeo de 30 s | Pendiente |
+| 7. Balance, prueba con 5 personas, vídeo de 30 s | **Primer pase de ritmo y dificultad hecho (0.4.0)** |
 
-## Tu opinión de la 0.2.0 y qué hice con ella
+## Tu opinión de la 0.3.1 y qué hice con ella (versión 0.4.0)
 
-- *«En general correcto; fluidez y velocidad correctas.»* → No he tocado ni el movimiento ni
-  la velocidad.
-- *«Las vetas y las construcciones no parecen muy intuitivas.»* →
-  - Las vetas ahora son **un montón del mismo mineral que recoges**.
-  - Cada edificio tiene **una silueta distinta**: la Fundición es un horno con la puerta al
-    rojo, la Fábrica de munición una prensa con tres balas.
-  - Encima de cada máquina hay **un cartel con lo que entra ▸ lo que sale**.
-  - Además, en `docs/ARTE_PROMPTS.md` tienes **los prompts para generar el arte de verdad con
-    Gemini** (ver "Lo siguiente").
-- *«Hay pocas estructuras y recursos: da poco juego.»* → Llegan los hitos 4 y 5:
-  - 30 zonas en lugar de 14.
-  - Drones, torretas, muros, panel solar y disipador.
-  - Bichos y noches, y el jefe en el Nido.
+- *«Lo veía en el iPhone. Prefiero que el juego ocupe todo el ancho.»* → En el móvil en
+  vertical el juego ocupa siempre todo el ancho, también en pantallas bajas como el visor de
+  Claude: caben 10 casillas a lo ancho y, como mínimo, 13 a lo alto. Solo si la pantalla es
+  más ancha que el mapa entero (ordenador, móvil en horizontal) quedan bandas oscuras a los
+  lados.
+- *«Avanza muy rápido y es muy fácil: en 5 min tenía todo y los bichos apenas me tocaban.»* →
+  - **Zonas más caras**: la primera cuesta $50 (antes $15) y cada una un 15 % más que la
+    anterior. Con el robot del simulador, la zona 15 llega a los 10 min (antes 4) y la región
+    entera, en 55-70 min (antes 20). Una persona tardará más.
+  - **Noches más largas y fuertes**: más bichos (amenaza base 16, antes 10), en grupos más
+    pequeños y más seguidos. Duran casi un minuto (antes 23 s). El Swarmer muerde más fuerte
+    (8, antes 6). La primera noche trae 12 Swarmers (antes 8).
+  - **Días de unos 3 minutos** de mediana.
+- *«La electricidad no influye en nada; quiero verla junto al dinero.»* →
+  - Arriba, junto al dinero, está la energía **usada / disponible** («6/10 MW»). Ámbar cuando
+    estás cerca del límite; roja y latiendo cuando falta.
+  - **Ahora influye**: mejorar una máquina la hace más rápida, pero consume 1 MW más por nivel.
+    Al subir la primera Fundición a nivel 2 ya falta energía, y la cinta dice cuánto te frena
+    («POCA ENERGÍA · 83 % VELOCIDAD»). El panel solar llega justo después.
+  - **Segundo panel solar** al final de la región (en el norte): con el Disipador y las
+    mejoras vuelve a faltar energía, y una noche con poca energía duele (las torretas también
+    van más lentas).
 
-## Arreglos de la 0.3.1 (lo que me contaste de la 0.3.0)
+Dos fallos que encontré por el camino, y que ya están arreglados:
 
-- *«A veces el dinero de la plataforma de la nave no se puede coger y se queda ahí.»* → Era
-  dinero **fantasma**: si estabas encima del montón cuando la nave compraba, el dinero se cobraba
-  al momento, pero los billetes que aún caían se seguían dibujando. Ahora el montón dibujado
-  nunca supera al de verdad.
-- *«Con la barrera sur, al ir a la derecha, el borde izquierdo se pone negro y la barrera queda
-  encima.»* → Pasaba en pantallas más anchas que el juego (ordenador, móvil en horizontal): se
-  veía lo de fuera del mapa moverse con la cámara. Ahora el juego se recorta a su columna. En un
-  móvil en vertical no cambia nada.
+- **Matar al jefe y perder la noche a la vez**: si caía la Madre de la Prole pero sus crías
+  tiraban después la Torre de mando, la región quedaba conquistada y la noche, perdida. Ahora,
+  con la Madre caen todos sus bichos (y sueltan su botín).
+- **La partida podía atascarse para siempre**: si los bichos rompían todas las Fundiciones, no
+  quedaba de dónde sacar Placas, y sin Placas no se podía reparar nada. Ahora, si reparas sin
+  Placas en la pila, se paga con Créditos.
 
-## Qué probar ahora (versión 0.3.0, con los arreglos de la 0.3.1)
+## Qué probar ahora (versión 0.4.0)
 
-Se abre en el mismo enlace de siempre. **Tu partida anterior se conserva** (dinero y zonas),
-pero el mapa ha cambiado de sitio. Si prefieres empezar de cero: rueda dentada → «Borrar
-progreso» (dos toques).
+**Importante: borra el progreso antes de probar.** Tu partida ya tiene todo comprado, así que
+no notarías el nuevo ritmo. Rueda dentada → «Borrar progreso» y otra vez para confirmar (se
+pierde la partida de prueba, nada más).
 
-- **El día**: lo mismo que antes, pero al comprar la **primera torreta** aparece arriba la
-  **barra de Calor**. Se llena mientras las máquinas trabajan.
-- **«LA COLMENA DESPIERTA»**: la barra se ha llenado. Suena la sirena, sale una flecha roja por
-  donde van a entrar y a los 10 s empieza la noche.
-- **La noche**:
-  - Los bichos vienen del sur. Desde la noche 3, también del norte, si compraste la Expansión.
-  - Las torretas disparan solas mientras tengan munición. **Rellénalas pisando su caja
-    naranja** con cajas de munición en la pila.
-  - Tu comandante dispara solo; **quieto dispara más rápido**.
-  - El botín vuela hacia ti si estás cerca. Si cae lejos, pásale por encima: dura 30 s después
-    del amanecer.
-- **El informe**: al amanecer. El botón **×2 · AD** es un **vídeo simulado** (el primero es
-  gratis). Así medimos cuántos vídeos se usarían.
-- **Si cae la Torre de mando**: «Segunda oportunidad · AD» o «Rendirse». Rendirse solo te quita
-  el botín de esa noche, nunca lo ahorrado ni lo construido.
-- **Drones**:
-  - El minero lleva mineral a la Fundición. Los de carga mueven placas y munición; su ruta se
-    ve en el suelo.
-  - Sobre la salida de la Fábrica de munición hay un **cartel que se toca**: DEFENSA /
-    EQUILIBRIO / BENEFICIO. Decide si el dron se lleva toda la munición a vender o te deja
-    una parte para las torretas.
-- **Energía**: al construir la segunda Fundición falta energía. Sale la cinta «POCA ENERGÍA» y
-  todo va más lento hasta que compras el panel solar.
-- **Torretas**: la primera es una Gatling. En las siguientes **eliges** Gatling (rápida) o
-  Cañón (daño en área).
-- **Edificios rotos**: si los bichos rompen algo, queda el escombro. Quédate quieto al lado con
-  placas en la pila para repararlo.
-- **El jefe**: la última zona es el Nido, al sur, fuera del muro.
-  - Al pagarla aparece «ATACAR EL NIDO» con un punto de color: **verde** quiere decir que tu
-    defensa está a la altura.
-  - Quédate encima 1,5 s y sale la **Madre de la Prole**.
-  - Desde la noche 5 tienes el **Orbital**: el botón de abajo a la derecha, y luego tocas
-    dónde quieres que caiga.
+- **La pantalla**: que el juego llene todo el ancho del iPhone, sin bandas negras.
+- **La energía** junto al dinero: compra la Fábrica de munición (5/5), luego mejora la
+  Fundición y mira cómo se pone roja y sale la cinta. Compra el panel solar y vuelve a blanco.
+- **El ritmo**: ¿cada zona cuesta lo justo, o ahora se hace pesado?
+- **Las noches**: ¿llegan a tocarte la base? ¿Tienes que rellenar torretas y reparar?
+- **Los arreglos de la 0.3.1**: el dinero de la plataforma de la nave ya no debería quedarse
+  «fantasma» si esperas encima.
 
 Preguntas para ti:
 
-1. ¿Se entiende ahora qué es cada edificio y qué hace?
-2. ¿La primera noche asusta lo justo? ¿Se entiende que hay que rellenar las torretas?
-3. ¿Las noches llegan demasiado seguidas o demasiado espaciadas?
-4. ¿El jefe es demasiado fácil o demasiado difícil?
-5. ¿Va fluido de noche, con muchos bichos? Activa «Ver FPS» en los ajustes y dime la cifra.
+1. ¿El ritmo nuevo está bien, o nos hemos pasado de lento o de difícil?
+2. ¿Se entiende la energía con el indicador y la cinta?
+3. ¿Va fluido de noche con más bichos? Activa «Ver FPS» en los ajustes y dime la cifra.
 
-## Una contradicción del funcional que tienes que decidir
+## Una decisión del funcional que tienes que confirmar
 
-El apartado **6.3** pide unos tiempos por zona: 15-40 s en las 5 primeras, 40-90 s hasta la 15
-y 1,5-3 min hasta la 30. Con las 30 zonas de la región 1, eso suma unos **50 minutos**. Pero el
-apartado **6.4** dice que **la región 1 dura 15-25 minutos**. Las dos cosas no caben a la vez.
-**He dado prioridad a la 6.4**: el robot del simulador conquista la región en 19-25 minutos,
-así que las zonas van más rápido de lo que pide la 6.3. ¿Lo dejamos así (la tabla 6.3 valdría
-para las regiones siguientes) o prefieres otra cosa?
+El apartado **6.3** pide unos tiempos por zona que suman unos **50 minutos** para la región 1,
+pero el **6.4** dice que la región 1 dura **15-25 minutos**. Antes di prioridad a la 6.4. Como
+me pediste más lento, **ahora sigo la tabla 6.3**: el robot tarda 55-70 min. **¿Cambiamos la
+6.4 del funcional a «R1: 45-75 min»?** No lo toco hasta que me lo digas.
+
+Además, el funcional pide en la 6.3 que cada zona suba un 18-25 % de precio; uso un 15 %
+porque, con más subida, el final de la región se hace eterno. Lo apunto como provisional.
 
 ## Decisiones provisionales (las tomé para poder programar; dime si cambias alguna)
 
@@ -116,74 +97,64 @@ De la 0.2.0, siguen igual:
 - Para pagar hay que quedarse 0,4 s encima.
 - Guardado automático.
 
-Nuevas en la 0.3.0:
+De la 0.3.0 (con lo que cambió en la 0.4.0):
 
-1. **Mapa de la región 1 rehecho** (12 × 44 casillas) para poder defenderlo.
-   - La base está en el centro.
-   - El flanco sur ataca desde la primera noche; al sur del muro queda el Nido.
-   - El flanco norte se abre con la Expansión, pero **no ataca hasta la noche 3**, para dar
-     tiempo a montar algo.
+1. **Mapa de la región 1** (12 × 44 casillas). La base en el centro; el flanco sur ataca desde
+   la primera noche; el norte se abre con la Expansión, pero **no ataca hasta la noche 3**.
 2. **El Calor solo sube mientras una máquina trabaja** (Fundición 1/s, Fábrica de munición
-   1,5/s; el Disipador lo baja 2/s).
-   - Barra B(n) = 120 × (1 + 0,25·n).
-   - Amenaza A(n) = 10 × (1 + 0,15·n).
-   - El Calor empieza a contar al comprar la primera torreta.
-3. **La primera noche está guionizada**: 8 Swarmers por el sur, y la Torre de mando no se
+   1,5/s; el Disipador lo baja 2/s). Empieza a contar al comprar la primera torreta.
+   - Barra B(n) = **140** × (1 + 0,25·n) (antes 120).
+   - Amenaza A(n) = **16** × (1 + 0,15·n) (antes 10).
+   - **Nuevo**: los bichos llegan en grupos de 5 puntos de amenaza, cada 10 s.
+3. **La primera noche está guionizada**: **12** Swarmers por el sur, y la Torre de mando no se
    puede caer (funcional 12).
-4. **Bichos y cuándo aparecen**:
-   - Leapers desde la noche 4; saltan los muros.
-   - Crushers desde la noche 6.
-   - El dorado sale 1 de cada 150 y huye hacia el borde.
-   - Los bichos ganan un 8 % de vida por noche.
-5. **Torretas**:
-   - Caja de 5 cajas de munición; empiezan con 2.
-   - Gatling: 25 disparos por caja. Cañón: 6.
-   - 3 niveles: daño, cadencia y alcance.
-6. **Energía**: la Torre de mando da 5 MW; cada panel solar, 5 MW más.
-   - Consumen: Fundición 2, Fábrica de munición 3 y Disipador 3.
-   - Si falta, todo va más lento en proporción, torretas incluidas.
-7. **Edificios dañados**:
-   - Rinden entre el 100 % (sanos) y el 50 % (casi rotos).
-   - Rotos quedan como escombro.
-   - **Reparar**: quieto junto a ellos, una placa cada 0,25 s, +30 de vida. Un escombro vuelve
-     a funcionar al llegar a la mitad de su vida.
-8. **Noche perdida**: no cuenta (se repite la misma noche) y la Torre de mando se levanta al
-   35 %.
-9. **Botín de la noche**:
-   - Se cobra al cerrar el informe. Si se pierde la noche, se pierde.
-   - Lo que queda en el suelo dura 30 s tras el amanecer.
-   - Premio por aguantar: 15 × (1 + 0,5·n).
-10. **DEFENSA / EQUILIBRIO / BENEFICIO**:
-    - Solo afecta a los drones que llevan cosas a la exportación.
-    - EQUILIBRIO deja en la salida la mitad del montón (para tus torretas).
-    - DEFENSA no se lleva nada; BENEFICIO se lo lleva todo.
-11. **El jefe** (Madre de la Prole):
-    - 1.800 de vida.
-    - Pare 6 crías al 75, 50 y 25 % de su vida.
-    - El punto verde quiere decir que tu defensa la mataría en unos 20 s.
+4. **Bichos**: Leapers desde la noche 4 (saltan muros), Crushers desde la 6, el dorado 1 de
+   cada 150. Ganan un **6 %** de vida por noche (antes 8 %: ahora hay más noches). El Swarmer
+   muerde **8** (antes 6).
+5. **Torretas**: caja de 5 cajas de munición, empiezan con 2. Gatling 25 disparos por caja,
+   Cañón 6. Tres niveles: daño, cadencia y alcance.
+6. **Energía**: la Torre de mando da 5 MW y cada panel solar 5 más (hay **dos** paneles).
+   Consumen: Fundición **2 / 3 / 4** MW según su nivel, Fábrica de munición **3 / 4 / 5** y
+   Disipador 3. Si falta, todo va más lento en proporción, torretas incluidas.
+7. **Edificios dañados**: rinden entre el 100 % y el 50 %; rotos quedan como escombro.
+   Reparar: quieto al lado, una Placa cada 0,25 s, +30 de vida. **Sin Placas, cada tramo cuesta
+   $10.** Un escombro vuelve a funcionar a la mitad de su vida.
+8. **Noche perdida**: se repite la misma noche, la Torre de mando se levanta al **60 %** (antes
+   35 %) y **cada derrota seguida hace la repetición un 20 % más suave** (hasta −60 %). Sin
+   esto, una noche demasiado dura se perdía una y otra vez y la partida no avanzaba.
+9. **Botín de la noche**: se cobra al cerrar el informe y se pierde si se pierde la noche; lo
+   que queda en el suelo dura 30 s tras el amanecer. Premio por aguantar: 15 × (1 + 0,5·n).
+10. **DEFENSA / EQUILIBRIO / BENEFICIO**: solo afecta a los drones que llevan cosas a la
+    exportación. EQUILIBRIO deja la mitad para tus torretas.
+11. **El jefe** (Madre de la Prole): 1.800 de vida; pare 6 crías al 75, 50 y 25 %; el punto
+    verde quiere decir que tu defensa la mataría en unos 20 s. **Al morir ella, mueren todos
+    sus bichos.**
 12. **Orbital Strike**: desde la noche 5, una carga por noche.
-13. **Precios**: P(n) = 15 × 1,16^n (antes 1,25: ahora hay el doble de zonas).
-14. **Al conquistar la región**: las noches siguen, pero sin jefe; sale el aviso de que la
-    región 2 llegará en otra versión.
+13. **Precios**: P(n) = **50 × 1,15^n** (antes 15 × 1,16^n).
+14. **Al conquistar la región**: las noches siguen, sin jefe; sale el aviso de la región 2.
+15. **Orden de las zonas** (0.4.0): el primer panel solar sale justo después de mejorar la
+    Fundición; el segundo, al final, junto al Disipador.
 
-## Simulador (versión 0.3.0)
+## Simulador (versión 0.4.0)
 
-El robot conquista la región 1 en **19-25 minutos** (mediana ~20:30) con las tres
-estrategias (`balanced`, `profit`, `defense`), y pierde alrededor de **1 noche de cada 10**,
-casi siempre la 6 (la primera con Crushers) o el primer intento contra el jefe. **El cuello de
-botella ya no es solo el comandante**: con drones, las máquinas trabajan el 45-65 % del tiempo.
-Recuerda que el robot juega sin dudar: una persona tardará más.
+16 partidas del robot (8 `balanced`, 4 `defense`, 4 `profit`): **todas conquistan la región**,
+en **55-70 min** (mediana ~57), con 12-16 noches y 0-3 derrotas. Las noches duran ~1 min y los
+días ~3 min. Zona 5 a los 3 min, zona 15 a los 10, zona 29 a los 42. A lo largo de la región
+los bichos rompen entre 4 y 16 edificios. El robot defiende sin dudar: una persona perderá más.
+
+Para el robot también hubo mejoras: si un bicho muerde la base por donde no llega ninguna
+torreta, ahora se acerca a dispararle (antes se quedaba quieto junto a una torreta lejana).
 
 ## Lo siguiente
 
-1. **Tu opinión de la 0.3.0**, sobre todo la noche y el jefe.
+1. **Tu opinión de la 0.4.0**: ritmo, dificultad, energía y pantalla.
 2. **Arte con IA**: empieza por la Fundición con el prompt de `docs/ARTE_PROMPTS.md` y
    mándamela. Cuando aprobemos el estilo, el resto de edificios, objetos y bichos.
 3. **Hito 6**:
    - Tutorial guionizado de los primeros 20 minutos (funcional 12).
    - Producción mientras no juegas (tope de 2 h) con la pantalla «WHILE YOU WERE AWAY».
    - Los otros dos vídeos simulados: offline ×2 y suministro aéreo.
-4. **Hito 7**: balance fino con el simulador y la prueba con 5 personas.
+4. **Hito 7**: balance fino con tu opinión y la prueba con 5 personas.
 
 ## Pendientes técnicos (no urgentes)
 
@@ -193,6 +164,9 @@ Recuerda que el robot juega sin dudar: una persona tardará más.
   Android habrá que meterlas en el propio archivo.
 - **Guardado** en `localStorage`; en Android irá también a Preferences (funcional 20). Una
   noche a medias no se guarda: al volver, es de día con la barra de Calor casi llena.
-- **El funcional no está marcado** con PENDIENTE/ACTUAL: lo hago cuando validemos los hitos 4 y 5.
+- **El funcional no está marcado** con PENDIENTE/ACTUAL: lo hago cuando validemos el balance.
 - **El sonido** está sintetizado (también la percusión de la noche) y no lo he podido oír:
   dime si algo suena mal o molesta.
+- **El robot se atasca a veces con la pila llena de mineral** cuando las Fundiciones están
+  llenas (no hay forma de tirar cosas de la pila). Una persona podría caer en lo mismo: si te
+  pasa, dímelo y pensamos una papelera o algo parecido.

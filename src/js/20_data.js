@@ -66,10 +66,10 @@
       secondChance: true,
       orbitalFrom: 5,      // el Orbital Strike se desbloquea en la noche 5 (funcional 4.4)
       lootDawn: 30,        // el botín que quedó en el suelo dura 30 s tras el amanecer
-      firstSwarmers: 12,    // la primera noche, guionizada: solo Swarmers por el sur
-      lostHq: 0.6,  
+      firstSwarmers: 12,   // la primera noche, guionizada: solo Swarmers por el sur
+      lostHq: 0.6,         // tras perder una noche, la Torre de mando se levanta con el 60 % de su vida
       mercy: 0.2,          // cada noche perdida seguida, la repetición trae un 20 % menos de amenaza...
-      mercyMax: 0.6,       // ...hasta un 60 % menos como mucho        // tras perder una noche, la Torre de mando se levanta con esta parte de su vida
+      mercyMax: 0.6,       // ...hasta un 60 % menos como mucho
     },
 
     orbital: { delay: 1.5, radius: 1.6, dmg: 160 },

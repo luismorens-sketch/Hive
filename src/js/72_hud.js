@@ -20,7 +20,7 @@
     pop: 0,               // animación de entrada de la ventana abierta
   };
 
-  function T(k, a) { return HB.T(k, a); }
+  function T(k, a, b) { return HB.T(k, a, b); }
 
   function button(x, y, w, h, label, fill, ink, fn, opts) {
     const g = V.ctx;
@@ -109,8 +109,8 @@
     const over = p.demand > p.supply, near = !over && p.demand >= p.supply * 0.85;
     const col = over ? '#ff5a5a' : (near ? P.amber : '#ffffff');
     const txt = T('power_hud', p.demand, p.supply);
-    g.font = V.font(30);
-    const w = g.measureText(txt).width + 44;
+    g.font = V.font(28);
+    const w = g.measureText(txt).width + 42;
     const blink = over && Math.floor(vis.clock * 4) % 2;
     D.rr(g, x, y, w, h, 14); g.fillStyle = blink ? 'rgba(120,20,30,0.9)' : P.hud; g.fill();
     g.lineWidth = 2; g.strokeStyle = over ? '#ff5a5a' : 'rgba(255,255,255,0.12)'; g.stroke();
@@ -119,19 +119,21 @@
     g.beginPath();
     g.moveTo(bx + 3, by - 13); g.lineTo(bx - 7, by + 2); g.lineTo(bx, by + 2); g.lineTo(bx - 3, by + 13); g.lineTo(bx + 8, by - 3); g.lineTo(bx + 1, by - 3);
     g.closePath(); g.fillStyle = over ? '#ff5a5a' : P.yellow; g.fill(); g.lineWidth = 2; g.strokeStyle = P.ink; g.stroke();
-    V.text(txt, x + 32, y + h / 2 + 3, 30, col, P.ink, 'left');
+    V.text(txt, x + 32, y + h / 2 + 3, 28, col, P.ink, 'left');
   }
 
   function drawPower(R, y) {
     if (!R.power || R.power.f >= 1) return y;
-    const g = V.ctx, w = 250, x = V.gx + V.gw / 2 - w / 2;
+    const g = V.ctx, txt = T('low_power_speed', Math.round(R.power.f * 100));
+    g.font = V.font(18);
+    const tw = g.measureText(txt).width + 16, w = tw + 60, x = V.gx + V.gw / 2 - w / 2;
     g.save(); D.rr(g, x, y, w, 24, 4); g.clip();
     g.fillStyle = P.amber; g.fillRect(x, y, w, 24);
     g.fillStyle = P.ink;
     for (let i = -2; i < w / 18 + 2; i++) { const sx = x + i * 18 + (vis.clock * 30) % 18; g.beginPath(); g.moveTo(sx, y + 24); g.lineTo(sx + 9, y + 24); g.lineTo(sx + 21, y); g.lineTo(sx + 12, y); g.closePath(); g.fill(); }
     g.restore();
-    D.rr(g, x + 30, y + 3, w - 60, 18, 4); g.fillStyle = P.amber; g.fill();
-    V.text(T('low_power_speed', Math.round(R.power.f * 100)), x + w / 2, y + 13, 18, P.ink, null);
+    D.rr(g, x + 30, y + 3, tw, 18, 4); g.fillStyle = P.amber; g.fill();
+    V.text(txt, x + w / 2, y + 13, 18, P.ink, null);
     return y + 32;
   }
 
