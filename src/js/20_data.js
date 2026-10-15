@@ -9,7 +9,7 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.6.0',      // sube con cada versión que se publica para probar
+    version: '0.7.0',      // sube con cada versión que se publica para probar
     hito: 6,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
@@ -266,8 +266,8 @@
   // el segundo de juego en que pasa cada uno por primera vez; el menú de pruebas y el simulador
   // los enseñan en este orden (sirve para ver dónde se atasca quien juega por primera vez).
   HB.FTUE = ['intro', 'move', 'mine', 'feed', 'pickup', 'sell', 'collect', 'buy', 'drone', 'heat',
-    'night', 'refill', 'power', 'choice', 'leaper', 'orbitalReady', 'orbital', 'boss', 'cleared',
-    'offlineTip', 'away'];
+    'warn', 'night', 'win', 'refill', 'power', 'choice', 'leaper', 'orbitalReady', 'orbital', 'boss',
+    'cleared', 'offlineTip', 'away'];
 
   // Lugares de vídeo recompensado (funcional 15.3). En el prototipo son SIMULADOS: el botón da
   // la recompensa sin anuncio y se cuenta en el menú de pruebas.

@@ -44,6 +44,17 @@
     return '+' + Math.round((r - 1) * 100) + '%';
   }
 
+  const SGT = {
+    intro: ['tut_hello', P.yellow, 'normal'],
+    drone: ['tut_drone', P.tealL, 'normal'],
+    heat: ['tut_heat', P.orangeL, 'normal'],
+    warn: ['tut_warn', '#ff8a8a', 'alarm'],
+    win: ['tut_win', P.cashL, 'happy'],
+    power: ['tut_power', P.amber, 'alarm'],
+    leaper: ['tut_leaper', P.acid, 'alarm'],
+    boss: ['tut_boss', '#ff8a8a', 'alarm'],
+  };
+
   const H = {
     mine: function (st, e) {
       const v = e.a, idx = e.b;
@@ -391,13 +402,12 @@
     // al cobrar lo producido mientras no jugabas (funcional 14.4), lo mismo
     awayClaim: function (st, e) { rain(e.a); },
 
-    // ---------- Tutorial (funcional 12): un aviso corto la primera vez que pasa algo nuevo ----------
+    // ---------- Tutorial (funcional 12): el sargento Brass avisa la primera vez que pasa algo ----------
+    // [clave del texto, color, cara]. También en los momentos fuertes: primera noche, primera
+    // victoria y el jefe (la región conquistada la cuenta la tarjeta de 72_hud.js).
     ftue: function (st, e) {
-      const k = e.a, T = HB.T, tip = HB.HUD.tip;
-      if (k === 'drone') tip(T('tut_drone'), T('tut_drone_sub'), P.tealL);
-      else if (k === 'heat') tip(T('tut_heat'), T('tut_heat_sub'), P.orangeL);
-      else if (k === 'power') tip(T('tut_power'), T('tut_power_sub'), P.amber);
-      else if (k === 'leaper') tip(T('tut_leaper'), T('tut_leaper_sub'), P.acid);
+      const L = SGT[e.a];
+      if (L) HB.HUD.tip(HB.T(L[0]), HB.T(L[0] + '_sub'), L[1], L[2]);
     },
 
     // ---------- Drones ----------

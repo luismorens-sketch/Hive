@@ -191,6 +191,7 @@
     R._warnT = C().night.warn;
     R._plan = plan(st, R, opts);
     ev(st, 'warn', R._plan);
+    HB.Logic.ftue(st, 'warn');
   }
 
   // ---------- Bichos ----------
@@ -644,6 +645,7 @@
       st.report = null;
       st.needSave = true;
       ev(st, 'claim', r, mult);
+      if (r.won && !r.cleared) HB.Logic.ftue(st, 'win');
     },
 
     secondChance: function (st) {

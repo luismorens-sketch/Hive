@@ -47,12 +47,18 @@
   }
 
   // Texto que se encoge hasta caber en maxW (las frases largas en pantallas estrechas).
-  function fitText(s, x, y, px, col, maxW, weight, stroke) {
+  function fitText(s, x, y, px, col, maxW, weight, stroke, align) {
     const g = V.ctx;
     g.font = V.font(px, weight);
     const w = g.measureText(s).width;
     if (w > maxW) px = Math.max(12, Math.floor(px * maxW / w));
-    V.text(s, x, y, px, col, stroke || null, 'center', weight);
+    V.text(s, x, y, px, col, stroke || null, align || 'center', weight);
+  }
+
+  // El retrato del sargento en píxeles de pantalla: (x, y) es el pie del busto; size, su alto.
+  function sergeant(mood, talking, x, y, size) {
+    const spr = A.sergeant(mood, talking), k = size / 2.2;
+    V.ctx.drawImage(spr.c, x - spr.ax * k, y - (spr.ay + 1.05) * k, spr.w * k, spr.h * k);
   }
 
   // Parte una frase en líneas que caben en maxW.
@@ -318,18 +324,19 @@
     const cx = V.gx + V.gw / 2, cy = V.gh * 0.47;
     const pw = Math.min(V.gw - 24, 380), inner = pw - 48;
     const l1 = wrap(T('off_l1'), 20, inner, 500), l2 = wrap(T('off_l2', duration(HB.CONFIG.offline.cap)), 20, inner, 500);
-    const ph = 262 + (l1.length + l2.length) * 26;
+    const ph = 322 + (l1.length + l2.length) * 26;
     const s = HB.easeOutBack(Math.min(1, H.pop));
     g.save(); g.translate(cx, cy); g.scale(s, s); g.translate(-cx, -cy);
     panel(cx, cy, pw, ph, P.cash);
     let y = cy - ph / 2 + 40;
     fitText(T('off_title'), cx, y, 32, P.yellow, inner);
-    // un dron con su carga, para que se vea de qué va
-    y += 52;
-    const dr = A.drone(), bill = A.item('bill'), k = 130, bob = Math.sin(vis.clock * 4) * 3;
-    g.drawImage(bill.c, cx - bill.ax * k * 0.6, y + 40 + bob - bill.ay * k * 0.6, bill.w * k * 0.6, bill.h * k * 0.6);
-    g.drawImage(dr.c, cx - dr.ax * k, y + bob - dr.ay * k, dr.w * k, dr.h * k);
-    y += 70;
+    // el sargento, contento (región conquistada), con un dron que trae la carga
+    y += 120;
+    sergeant('happy', false, cx - 20, y + 10, 104);
+    const dr = A.drone(), bill = A.item('bill'), k = 90, bob = Math.sin(vis.clock * 4) * 3;
+    g.drawImage(bill.c, cx + 62 - bill.ax * k * 0.6, y - 18 + bob - bill.ay * k * 0.6, bill.w * k * 0.6, bill.h * k * 0.6);
+    g.drawImage(dr.c, cx + 62 - dr.ax * k, y - 44 + bob - dr.ay * k, dr.w * k, dr.h * k);
+    y += 40;
     for (const line of l1) { V.text(line, cx, y, 20, '#ffffff', null, 'center', 500); y += 26; }
     y += 6;
     for (const line of l2) { V.text(line, cx, y, 20, P.cashL, null, 'center', 500); y += 26; }
@@ -342,27 +349,38 @@
     g.restore();
   }
 
-  // Avisos del tutorial: un concepto cada vez (funcional 12), abajo, sin parar el juego.
-  H.tip = function (s, sub, col) { H.tips.push({ s: s, sub: sub, col: col || P.yellow, t: 0, dur: 4.2 }); };
+  // Avisos del tutorial: un concepto cada vez (funcional 12), abajo, sin parar el juego. Los da
+  // el sargento Brass por radio: mood = su cara ('normal', 'alarm', 'happy'). Un toque los quita.
+  H.tip = function (s, sub, col, mood) {
+    H.tips.push({ s: s, sub: sub, col: col || P.yellow, mood: mood || 'normal', t: 0, dur: 4.5 });
+  };
 
   function drawTip(dt) {
     if (!H.tipNow && H.tips.length) H.tipNow = H.tips.shift();
     const t = H.tipNow;
-    if (!t) return;
+    if (!t) { H.tipBox = null; return; }
+    if (!t.t) HB.Audio.play('radio');
     t.t += dt;
-    if (t.t > t.dur) { H.tipNow = null; return; }
+    if (t.t > t.dur) { H.tipNow = null; H.tipBox = null; return; }
     const g = V.ctx;
-    const a = t.t < 0.25 ? t.t / 0.25 : (t.t > t.dur - 0.4 ? Math.max(0, (t.dur - t.t) / 0.4) : 1);
-    const sc = t.t < 0.3 ? HB.easeOutBack(t.t / 0.3) : 1;
-    const pw = Math.min(V.gw - 32, 380), ph = t.sub ? 76 : 52;
-    const cx = V.gx + V.gw / 2, cy = V.gh * 0.75;
-    g.save(); g.globalAlpha = a; g.translate(cx, cy); g.scale(sc, sc); g.translate(-cx, -cy);
-    D.rr(g, cx - pw / 2, cy - ph / 2 + 4, pw, ph, 16); g.fillStyle = 'rgba(0,0,0,0.35)'; g.fill();
-    D.rr(g, cx - pw / 2, cy - ph / 2, pw, ph, 16); g.fillStyle = 'rgba(20,24,28,0.92)'; g.fill();
+    const a = t.t < 0.2 ? t.t / 0.2 : (t.t > t.dur - 0.4 ? Math.max(0, (t.dur - t.t) / 0.4) : 1);
+    const rise = t.t < 0.35 ? (1 - HB.easeOutBack(t.t / 0.35)) * 40 : 0;
+    const pw = Math.min(V.gw - 24, 400), ph = 84;
+    const x0 = V.gx + V.gw / 2 - pw / 2, y0 = V.gh * 0.75 - ph / 2 + rise;
+    g.save(); g.globalAlpha = a;
+    D.rr(g, x0, y0 + 4, pw, ph, 16); g.fillStyle = 'rgba(0,0,0,0.35)'; g.fill();
+    D.rr(g, x0, y0, pw, ph, 16); g.fillStyle = 'rgba(20,24,28,0.94)'; g.fill();
     g.lineWidth = 3; g.strokeStyle = t.col; g.stroke();
-    fitText(t.s, cx, cy - (t.sub ? 14 : 0), 30, t.col, pw - 28);
-    if (t.sub) fitText(t.sub, cx, cy + 20, 19, '#ffffff', pw - 28, 500);
+    // el sargento asoma por la izquierda y mueve la boca mientras «habla»
+    const talking = t.t < 1.6 && Math.floor(t.t / 0.12) % 2 === 1;
+    const bob = Math.sin(t.t * 5) * 1.5;
+    sergeant(t.mood, talking, x0 + 50, y0 + ph - 2 + bob, 104);
+    const tx = x0 + 102, tw = pw - 116;
+    fitText(T('sgt_name'), tx, y0 + 16, 15, P.yellow, tw, 600, null, 'left');
+    fitText(t.s, tx, y0 + 42, 27, t.col, tw, 600, null, 'left');
+    if (t.sub) fitText(t.sub, tx, y0 + 66, 17, '#ffffff', tw, 500, null, 'left');
     g.restore();
+    H.tipBox = { x: x0, y: y0, w: pw, h: ph };
   }
 
   function drawDefeat(st, game) {
@@ -411,7 +429,7 @@
   function drawHand() {
     const g = V.ctx;
     const t = vis.clock;
-    const cx = V.gx + V.gw / 2 + Math.sin(t * 2.2) * V.gw * 0.18, cy = V.gh * 0.72 + Math.cos(t * 4.4) * 8;
+    const cx = V.gx + V.gw / 2 + Math.sin(t * 2.2) * V.gw * 0.18, cy = V.gh * 0.6 + Math.cos(t * 4.4) * 8;
     g.globalAlpha = 0.9;
     D.ellipse(g, cx, cy, 26, 26); g.lineWidth = 4; g.strokeStyle = 'rgba(255,255,255,0.7)'; g.stroke();
     g.save(); g.translate(cx + 10, cy + 14); g.rotate(-0.35);
@@ -524,6 +542,11 @@
   H.tap = function (x, y, game) {
     const st = game.st;
     if (game.intro) { game.endIntro(); return true; }   // un toque salta la entrada
+    const tb = H.tipBox;
+    if (tb && H.tipNow && x >= tb.x && x <= tb.x + tb.w && y >= tb.y - 30 && y <= tb.y + tb.h) {
+      H.tipNow.t = Math.max(H.tipNow.t, H.tipNow.dur - 0.3);   // un toque sobre el aviso lo quita
+      return true;
+    }
     for (let i = H.buttons.length - 1; i >= 0; i--) {
       const b = H.buttons[i];
       if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) { b.fn(); HB.Audio.play('pop'); return true; }

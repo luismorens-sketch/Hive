@@ -206,7 +206,34 @@ A chunky stylized mobile game boss creature seen exactly from above (top-down, 9
 A chunky stylized mobile game asset: an alien hive nest mound, an organic purple and violet mound made of rounded lumps, with several dark holes glowing acid pink inside, a few pale bony spikes sticking out. Three-quarter top-down view, camera about 35 degrees above. Menacing but not gross, no gore. Thick dark outline (#1C2126), saturated colors, soft clean cel shading, polished casual mobile game style. Palette: violet #8E3FD0, acid pink #FF4FA3, outline #1C2126. One single object, centered, fully inside the frame, square image. Plain solid pure green background #00FF00, no shadow on the background, no scenery. The object must contain no green. Absolutely no text, no letters, no numbers, no logos.
 ```
 
-## 6. Más adelante
+## 6. El sargento Brass (fondo magenta)
+
+El que habla en los avisos (funcional 12). Son **tres imágenes del mismo personaje**, una por
+cara. Para que salga el mismo en las tres: haz primero `hb_sgt_normal` y, **en la misma
+conversación de Gemini**, pide las otras dos con la frase de cambio que va debajo de cada una.
+Mientras no lleguen, el juego usa el retrato dibujado con código.
+
+### `hb_sgt_normal` — Cara normal (la primera: fija el personaje)
+
+```
+A chunky stylized mobile game character portrait: head-and-shoulders bust of a tough but friendly veteran army sergeant for a toy-military sci-fi game. Big head, toy-like proportions. He wears a rounded olive green combat helmet with teal goggles pushed up on the front of the helmet, a dark radio headset with an orange ear cup and a small microphone near the mouth, a big bushy gray-brown mustache, warm skin, an olive green uniform with three yellow sergeant chevrons on the shoulder and a row of three colorful medal ribbons with one round gold medal on the chest. Facing the viewer, slightly turned. Expression: stern but friendly, confident, mouth closed under the mustache. The bust is cut straight at the bottom edge of the image. Thick dark outline (#1C2126) around every shape, saturated colors, soft clean cel shading, polished casual mobile game style. Palette: olive green #6F9440, teal #27B3A4, safety orange #FF8A1F, yellow #FFD23F, outline #1C2126. One single character, centered, square image. Plain solid pure magenta background #FF00FF filling the whole background, no shadow on the background, no scenery. The character must contain no magenta or pink. Absolutely no text, no letters, no numbers, no logos.
+```
+
+### `hb_sgt_alarm` — Alarmado (noches y jefe)
+
+En la misma conversación, después de la normal:
+
+```
+Same character, same outfit, same framing, same style and same magenta background, but now alarmed and shouting an order: eyebrows angled down, eyes wide open, mouth wide open under the mustache. No text.
+```
+
+### `hb_sgt_happy` — Contento (victorias)
+
+```
+Same character, same outfit, same framing, same style and same magenta background, but now very happy: a big grin with white teeth under the mustache, eyes squinting with joy, eyebrows raised. No text.
+```
+
+## 7. Más adelante
 
 - **El comandante** (4 direcciones, andar y disparar). Es lo más difícil de conseguir coherente
   con IA (tiene que ser el mismo personaje en todas las poses). Lo dejo para cuando el estilo de

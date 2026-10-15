@@ -1,4 +1,4 @@
-# HIVE BREAKER — Funcional v0.3
+# HIVE BREAKER — Funcional v0.3.1
 
 Arcade Idle Tycoon para Android. Aterrizas como comandante en un planeta infestado:
 recoges mineral con tus propias manos, lo fundes, lo vendes a la flota y con cada
@@ -15,6 +15,12 @@ construido tiene que aguantar. Región a región, hasta matar a la Reina.
 ---
 
 ## 0. Cambios
+
+### v0.3.1 (15/10/2026)
+- **Offline**: lo ganado fuera tampoco supera lo que cabe en la caja fuerte de la Exportación,
+  además del tope de 2 h (5.5, 14.4).
+- **Guía con personaje**: el **Sargento Brass** habla en los avisos del tutorial y en los
+  momentos fuertes (12, 19). El nombre es provisional.
 
 ### v0.3 (13/10/2026)
 - Cerradas las 10 decisiones abiertas (apartado 24).
@@ -247,7 +253,8 @@ R3  Élites ─► Chitin + Plate ─► Taller ─► Armor ─► Muros reforz
 - Paga con un **montón de billetes** junto a la plataforma, con tope (Caja fuerte,
   mejorable). Pisar el montón = los billetes vuelan al contador.
 - Precios iniciales R1: Plate $3 · Ammo $10 · Armor $40 (R3).
-- Offline la nave sigue comprando: el montón crece hasta el tope de tiempo offline.
+- Offline la nave sigue comprando: el montón crece hasta el tope de tiempo offline o hasta
+  llenar la caja fuerte, lo que llegue antes (decidido 15/10/2026).
 
 ---
 
@@ -513,6 +520,16 @@ Reglas del tutorial:
 - El permiso de notificaciones se pide cuando tiene sentido (al explicar el offline),
   nunca al abrir el juego.
 
+**Guía: el Sargento Brass** (decidido 15/10/2026; el nombre es provisional). Un sargento
+veterano de la flota que habla por radio: retrato de busto con el mismo casco que el
+comandante (gafas turquesa subidas), cascos de radio, bigote, galones y condecoraciones.
+Tres caras: normal, alarmado y contento.
+- Asoma al lado de los avisos del tutorial y en los **momentos fuertes**: la primera noche
+  («¡Ahí vienen!»), la primera noche ganada, la llegada del jefe y la región conquistada.
+- **Nunca para el juego ni pide tocar «siguiente»**: dice su frase y se va solo (un toque lo
+  quita antes). Frases de unas 8 palabras como mucho. Las flechas y la mano siguen enseñando
+  lo demás.
+
 ---
 
 ## 13. Jugosidad (feedback)
@@ -602,6 +619,8 @@ fichas propias, skins exclusivas y clasificación.
   investigación terminada, evento. Máximo 2 al día, nunca de 22:00 a 9:00.
 - **Tope offline:** 2 h base → 6 h con investigación (decidido). Un tope corto
   provoca más regresos al día, que es donde se generan los ingresos por anuncio.
+  Además, lo ganado fuera no supera lo que cabe en la **caja fuerte** de la Exportación
+  (decidido 15/10/2026): sin ese tope, 2 h fuera daban más que la región 1 entera.
 
 ---
 
@@ -820,7 +839,7 @@ revivir sin vídeo · niveles del pase · cosméticos · cofres de **contenido f
   **fondo verde puro**, no magenta (mismo caso que el neón de MFP).
 - Sprites mínimos del MVP: comandante (4 direcciones, andar y disparar), 3 objetos,
   billete, 6 edificios, 2 drones, 2 torretas, muro, 3 bichos + jefe, veta, nave,
-  zona de pago y cofre.
+  zona de pago, cofre y el retrato del Sargento Brass (3 caras, apartado 12).
 
 ---
 
@@ -979,6 +998,8 @@ invertir en captación.
 | 8 | Idiomas | Sistema de idiomas de CORE desde el inicio; **inglés + español** en el MVP; portugués (Brasil), alemán, francés, japonés y coreano para el lanzamiento | 20, 21 |
 | 9 | Repositorio | `Hive` (GitHub) | 20 |
 | 10 | Comandante | **Fijo con skins** | 4 |
+| 11 | Tope offline (2) | También lo limita la **caja fuerte** de la Exportación (15/10/2026) | 5.5, 14.4 |
+| 12 | Guía con personaje | **Sargento Brass** (nombre provisional) en el tutorial y los momentos fuertes (15/10/2026) | 12, 19 |
 
 ### 24.2 Abiertas
 Ninguna por ahora. Las próximas saldrán del simulador (hito 1) y de la primera prueba

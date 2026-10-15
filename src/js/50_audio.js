@@ -100,6 +100,12 @@
     roar: function (t, o) { noise(t, 0.9, 0.22 * o.vol, 'lowpass', 500, 180, 3); tone('sawtooth', 70, 45, t, 0.9, 0.12 * o.vol); },
     hurt: function (t, o) { tone('square', 220, 110, t, 0.12, 0.08 * o.vol); },
     fanfare: function (t, o) { [523, 659, 784, 1046, 1318].forEach(function (f, i) { tone('triangle', f, 0, t + i * 0.09, 0.25, 0.13 * o.vol); }); },
+    // la radio del sargento: chasquido y dos pitidos cortos
+    radio: function (t, o) {
+      noise(t, 0.06, 0.07 * o.vol, 'bandpass', 2600, 0, 3);
+      tone('square', 1320, 0, t + 0.04, 0.05, 0.045 * o.vol);
+      tone('square', 1760, 0, t + 0.11, 0.06, 0.045 * o.vol);
+    },
     lose: function (t, o) { [392, 330, 262].forEach(function (f, i) { tone('triangle', f, f * 0.97, t + i * 0.18, 0.3, 0.12 * o.vol); }); },
   };
 

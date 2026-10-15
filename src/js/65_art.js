@@ -474,6 +474,113 @@
     },
   };
 
+  // ---------- El sargento Brass: el que habla en los avisos (funcional 12) ----------
+  // Retrato de busto con el mismo casco que el comandante (y las gafas turquesa subidas), cascos
+  // de radio, bigote, galones y condecoraciones. mood: 'normal' · 'alarm' · 'happy'.
+  // open: boca abierta (al hablar se alterna). Anclaje en el centro; el busto acaba abajo (+1.05).
+  HB.Art.sergeant = function (mood, open) {
+    return V.sprite('sgt:' + mood + ':' + (open ? 1 : 0), 2.2, 2.2, 1.1, 1.1, function (g) {
+      const skin = '#e9b48c', skinD = '#c98d66', hair = '#6b5a48', brow = '#4f4033';
+      g.lineJoin = 'round'; g.lineCap = 'round';
+      // hombros y uniforme
+      g.beginPath();
+      g.moveTo(-0.96, 1.05); g.quadraticCurveTo(-0.96, 0.44, -0.46, 0.33);
+      g.lineTo(0.46, 0.33); g.quadraticCurveTo(0.96, 0.44, 0.96, 1.05); g.closePath();
+      D.fillStroke(g, P.olive, LW);
+      g.beginPath(); g.moveTo(-0.25, 0.33); g.lineTo(0, 0.6); g.lineTo(0.25, 0.33); g.closePath();
+      D.fillStroke(g, P.oliveD, 0.04);
+      // galones de sargento: tres uves amarillas en el hombro
+      g.strokeStyle = P.yellow; g.lineWidth = 0.055;
+      for (let i = 0; i < 3; i++) {
+        const y = 0.56 + i * 0.1;
+        g.beginPath(); g.moveTo(-0.84, y); g.lineTo(-0.71, y + 0.08); g.lineTo(-0.58, y); g.stroke();
+      }
+      // condecoraciones: tres pasadores y una medalla
+      [['#d8433c', P.yellow], [P.teal, '#ffffff'], [P.orange, P.ink]].forEach(function (c, i) {
+        const x = 0.2 + i * 0.17, y = 0.6;
+        g.fillStyle = c[0]; g.fillRect(x, y, 0.15, 0.08);
+        g.fillStyle = c[1]; g.fillRect(x + 0.06, y, 0.03, 0.08);
+        g.lineWidth = 0.02; g.strokeStyle = P.ink; g.strokeRect(x, y, 0.15, 0.08);
+      });
+      g.fillStyle = '#d8433c'; g.fillRect(0.4, 0.69, 0.09, 0.12);
+      g.lineWidth = 0.02; g.strokeStyle = P.ink; g.strokeRect(0.4, 0.69, 0.09, 0.12);
+      D.ellipse(g, 0.445, 0.88, 0.08, 0.08); D.fillStroke(g, P.yellow, 0.03);
+      D.ellipse(g, 0.425, 0.86, 0.025, 0.025); g.fillStyle = '#fff6c0'; g.fill();
+      // cuello y cabeza
+      D.rr(g, -0.17, 0.1, 0.34, 0.28, 0.06); D.fillStroke(g, skinD, 0.04);
+      // la cabeza, grande (proporciones de juguete)
+      g.save(); g.translate(0, 0.02); g.scale(1.24, 1.24);
+      D.ellipse(g, 0.43, -0.02, 0.07, 0.1); D.fillStroke(g, skin, 0.04);   // oreja (la otra la tapa el auricular)
+      D.ellipse(g, 0, -0.08, 0.42, 0.44); D.fillStroke(g, skin, LW);
+      D.ellipse(g, -0.2, 0.12, 0.08, 0.05); g.fillStyle = 'rgba(220,110,90,0.35)'; g.fill();   // mejillas
+      D.ellipse(g, 0.2, 0.12, 0.08, 0.05); g.fill();
+      // cejas
+      g.strokeStyle = brow; g.lineWidth = 0.075;
+      for (const s of [-1, 1]) {
+        g.beginPath();
+        if (mood === 'alarm') { g.moveTo(s * 0.29, -0.21); g.lineTo(s * 0.07, -0.1); }
+        else if (mood === 'happy') { g.moveTo(s * 0.28, -0.15); g.quadraticCurveTo(s * 0.18, -0.24, s * 0.07, -0.17); }
+        else { g.moveTo(s * 0.28, -0.17); g.lineTo(s * 0.07, -0.13); }
+        g.stroke();
+      }
+      // ojos
+      for (const s of [-1, 1]) {
+        const ex = s * 0.16, ey = -0.03;
+        if (mood === 'happy') {
+          g.strokeStyle = P.ink; g.lineWidth = 0.045;
+          g.beginPath(); g.arc(ex, ey + 0.03, 0.06, Math.PI * 1.1, Math.PI * 1.9); g.stroke();
+        } else if (mood === 'alarm') {
+          D.ellipse(g, ex, ey, 0.075, 0.08); D.fillStroke(g, '#ffffff', 0.03);
+          D.ellipse(g, ex, ey + 0.01, 0.035, 0.04); g.fillStyle = P.ink; g.fill();
+        } else {
+          D.ellipse(g, ex, ey, 0.045, 0.05); g.fillStyle = P.ink; g.fill();
+          D.ellipse(g, ex - 0.015, ey - 0.02, 0.015, 0.015); g.fillStyle = '#ffffff'; g.fill();
+        }
+      }
+      // nariz y boca
+      D.ellipse(g, 0, 0.07, 0.065, 0.075); D.fillStroke(g, skinD, 0.035);
+      const my = 0.27;
+      if (mood === 'happy') {
+        g.beginPath(); g.moveTo(-0.14, my - 0.02); g.quadraticCurveTo(0, my + (open ? 0.2 : 0.14), 0.14, my - 0.02); g.closePath();
+        D.fillStroke(g, '#ffffff', 0.035);
+      } else if (mood === 'alarm' || open) {
+        const rx = mood === 'alarm' ? (open ? 0.11 : 0.09) : 0.075, ry = mood === 'alarm' ? (open ? 0.09 : 0.06) : 0.05;
+        D.ellipse(g, 0, my + 0.01, rx, ry); D.fillStroke(g, '#5a1f1f', 0.035);
+        D.ellipse(g, 0, my + ry * 0.45, rx * 0.6, ry * 0.4); g.fillStyle = '#d8433c'; g.fill();
+      } else {
+        g.strokeStyle = P.ink; g.lineWidth = 0.04;
+        g.beginPath(); g.moveTo(-0.07, my); g.lineTo(0.07, my - 0.01); g.stroke();
+      }
+      // bigote (lo que más se reconoce a tamaño pequeño)
+      for (const s of [-1, 1]) {
+        g.beginPath();
+        g.moveTo(0, 0.14);
+        g.quadraticCurveTo(s * 0.1, 0.1, s * 0.26, 0.17);
+        g.quadraticCurveTo(s * 0.3, 0.24, s * 0.2, 0.23);
+        g.quadraticCurveTo(s * 0.08, 0.2, 0, 0.21);
+        g.closePath();
+        D.fillStroke(g, hair, 0.035);
+      }
+      // casco (como el del comandante) con su brillo, y las gafas turquesa subidas
+      g.beginPath(); g.ellipse(0, -0.3, 0.52, 0.44, 0, Math.PI, 0); g.closePath();
+      D.fillStroke(g, P.oliveD, LW);
+      D.rr(g, -0.6, -0.33, 1.2, 0.13, 0.065); D.fillStroke(g, P.oliveD, LW);
+      D.ellipse(g, -0.2, -0.56, 0.17, 0.08); g.fillStyle = P.oliveL; g.fill();
+      D.rr(g, -0.31, -0.49, 0.62, 0.17, 0.08); D.fillStroke(g, P.tealL, 0.045);
+      g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(-0.24, -0.46, 0.16, 0.04);
+      // galón en el casco
+      g.strokeStyle = P.yellow; g.lineWidth = 0.05;
+      g.beginPath(); g.moveTo(0.18, -0.63); g.lineTo(0.27, -0.58); g.lineTo(0.36, -0.63); g.stroke();
+      // cascos de radio: auricular y micrófono hasta la boca
+      D.ellipse(g, -0.44, -0.04, 0.11, 0.15); D.fillStroke(g, '#2b3135', 0.04);
+      D.ellipse(g, -0.45, -0.04, 0.05, 0.08); g.fillStyle = P.orange; g.fill();
+      g.strokeStyle = '#2b3135'; g.lineWidth = 0.045;
+      g.beginPath(); g.moveTo(-0.42, 0.08); g.quadraticCurveTo(-0.36, 0.33, -0.12, 0.32); g.stroke();
+      D.ellipse(g, -0.1, 0.32, 0.05, 0.04); g.fillStyle = '#2b3135'; g.fill();
+      g.restore();
+    });
+  };
+
   // Iconos de las zonas de pago de lo nuevo (blanco con contorno, como los demás).
   function icoStyle(g) { g.fillStyle = '#ffffff'; g.strokeStyle = P.ink; g.lineWidth = 0.05; g.lineJoin = 'round'; }
   const ZONE_ICONS = {

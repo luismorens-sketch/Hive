@@ -39,6 +39,10 @@
     hb_bug_leaper: { w: 1.1, center: true },
     hb_bug_crusher: { w: 1.6, center: true },
     hb_bug_brood: { w: 3.0, center: true },
+    // el sargento Brass (retrato de los avisos): una imagen por cara
+    hb_sgt_normal: { w: 2.2, center: true },
+    hb_sgt_alarm: { w: 2.2, center: true },
+    hb_sgt_happy: { w: 2.2, center: true },
   };
 
   const IMGS = {};
@@ -82,6 +86,7 @@
     vein: A.vein, smelter: A.smelter, ammo_fab: A.ammo_fab, export: A.export, hq: A.hq, solar: A.solar,
     dissipator: A.dissipator, ship: A.ship, item: A.item, billHud: A.billHud, turretBase: A.turretBase,
     turretHead: A.turretHead, wall: A.wall, dronePad: A.dronePad, drone: A.drone, bug: A.bug, nest: A.nest,
+    sergeant: A.sergeant,
   };
 
   A.smelter = function (flip, lvl) { return building('hb_smelter', 'smelter', flip) || orig.smelter(flip, lvl); };
@@ -116,6 +121,11 @@
   A.bug = function (type, frame) {
     const name = 'hb_bug_' + type, im = img(name);
     return im ? centered('i:' + name, im, ART_SPECS[name].w) : orig.bug(type, frame);
+  };
+  // El sargento: con imagen no mueve la boca (se queda la cara de cada momento).
+  A.sergeant = function (mood, open) {
+    const name = 'hb_sgt_' + mood, im = img(name);
+    return im ? centered('i:' + name, im, ART_SPECS[name].w) : orig.sergeant(mood, open);
   };
   // Muro: el bloque se repite a lo largo del tramo.
   A.wall = function (len) {

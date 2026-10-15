@@ -3,13 +3,14 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 15/10/2026 · **Versión publicada:** 0.6.0 ·
+**Última actualización:** 15/10/2026 · **Versión publicada:** 0.7.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
 
 Fase 2 del funcional (prototipo jugable): **hito 6 casi terminado** (falta el suministro
-aéreo, pendiente de tu decisión). Lo nuevo, el tutorial (0.6.0), está pendiente de tu prueba.
+aéreo, pendiente de tu decisión). El tutorial (0.6.0) y el Sargento Brass (0.7.0) están
+pendientes de tu prueba.
 
 | Hito (funcional 21) | Estado |
 |---|---|
@@ -23,7 +24,22 @@ aéreo, pendiente de tu decisión). Lo nuevo, el tutorial (0.6.0), está pendien
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass.
+
+## Lo nuevo de la 0.7.0: el Sargento Brass
+
+Decidido contigo el 15/10/2026 (ya está en el funcional, apartados 12 y 19):
+
+- Un **sargento de la flota que habla por radio**: casco como el del comandante (con las gafas
+  turquesa subidas), cascos de radio, bigote, galones y condecoraciones. Tres caras: normal,
+  alarmado y contento. Mientras no llegue el arte de Gemini, lo dibujo yo con código.
+- **Asoma al lado de los avisos de abajo**, mueve la boca mientras «habla» y suena un chasquido
+  de radio. Nunca para el juego: dice su frase y se va solo; un toque sobre el aviso lo quita.
+- **Cuándo habla**: al aterrizar («¡Comandante en tierra!»), con el primer dron, la barra de
+  Calor, la falta de energía, los Leapers y en los **momentos fuertes**: la primera noche
+  («¡Ahí vienen!»), la primera noche ganada («¡Buena puntería!»), la llegada del jefe y, en
+  la tarjeta final, la región conquistada (contento).
+- La mano de «arrastra para moverte» está un poco más arriba, para no pisar sus avisos.
 
 ## Lo nuevo de la 0.6.0: el tutorial de los primeros minutos (funcional 12)
 
@@ -51,12 +67,13 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.6.0)
+## Qué probar ahora (versión 0.7.0)
 
 **Para ver el tutorial hay que empezar de cero**: rueda dentada → «Borrar progreso» y otra vez
 para confirmar (se pierde la partida de prueba, nada más).
 
-- Que la entrada se vea bien y que un toque la salte.
+- Que la entrada se vea bien y que un toque la salte; después, el saludo del sargento.
+- **El sargento**: que se entienda quién es, que se lea lo que dice y que no estorbe.
 - Que los avisos de abajo se lean y no estorben (salen uno detrás de otro).
 - La noche 2: que veas la torreta casi vacía y sepas qué hacer.
 - Al final, la tarjeta «TU BASE NUNCA DUERME».
@@ -67,6 +84,7 @@ Preguntas para ti:
 
 1. ¿Se entiende el juego sin que nadie te explique nada?
 2. ¿Hay demasiados avisos, o falta alguno?
+3. ¿Te gusta el nombre **Sargento Brass**? Es provisional (ver abajo).
 
 ## Decidido por el autor
 
@@ -75,6 +93,8 @@ Preguntas para ti:
   se recalibra cuando entren más elementos, y entonces se ajusta también la 6.4. Que el código
   no cumpla la 6.4 **no es un error**.
 - **El ritmo y la dificultad de la 0.4.0** (15/10/2026): «por ahora está bien».
+- **Guía con personaje** (15/10/2026): un sargento con el mismo casco que el comandante y
+  condecoraciones, en el tutorial y en los momentos fuertes.
 - **Mientras no juegas** (15/10/2026): se programa ya, con **tope de 2 h** (funcional) y **tope
   de la caja fuerte** de la Exportación ($150 / $400 / $1.000): al volver, como mucho más o
   menos una zona (el doble con el vídeo). Sin la caja fuerte, 2 h darían ~$32.000, más que
@@ -114,6 +134,12 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
 - **Al conquistar la región**: las noches siguen, sin jefe; sale el aviso de la región 2.
 - **Mientras no juegas**: la pantalla sale tras 2 min fuera como mínimo. Los topes diarios de
   vídeos (funcional 15.3) todavía no se aplican: los vídeos son simulados y solo se cuentan.
+- **El nombre del sargento: «Brass»** (0.7.0). En inglés es el latón de los casquillos de
+  bala y también «los mandos» (*the brass*); suena igual en los dos idiomas. He comprobado que
+  no hay ningún personaje de videojuego conocido con ese nombre (el más parecido es un capitán
+  de policía de la serie *CSI*). Alternativas: **Stomp** («pisotón», aplasta bichos) o
+  **Swatter** («matamoscas»). Evité Sarge (*Army Men*), Brick (*Boom Beach*) y Hammer
+  (*StarCraft*), que ya son de otros juegos.
 - **Tutorial (0.6.0)**:
   - La **rueda dentada se ve desde el principio** (el funcional pide 5 min sin menús) porque
     ahí están las herramientas de prueba. En la versión de tienda se esconderá.
@@ -138,7 +164,9 @@ paso del tutorial.
 2. **Suministro aéreo** (el último vídeo simulado, funcional 15.3 n.º 4): una caja cae en el
    mapa cada 3-5 min y, con un vídeo, da 90 s de producción. **Dime si lo quieres**: también
    regala dinero.
-3. **Arte con IA**: empieza por la Fundición con el prompt de `docs/ARTE_PROMPTS.md`.
+3. **Arte con IA**: empieza por la Fundición con el prompt de `docs/ARTE_PROMPTS.md`. El
+   sargento tiene sus tres prompts en el apartado 6 (primero la cara normal, y las otras dos
+   en la misma conversación de Gemini, para que salga el mismo personaje).
 4. **Hito 7**: la prueba con 5 personas (con el registro de pasos del tutorial) y el vídeo de
    30 s.
 
