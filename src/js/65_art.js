@@ -492,8 +492,8 @@
       // galones de sargento: tres uves amarillas en el hombro
       g.strokeStyle = P.yellow; g.lineWidth = 0.055;
       for (let i = 0; i < 3; i++) {
-        const y = 0.56 + i * 0.1;
-        g.beginPath(); g.moveTo(-0.84, y); g.lineTo(-0.71, y + 0.08); g.lineTo(-0.58, y); g.stroke();
+        const y = 0.66 + i * 0.1;   // por debajo del borde del hombro, para que no se salgan
+        g.beginPath(); g.moveTo(-0.8, y); g.lineTo(-0.68, y + 0.08); g.lineTo(-0.56, y); g.stroke();
       }
       // condecoraciones: tres pasadores y una medalla
       [['#d8433c', P.yellow], [P.teal, '#ffffff'], [P.orange, P.ink]].forEach(function (c, i) {
