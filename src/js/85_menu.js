@@ -58,6 +58,10 @@
       G.save();
       close();
     });
+    row(T('sim_away'), null, function () {
+      close();
+      if (!G.checkAway(3600)) HB.HUD.showBanner(T('away_none_t'), HB.PAL.amber, 2.6, T('away_none'));
+    });
     const rb = row(resetArmed ? T('reset_confirm') : T('reset'), null, function () {
       if (!resetArmed) { resetArmed = true; render(); return; }
       resetArmed = false;

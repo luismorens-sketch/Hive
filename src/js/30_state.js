@@ -138,6 +138,8 @@
           hp: HB.CONFIG.cmd.hp, deadT: 0, cd: 0, stillT: 0, repT: 0,
         },
         report: null,     // informe de la noche pendiente de cerrar
+        away: null,       // lo producido mientras no jugabas, pendiente de cobrar (44_offline.js)
+        savedAt: 0,       // hora real del último guardado (la pone 90_main.js)
         choice: null,     // torreta pagada pendiente de elegir tipo
         defeat: null,     // la Torre de mando ha caído: segunda oportunidad
         stats: { mined: 0, made: 0, sold: 0, earned: 0, zones: 0, idle: 0, kills: 0, m: {} },
@@ -212,6 +214,7 @@
       if (!obj.ads) obj.ads = { seen: 0, log: {} };
       if (!obj.stats) obj.stats = { mined: 0, made: 0, sold: 0, earned: 0, zones: 0, idle: 0, kills: 0, m: {} };
       if (obj.stats.kills === undefined) obj.stats.kills = 0;
+      if (obj.away === undefined) obj.away = null;   // 0.5.0: pantalla de regreso pendiente
       return obj;
     },
   };

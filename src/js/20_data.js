@@ -9,8 +9,8 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.4.0',      // sube con cada versión que se publica para probar
-    hito: 5,               // hito del funcional 21 en el que estamos
+    version: '0.5.0',      // sube con cada versión que se publica para probar
+    hito: 6,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
     viewTiles: 10,         // casillas que caben a lo ancho de la pantalla (en un móvil en vertical)
@@ -75,6 +75,13 @@
     orbital: { delay: 1.5, radius: 1.6, dmg: 160 },
 
     save: { key: 'lmc_hb_save_v1', every: 20 },  // la clave NUNCA se renombra (funcional 20)
+
+    // Mientras no juegas (funcional 14.4 y 20). Ver 44_offline.js.
+    offline: {
+      cap: 7200,           // tope de 2 h (decidido); la investigación lo subirá a 6 h (fase 3)
+      minAway: 120,        // fuera menos de 2 min no sale la pantalla «WHILE YOU WERE AWAY»
+      vault: true,         // provisional: tampoco offline se compra más de lo que cabe en la caja fuerte
+    },
   };
 
   // Objetos que se cargan en la pila (funcional 5.1). h = alto en la pila (casillas).
@@ -259,6 +266,7 @@
   // la recompensa sin anuncio y se cuenta en el menú de pruebas.
   HB.AD_PLACEMENTS = {
     night_x2:      { cap: 15 },
+    offline_x2:    { cap: 3 },    // al volver: lo producido fuera, ×2
     second_chance: { cap: 1 },    // por noche
   };
 })(globalThis.HB);

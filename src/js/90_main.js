@@ -33,6 +33,16 @@
     HB.HUD.ad = { t: 0, dur: 2, cb: cb, done: false };
   };
 
+  // Lo producido mientras no jugabas (funcional 14.4). Se mira al abrir el juego y al volver a
+  // él (el móvil lo deja en segundo plano). fakeAway: segundos fuera, para el menú de pruebas.
+  G.checkAway = function (fakeAway) {
+    const st = G.st;
+    if (fakeAway) st.savedAt = Date.now() - fakeAway * 1000;
+    const a = HB.Offline.check(st, Date.now());
+    G.save();
+    return a;
+  };
+
   // Interruptor de la salida para los drones: DEFENSA → EQUILIBRIO → BENEFICIO (funcional 5.4).
   G.cyclePrio = function (e) {
     const order = ['defense', 'balanced', 'profit'];
@@ -152,9 +162,10 @@
     if (!st) st = HB.State.newGame(Date.now() & 0x7fffffff);
     G.st = st;
     setup();
+    G.checkAway();
 
     window.addEventListener('resize', function () { HB.View.resize(); });
-    document.addEventListener('visibilitychange', function () { if (document.hidden) G.save(); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) G.save(); else G.checkAway(); });
     window.addEventListener('pagehide', function () { G.save(); });
 
     // La tipografía Teko llega por internet: al cargar, se rehacen los dibujos con texto.

@@ -4,8 +4,11 @@
 // 2. Errores de sintaxis en src/js y tools.
 // 3. Textos: inglés y español tienen las mismas claves.
 // 4. Tablas: zonas bien escritas, nada pisando nada en el mapa.
-// 5. Prueba de humo: el robot del simulador juega 20 minutos sin que nada falle.
-// 6. Montaje: tools/build.js genera el HTML.
+// 5. Prueba de humo: el robot del simulador juega la región entera sin que nada falle.
+// 6. Guardado: guardar y cargar devuelve la misma partida.
+// 7. Mientras no juegas: el cálculo cuadra con lo que la base vende de verdad, y los topes.
+// 8. Arte hecho con IA: cada imagen tiene su sitio.
+// 9. Montaje: tools/build.js genera el HTML.
 // Si algo falla, termina con error (código 1) y dice qué.
 'use strict';
 const fs = require('fs');
@@ -219,9 +222,54 @@ if (HB) {
     else if (!('perks' in back)) bad('falta el campo perks en el guardado (funcional 15.9)');
     else ok('guardar y cargar funciona (clave ' + HB.CONFIG.save.key + ')');
   }
+
+  console.log('[check] 7. Mientras no juegas (offline)');
+  try {
+    const O = HB.Offline, K = HB.CONFIG.offline, before = failed;
+    // Sin drones que lleguen a la exportación, la base no vende nada sola.
+    const st0 = HB.State.newGame(9);
+    st0.savedAt = 1e12;
+    if (O.check(st0, 1e12 + 3600e3)) bad('offline: una partida nueva gana dinero sin drones');
+    // Con la cadena de drones hasta la exportación (todo lo de la lista hasta drone_cargo_2).
+    const st = HB.State.newGame(9), R = st.regions.r1;
+    for (const z of HB.REGIONS.r1.zones) { HB.Logic.forceUnlock(st, z); if (z.id === 'drone_cargo_2') break; }
+    HB.Logic.econ(st, 0.1);
+    const rate = O.rate(st);
+    // Lo que vende de verdad: 15 min de drones y máquinas, sin comandante ni noches.
+    const sim = HB.State.deserialize(HB.State.serialize(st)), Q = sim.regions.r1;
+    Q.heatOn = false;
+    const dt = 1 / HB.CONFIG.tickHz;
+    let earned = 0;
+    for (let i = 0, n = 15 * 60 * HB.CONFIG.tickHz; i < n; i++) {
+      HB.Drones.step(sim, Q, dt);
+      if (i % HB.CONFIG.econEvery === 0) { HB.Logic.econ(sim, dt * HB.CONFIG.econEvery); if (i > 120 * HB.CONFIG.tickHz) earned += Q.pile; Q.pile = 0; }
+      sim.ev.length = 0;
+    }
+    const real = earned / (13 * 60);
+    if (!(rate > 0)) bad('offline: con drones hasta la exportación, el ritmo calculado es 0');
+    else if (Math.abs(rate - real) > real * 0.1) bad('offline: el cálculo da $' + rate.toFixed(2) + '/s y la base vende $' + real.toFixed(2) + '/s');
+    // Topes: caja fuerte, 2 h, reloj hacia atrás y ausencias cortas.
+    st.savedAt = 1e12;
+    const v = O.compute(st, 1e12 + 3600e3);
+    if (!v || v.amount !== Math.min(O.vaultCap(R), Math.floor(rate * 3600))) bad('offline: 1 h fuera no respeta la caja fuerte');
+    K.vault = false;
+    const t = O.compute(st, 1e12 + 5 * 3600e3);
+    if (!t || t.capped !== 'time' || t.amount !== Math.floor(rate * K.cap)) bad('offline: 5 h fuera no se corta en ' + K.cap / 3600 + ' h');
+    K.vault = true;
+    if (O.compute(st, 1e12 - 3600e3)) bad('offline: con la hora hacia atrás se gana dinero');
+    if (O.compute(st, 1e12 + (K.minAway - 1) * 1000)) bad('offline: sale la pantalla tras menos de ' + K.minAway + ' s fuera');
+    // Cobrar ×2, y que la pantalla pendiente sobreviva a guardar y cargar.
+    const a = O.check(st, 1e12 + 3600e3);
+    const back = HB.State.deserialize(HB.State.serialize(st));
+    if (!a || !back.away || back.away.amount !== a.amount) bad('offline: la pantalla de regreso no se guarda');
+    const c0 = R.credits;
+    O.claim(st, 2);
+    if (R.credits !== c0 + a.amount * 2 || st.away) bad('offline: cobrar ×2 no da el doble');
+    if (failed === before) ok('ritmo calculado $' + rate.toFixed(2) + '/s · real $' + real.toFixed(2) + '/s · 1 h fuera = $' + a.amount + ' (caja fuerte) · topes de 2 h y de reloj bien');
+  } catch (e) { bad('offline ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
 }
 
-console.log('[check] 7. Arte hecho con IA (assets/sprites)');
+console.log('[check] 8. Arte hecho con IA (assets/sprites)');
 {
   const dir = path.join(ROOT, 'assets', 'sprites');
   const specs = fs.readFileSync(path.join(ROOT, 'src', 'js', '67_art_images.js'), 'utf8');
@@ -234,7 +282,7 @@ console.log('[check] 7. Arte hecho con IA (assets/sprites)');
   if (!n) ok(files.length ? files.length + ' imágenes, todas con su sitio' : 'todavía ninguna (se usan los dibujos hechos con código)');
 }
 
-console.log('[check] 8. Montaje');
+console.log('[check] 9. Montaje');
 try {
   const { execFileSync } = require('child_process');
   execFileSync(process.execPath, [path.join(__dirname, 'build.js')], { stdio: 'pipe' });

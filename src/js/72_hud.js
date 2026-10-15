@@ -2,8 +2,9 @@
 //
 // Arriba: dinero y ajustes; debajo, la barra de Calor con «provocar» (de día) o la noche en
 // curso con su botín. Abajo a la derecha, de noche, el Orbital Strike.
-// Ventanas (paran el juego): elegir torreta, informe de la noche, segunda oportunidad y el vídeo
-// simulado (funcional 15.3: en el prototipo el botón «AD» da la recompensa sin anuncio).
+// Ventanas (paran el juego): elegir torreta, informe de la noche, segunda oportunidad, lo producido
+// mientras no jugabas («WHILE YOU WERE AWAY», funcional 14.4) y el vídeo simulado (funcional 15.3:
+// en el prototipo el botón «AD» da la recompensa sin anuncio).
 // Cada botón que se dibuja se apunta en `buttons` para que 80_input.js sepa qué se ha tocado.
 (function (HB) {
   'use strict';
@@ -18,6 +19,7 @@
     aiming: false,        // eligiendo dónde cae el Orbital
     ad: null,             // vídeo simulado en pantalla: { t, dur, done }
     pop: 0,               // animación de entrada de la ventana abierta
+    awayT: 0,             // segundos que lleva abierta la pantalla de regreso (la cifra rueda)
   };
 
   function T(k, a, b) { return HB.T(k, a, b); }
@@ -39,6 +41,15 @@
     }
     V.text(label, tx, y + 2, opts.size || Math.min(30, h * 0.5), ink, null);
     H.buttons.push({ x: x - w / 2, y: y - h / 2, w: w, h: h, fn: fn });
+  }
+
+  // Texto que se encoge hasta caber en maxW (las frases largas en pantallas estrechas).
+  function fitText(s, x, y, px, col, maxW, weight) {
+    const g = V.ctx;
+    g.font = V.font(px, weight);
+    const w = g.measureText(s).width;
+    if (w > maxW) px = Math.max(12, Math.floor(px * maxW / w));
+    V.text(s, x, y, px, col, null, 'center', weight);
   }
 
   function panel(x, y, w, h, border) {
@@ -224,6 +235,60 @@
     g.restore();
   }
 
+  function duration(secs) {
+    const m = Math.max(1, Math.floor(secs / 60));
+    if (m < 60) return T('dur_m', m);
+    return m % 60 ? T('dur_hm', Math.floor(m / 60), m % 60) : T('dur_h', m / 60);
+  }
+
+  // Lo producido mientras no jugabas (funcional 14.4): la cifra rueda y se cobra o se dobla.
+  function drawAway(st, game, dt) {
+    const a = st.away, g = V.ctx;
+    const roll = 1.2;
+    const before = H.awayT;
+    H.awayT += dt;
+    // la cifra rueda con un tic, y suena la caja al terminar
+    if (H.awayT < roll && Math.floor(H.awayT / 0.09) !== Math.floor(before / 0.09)) HB.Audio.play('tic', { step: Math.floor(H.awayT / 0.09) % 13, vol: 0.5 });
+    if (before < roll && H.awayT >= roll) HB.Audio.play('chaching');
+    scrim(0.6);
+    const cx = V.gx + V.gw / 2, cy = V.gh * 0.47;
+    const pw = Math.min(V.gw - 24, 380), ph = a.capped ? 370 : 330;
+    const inner = pw - 40;
+    const s = HB.easeOutBack(Math.min(1, H.pop));
+    g.save(); g.translate(cx, cy); g.scale(s, s); g.translate(-cx, -cy);
+    panel(cx, cy, pw, ph, P.cash);
+    let y = cy - ph / 2 + 40;
+    fitText(T('away_title'), cx, y, 32, P.yellow, inner);
+    y += 36;
+    fitText(T('away_for', duration(a.away)), cx, y, 20, '#c9d1d6', inner, 500);
+    y += 58;
+    const shown = Math.round(a.amount * HB.easeOutCubic(Math.min(1, H.awayT / roll)));
+    const pulse = H.awayT >= roll ? 1 + 0.08 * Math.max(0, 1 - (H.awayT - roll) * 4) : 1;
+    const bill = A.billHud();
+    const txt = HB.money(shown);
+    g.font = V.font(56);
+    // billete + cifra, centrados juntos (se mide la cifra final para que no baile al rodar)
+    const x0 = cx - (66 + g.measureText(HB.money(a.amount)).width) / 2;
+    g.drawImage(bill.c, x0, y - 24, 60, 45);
+    V.text(txt, x0 + 66, y + 3, 56 * pulse, P.cashL, P.ink, 'left');
+    y += 50;
+    fitText(T('away_sub'), cx, y, 17, '#ffffff', inner, 500);
+    if (a.capped === 'vault') {
+      y += 34; fitText(T('away_vault'), cx, y, 22, P.amber, inner);
+      y += 24; fitText(T('away_vault_sub'), cx, y, 16, '#c9d1d6', inner, 500);
+    } else if (a.capped === 'time') {
+      y += 34; fitText(T('away_cap', duration(HB.CONFIG.offline.cap)), cx, y, 22, P.amber, inner);
+    }
+    const by = cy + ph / 2 - 44;
+    const free = adFirstFree(st);
+    button(cx - pw / 4 + 4, by, pw / 2 - 28, 56, free ? 'x2' : T('x2_ad'), P.cash, '#ffffff', function () {
+      game.watchAd('offline_x2', function () { HB.Offline.claim(st, 2); });
+    }, { clap: !free, size: 24 });
+    if (free) V.text(T('free_ad'), cx - pw / 4 + 4, by - 40, 16, P.cashL, P.ink);
+    button(cx + pw / 4 - 4, by, pw / 2 - 28, 56, T('collect'), P.yellow, P.ink, function () { HB.Offline.claim(st, 1); }, { size: 24 });
+    g.restore();
+  }
+
   function drawDefeat(st, game) {
     const g = V.ctx;
     scrim(0.6);
@@ -289,7 +354,7 @@
     g.fillStyle = 'rgba(255,255,255,0.8)'; g.fill(); g.lineWidth = 3; g.strokeStyle = P.ink; g.stroke();
   }
 
-  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || H.ad); };
+  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || st.away || H.ad); };
 
   H.showBanner = function (s, col, dur, sub) { H.banner = { s: s, col: col, t: 0, dur: dur || 1.8, sub: sub }; };
 
@@ -367,6 +432,8 @@
     else if (st.choice) drawChoice(st, game);
     else if (st.defeat) drawDefeat(st, game);
     else if (st.report) drawReport(st, game);
+    else if (st.away) drawAway(st, game, dt);
+    if (!st.away) H.awayT = 0;
   };
 
   // Un toque corto: primero los botones; luego lo que se puede tocar en el mundo; luego el Orbital.

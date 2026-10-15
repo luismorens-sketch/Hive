@@ -19,6 +19,24 @@
     v.sqv -= (amount === undefined ? FX.squash : amount) * 14;
   }
 
+  // Billetes que llueven desde el centro de la pantalla hacia el contador.
+  function rain(amount) {
+    if (!(amount > 0)) return;
+    vis.credInFlight += amount;
+    const n = Math.min(FX.billMax, Math.max(5, Math.ceil(amount / 10)));
+    const share = amount / n;
+    const cx = V.gx + V.gw / 2, cy = V.gh * 0.5;
+    for (let k = 0; k < n; k++) {
+      const last = k === n - 1;
+      Fx.fly({
+        spr: A.billHud(), screen: true, x: cx + (Math.random() - 0.5) * 120, y: cy + (Math.random() - 0.5) * 60, z: 0,
+        to: function (o) { const h = vis.hudCredits || { x: 40, y: 37 }; o.x = h.x; o.y = h.y; o.z = 0; },
+        dur: FX.billFly, arc: 80, delay: k * FX.billStagger * 1.5, scale: 1.1, ease: HB.easeInOut,
+        land: function () { vis.credInFlight = last ? 0 : Math.max(0, vis.credInFlight - share); vis.credPulse = 1; Au.play('cling', { step: Au.step() }); },
+      });
+    }
+  }
+
   function gainPct(e) {
     const L = HB.MACHINES[e.type].levels, a = L[e.level - 2], b = L[e.level - 1];
     if (!a || !b) return null;
@@ -367,22 +385,11 @@
     // al cerrar el informe, el botín llueve hacia el contador (funcional 3.3)
     claim: function (st, e) {
       const r = e.a, mult = e.b || 1;
-      const amount = r.won ? Math.round((r.loot + r.bonus) * mult) : 0;
-      if (amount <= 0) return;
-      vis.credInFlight += amount;
-      const n = Math.min(FX.billMax, Math.max(5, Math.ceil(amount / 10)));
-      const share = amount / n;
-      const cx = V.gx + V.gw / 2, cy = V.gh * 0.5;
-      for (let k = 0; k < n; k++) {
-        const last = k === n - 1;
-        Fx.fly({
-          spr: A.billHud(), screen: true, x: cx + (Math.random() - 0.5) * 120, y: cy + (Math.random() - 0.5) * 60, z: 0,
-          to: function (o) { const h = vis.hudCredits || { x: 40, y: 37 }; o.x = h.x; o.y = h.y; o.z = 0; },
-          dur: FX.billFly, arc: 80, delay: k * FX.billStagger * 1.5, scale: 1.1, ease: HB.easeInOut,
-          land: function () { vis.credInFlight = last ? 0 : Math.max(0, vis.credInFlight - share); vis.credPulse = 1; Au.play('cling', { step: Au.step() }); },
-        });
-      }
+      rain(r.won ? Math.round((r.loot + r.bonus) * mult) : 0);
     },
+
+    // al cobrar lo producido mientras no jugabas (funcional 14.4), lo mismo
+    awayClaim: function (st, e) { rain(e.a); },
 
     // ---------- Drones ----------
     droneNew: function (st, e) {

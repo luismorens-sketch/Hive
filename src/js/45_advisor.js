@@ -554,6 +554,10 @@
       HB.Night.giveUp(st);
       return 'giveup';
     }
+    if (st.away) {
+      HB.Offline.claim(st, mem.ads ? 2 : 1);
+      return mem.ads ? 'x2' : 'claim';
+    }
     if (st.report) {
       const x2 = mem.ads && st.report.won;
       HB.Night.claimReport(st, x2 ? 2 : 1);

@@ -16,6 +16,7 @@
 
   function sync(st, R) {
     if (R._drones && R._dronesVer === R._solidsVer) return;
+    const loading = !R._drones;   // al cargar la partida se rehacen: no se anuncian otra vez
     R._drones = R._drones || [];
     for (const e of R.ents) {
       if (HB.MACHINES[e.type].kind !== 'dronepad') continue;
@@ -25,7 +26,7 @@
       for (let i = have; i < lv.n; i++) {
         const d = { id: e.id + '#' + i, pad: e.id, idx: i, x: e.x, y: e.y, st: 'toSrc', carry: [], t: 0, wait: 0, hide: 0, drop: 1.2 };
         R._drones.push(d);
-        HB.Logic.ev(st, 'droneNew', d, e);
+        if (!loading) HB.Logic.ev(st, 'droneNew', d, e);
       }
     }
     R._dronesVer = R._solidsVer;

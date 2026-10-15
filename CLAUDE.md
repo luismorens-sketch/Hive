@@ -63,7 +63,8 @@ Dos reglas que ya costaron disgustos en los otros juegos:
   (`git pull`). Lo que se prueba tiene que poder regenerarse desde `src/`.
 - **Las banderas en la dirección (`?algo=1`) no funcionan dentro de un Artifact**, porque la
   página va en un iframe. Lo que haya que probar va en el menú de ajustes (rueda dentada):
-  "Herramientas de prueba" tiene piloto automático, velocidad ×4, FPS y +$500.
+  "Herramientas de prueba" tiene piloto automático, velocidad ×4, FPS, +$500 y "Simular 1 h
+  fuera" (la pantalla de regreso sin esperar).
 
 ## Comandos
 
@@ -73,7 +74,7 @@ para recortar arte).
 
 | Comando | Qué hace |
 |---|---|
-| `node tools/check.js` | Comprueba todo antes de comprometer: marcas de conflicto, sintaxis, textos en los dos idiomas, tablas y mapa (que nada se pise), una partida del robot, el guardado y el montaje |
+| `node tools/check.js` | Comprueba todo antes de comprometer: marcas de conflicto, sintaxis, textos en los dos idiomas, tablas y mapa (que nada se pise), una partida del robot, el guardado, lo producido mientras no juegas y el montaje |
 | `node tools/build.js` | Monta el juego en un solo HTML: `dist/hive_breaker.html` (doble clic para jugar en el ordenador) y `dist/hive_breaker_artifact.html` (para publicar) |
 | `node tools/sim_balance.js` | Simulador de balance: el robot juega la región y dice cuánto tarda en cada zona frente a los tiempos del funcional 6.3. `--k 1.2 --p0 15` prueba otra curva de precios sin tocar las tablas |
 | `node tools/capture.js` | Solo en la nube: abre el juego en un móvil simulado, lo juega en piloto automático y guarda capturas en `capturas/`. Sirve para que Claude vea lo que dibuja antes de publicar |
@@ -89,7 +90,7 @@ Los archivos de `src/js/` se pegan en orden de número. La frontera importante e
 
 | Archivos | Qué son | Regla |
 |---|---|---|
-| `00_core` – `49` | **Lógica**: reglas, tablas, guardado, drones (`42`), la noche (`43`), el consejero (`45`) | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
+| `00_core` – `49` | **Lógica**: reglas, tablas, guardado, drones (`42`), la noche (`43`), lo producido mientras no juegas (`44`), el consejero (`45`) | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
 | `50_audio` – `90_main` | **Presentación**: sonido, vista, efectos, arte (`65`, `66`, `67`), mundo (`70`), HUD y ventanas (`72`), sensación (`75`), dedo, menú, arranque | Leen el estado; no deciden reglas |
 
 Dónde se toca cada cosa:
@@ -101,13 +102,15 @@ Dónde se toca cada cosa:
 - **Reglas** → `src/js/40_logic.js` (comandante, máquinas, energía, reparar),
   `42_drones.js` y `43_night.js` (Calor, oleadas, bichos, torretas, informe, jefe). La lógica
   avisa de lo que pasa con eventos (`st.ev`) y no sabe nada del dibujo.
+- **Mientras no juegas** (lo que vende la base sola, topes de tiempo y de caja fuerte) →
+  `src/js/44_offline.js`. La hora real se la pasa `90_main.js`: la lógica no la lee.
 - **Qué toca hacer ahora** (flecha guía, piloto automático y robot del simulador) →
   `src/js/45_advisor.js`. Es el mismo código para los tres.
 - **Sensación** (vuelos, chispas, sonidos, vibración de cada momento) → `src/js/75_juice.js`.
 - **Arte** → `src/js/65_art.js` y `66_art_war.js` (dibujado con código). Las imágenes de IA
   las coloca `67_art_images.js` (tabla `ART_SPECS`: tamaño y punto de apoyo de cada una).
-- **HUD y ventanas** (barra de Calor, informe, elegir torreta, segunda oportunidad, vídeo
-  simulado) → `src/js/72_hud.js`.
+- **HUD y ventanas** (barra de Calor, informe, elegir torreta, segunda oportunidad,
+  «WHILE YOU WERE AWAY», vídeo simulado) → `src/js/72_hud.js`.
 
 Reglas del código:
 
