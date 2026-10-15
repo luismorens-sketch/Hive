@@ -75,12 +75,15 @@ Preguntas para ti:
 2. ¿Se entiende la energía con el indicador y la cinta?
 3. ¿Va fluido de noche con más bichos? Activa «Ver FPS» en los ajustes y dime la cifra.
 
-## Una decisión del funcional que tienes que confirmar
+## Duración de la región 1: decidido por el autor (15/10/2026)
 
 El apartado **6.3** pide unos tiempos por zona que suman unos **50 minutos** para la región 1,
-pero el **6.4** dice que la región 1 dura **15-25 minutos**. Antes di prioridad a la 6.4. Como
-me pediste más lento, **ahora sigo la tabla 6.3**: el robot tarda 55-70 min. **¿Cambiamos la
-6.4 del funcional a «R1: 45-75 min»?** No lo toco hasta que me lo digas.
+pero el **6.4** dice que la región 1 dura **15-25 minutos**. Como el autor pidió más lento,
+**se sigue la tabla 6.3**: el robot tarda 55-70 min.
+
+**Decisión del autor: los tiempos se quedan así por ahora.** Habrá que recalibrar cuando
+entren más elementos en el juego; entonces se ajusta también la 6.4 del funcional. Hasta
+entonces, que el código no cumpla la 6.4 **no es un error**: no hay que «arreglarlo».
 
 Además, el funcional pide en la 6.3 que cada zona suba un 18-25 % de precio; uso un 15 %
 porque, con más subida, el final de la región se hace eterno. Lo apunto como provisional.
@@ -147,7 +150,7 @@ torreta, ahora se acerca a dispararle (antes se quedaba quieto junto a una torre
 
 ## Lo siguiente
 
-1. **Tu opinión de la 0.4.0**: ritmo, dificultad, energía y pantalla.
+1. **Tu opinión de la 0.4.0**: dificultad, energía y pantalla (el ritmo se queda así por ahora).
 2. **Arte con IA**: empieza por la Fundición con el prompt de `docs/ARTE_PROMPTS.md` y
    mándamela. Cuando aprobemos el estilo, el resto de edificios, objetos y bichos.
 3. **Hito 6**:
