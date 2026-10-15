@@ -43,7 +43,9 @@
   function price(R, z) {
     const d = regionDef(R);
     const n = zoneIndex(d, z.id);
-    return nicePrice(d.p0 * Math.pow(d.k, n) * (z.mult || 1));
+    // las primeras zonas, más baratas (early): un arranque rápido que enganche (funcional 21)
+    const e = d.early && n < d.early.length ? d.early[n] : 1;
+    return nicePrice(d.p0 * Math.pow(d.k, n) * (z.mult || 1) * e);
   }
 
   function remaining(R, z) { return price(R, z) - (R.paid[z.id] || 0); }
@@ -402,6 +404,7 @@
 
     if (HB.Drones) HB.Drones.step(st, R, dt);
     if (HB.Night) HB.Night.step(st, R, dt);
+    if (HB.Supply) HB.Supply.step(st, R, dt);
   }
 
   function actions(st, R, c, dt) {

@@ -372,6 +372,35 @@
     g.restore();
   }
 
+  // ---------- Suministro aéreo (funcional 15.3): con el vídeo da 90 s de producción ----------
+  function drawSupplyWin(st, game) {
+    const g = V.ctx, sp = st.supply;
+    scrim(0.6);
+    const cx = V.gx + V.gw / 2, cy = V.gh * 0.47;
+    const pw = Math.min(V.gw - 24, 380), ph = 380, x0 = cx - pw / 2, y0 = cy - ph / 2;
+    const s = HB.easeOutBack(Math.min(1, H.pop));
+    g.save(); g.translate(cx, cy); g.scale(s, s); g.translate(-cx, -cy);
+    panel(cx, cy, pw, ph, P.orange);
+    fitText(T('sup_title'), cx, y0 + 38, 34, P.orangeL, pw - 40);
+    sergeant('normal', false, x0 + 50, y0 + 150, 88);
+    let ly = y0 + 96;
+    for (const l of wrap(T('sup_line'), 20, pw - 124, 500)) { V.text(l, x0 + 102, ly, 20, '#ffffff', null, 'left', 500); ly += 25; }
+    // la caja y lo que trae
+    const cr = A.supplyCrate(), kk = 92 / 1.4, by = y0 + 210 + Math.sin(vis.clock * 4) * 3;
+    g.drawImage(cr.c, cx - 70 - cr.ax * kk, by - cr.ay * kk + 20, cr.w * kk, cr.h * kk);
+    const bill = A.billHud(), bk = 54 / 0.6;
+    g.drawImage(bill.c, cx + 4 - bill.ax * bk, y0 + 212 - bill.ay * bk, bill.w * bk, bill.h * bk);
+    V.text(HB.money(sp.amount), cx + 36, y0 + 214, 40, P.cashL, P.ink, 'left');
+    fitText(T('sup_sub', HB.CONFIG.supply.secs), cx, y0 + 262, 18, '#c9d1d6', pw - 40, 500);
+    const by2 = y0 + ph - 44, free = adFirstFree(st);
+    button(cx - pw / 4 + 4, by2, pw / 2 - 28, 56, free ? T('sup_open_free') : T('sup_open'), P.cash, '#ffffff', function () {
+      game.watchAd('supply', function () { HB.Supply.claim(st, true); game.save(); });
+    }, { clap: !free, size: 22 });
+    if (free) V.text(T('free_ad'), cx - pw / 4 + 4, by2 - 40, 16, P.cashL, P.ink);
+    button(cx + pw / 4 - 4, by2, pw / 2 - 28, 56, T('sup_leave'), '#4a545b', '#ffffff', function () { HB.Supply.claim(st, false); game.save(); }, { size: 22 });
+    g.restore();
+  }
+
   // ---------- Cofre (funcional 13.2): tiembla cada vez más, estalla al tocarlo y salen los premios ----------
   const RARITY = { common: '#ffffff', rare: '#5aa8ff', epic: '#b06cff', legendary: P.yellow };
 
@@ -564,7 +593,7 @@
     g.fillStyle = 'rgba(255,255,255,0.8)'; g.fill(); g.lineWidth = 3; g.strokeStyle = P.ink; g.stroke();
   }
 
-  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || st.away || H.ad || HB.Chests.pending(st) || offlineTip(st)); };
+  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || st.away || H.ad || HB.Chests.pending(st) || st.supply || offlineTip(st)); };
 
   H.showBanner = function (s, col, dur, sub) { H.banner = { s: s, col: col, t: 0, dur: dur || 1.8, sub: sub }; };
 
@@ -654,6 +683,7 @@
     else if (st.report) drawReport(st, game);
     else if (st.away) drawAway(st, game, dt);
     else if (HB.Chests.pending(st)) drawChest(st, game, dt);
+    else if (st.supply) drawSupplyWin(st, game);
     else if (offlineTip(st)) drawOfflineTip(st, game);
     if (!st.away) H.awayT = 0;
   };

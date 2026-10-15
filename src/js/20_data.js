@@ -9,7 +9,7 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.8.0',      // sube con cada versión que se publica para probar
+    version: '0.9.0',      // sube con cada versión que se publica para probar
     hito: 6,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
@@ -75,6 +75,17 @@
     orbital: { delay: 1.5, radius: 1.6, dmg: 160 },
 
     save: { key: 'lmc_hb_save_v1', every: 20 },  // la clave NUNCA se renombra (funcional 20)
+
+    // Suministro aéreo (funcional 15.3, vídeo n.º 4). Ver 47_supply.js. Prudente a propósito
+    // (decidido 15/10/2026): el funcional dice cada 3-5 min; aquí, cada 4-5 y solo de día.
+    supply: {
+      from: 1,             // empieza a caer tras la primera noche ganada
+      every: [240, 300],   // cada 4-5 min de día (al azar)
+      fall: 1.2,           // segundos que tarda en bajar en paracaídas
+      life: 60,            // en el suelo dura 60 s; luego se la lleva el viento
+      secs: 90,            // con el vídeo da 90 s de producción en Créditos
+      min: 25,             // y nunca menos de $25
+    },
 
     // Mientras no juegas (funcional 14.4 y 20). Ver 44_offline.js.
     offline: {
@@ -183,6 +194,9 @@
       w: 12, h: 44,
       fogY: 15.4,           // por encima de esta fila hay niebla al empezar
       p0: 50, k: 1.15,
+      // Las 5 primeras zonas cuestan menos (decidido 15/10/2026): el funcional 21 pide que la
+      // primera zona se pague en menos de 45 s y el primer dron llegue antes de 3 min.
+      early: [0.5, 0.55, 0.6, 0.6, 0.55],
       visible: 3,
       spawn: { x: 6.0, y: 26.4 },
       // Amenaza (funcional 8): barra de Calor B(n) = B0·(1 + 0,25·n); amenaza A(n) = A0·(1 + 0,15·n)
@@ -276,13 +290,14 @@
   // los enseñan en este orden (sirve para ver dónde se atasca quien juega por primera vez).
   HB.FTUE = ['intro', 'move', 'mine', 'feed', 'pickup', 'sell', 'collect', 'buy', 'drone', 'heat',
     'warn', 'night', 'win', 'chest', 'refill', 'power', 'choice', 'leaper', 'orbitalReady', 'orbital', 'boss',
-    'cleared', 'offlineTip', 'away'];
+    'cleared', 'offlineTip', 'away', 'supplyDrop', 'supply'];
 
   // Lugares de vídeo recompensado (funcional 15.3). En el prototipo son SIMULADOS: el botón da
   // la recompensa sin anuncio y se cuenta en el menú de pruebas.
   HB.AD_PLACEMENTS = {
     night_x2:      { cap: 15 },
     offline_x2:    { cap: 3 },    // al volver: lo producido fuera, ×2
+    supply:        { cap: 8 },    // suministro aéreo
     second_chance: { cap: 1 },    // por noche
   };
 })(globalThis.HB);

@@ -3,14 +3,14 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 15/10/2026 · **Versión publicada:** 0.8.0 ·
+**Última actualización:** 15/10/2026 · **Versión publicada:** 0.9.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
 
-Fase 2 del funcional (prototipo jugable): **hito 6 casi terminado** (falta el suministro
-aéreo, pendiente de tu decisión). El tutorial (0.6.0) y el Sargento Brass (0.7.0) están
-pendientes de tu prueba.
+Fase 2 del funcional (prototipo jugable): **hito 6 terminado** (0.9.0). Toca el hito 7: la
+prueba con 5 personas y el vídeo de 30 s. Pendientes de tu prueba: el tutorial (0.6.0), el
+Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro aéreo (0.9.0).
 
 | Hito (funcional 21) | Estado |
 |---|---|
@@ -19,12 +19,29 @@ pendientes de tu prueba.
 | 3. Jugosidad de recoger, cobrar y desbloquear | Primer pase hecho; se pule con tu opinión |
 | 4. Drones, torretas, munición, bichos, campo de flujo, noche | Hecho y probado (0.3.0) |
 | 5. Calor-reloj, energía, brownout, jefe | Hecho y probado (0.3.0) |
-| 6. Tutorial, guardado/offline, vídeos simulados | Guardado, mientras no juegas (0.5.0), **tutorial (0.6.0)** y 3 de los 4 vídeos simulados, hechos. Falta el **suministro aéreo** |
+| 6. Tutorial, guardado/offline, vídeos simulados | **Hecho**: guardado, mientras no juegas (0.5.0), tutorial (0.6.0) con el Sargento Brass (0.7.0), cofre (0.8.0) y los 4 vídeos simulados (0.9.0) |
 | 7. Balance, prueba con 5 personas, vídeo de 30 s | Primer pase de ritmo y dificultad hecho (0.4.0) |
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo.
+
+## Lo nuevo de la 0.9.0: arranque rápido y suministro aéreo
+
+Decidido contigo el 15/10/2026 (ya está en el funcional):
+
+- **Las 5 primeras zonas, más baratas**: $25, $41, $52, $55 y $63 (antes $50, $75, $86, $91 y
+  $115). El resto, igual. Con el robot: primera zona a los **0:25** (antes 0:45), primer dron
+  a los **2:00** (antes 3:49) y primera noche a los 3:32. Es casi la tabla del funcional 12
+  (0:35, 2:30 y 3:30) y deja margen para que una persona cumpla el criterio de éxito 1 (primera
+  zona en menos de 45 s, dron antes de 3 min). La región sigue durando lo mismo.
+- **Suministro aéreo** (el cuarto vídeo simulado): tras la primera noche ganada, de día, cada
+  4-5 min cae en paracaídas una caja cerca de la Torre de mando, con una baliza naranja; si
+  queda fuera de la pantalla, una flecha naranja en el borde dice dónde está. El Sargento Brass
+  avisa la primera vez. Al pisarla: **ABRIR · AD** da 90 s de lo que vende tu base (como
+  mínimo $25) y **DEJARLA** no da nada. Si no la coges en 60 s, se va (parpadea los últimos
+  10 s). Con el robot, cada caja da entre $400 y $1.000.
+- Para probarlo sin esperar: «Herramientas de prueba» → «Lanzar una caja de suministros».
 
 ## Lo nuevo de la 0.8.0: el cofre y las Gemas (funcional 12, 13.2 y 9.5)
 
@@ -79,7 +96,7 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.8.0)
+## Qué probar ahora (versión 0.9.0)
 
 **Para ver el tutorial hay que empezar de cero**: rueda dentada → «Borrar progreso» y otra vez
 para confirmar (se pierde la partida de prueba, nada más).
@@ -88,6 +105,10 @@ para confirmar (se pierde la partida de prueba, nada más).
 - **El sargento**: que se entienda quién es, que se lea lo que dice y que no estorbe.
 - **El cofre**: con «Abrir un cofre de prueba» o ganando la primera noche. ¿Se siente como un
   premio? ¿Se ven bien las Gemas arriba?
+- **El arranque**: desde cero, ¿pagas la primera zona en menos de 45 s y contratas el dron
+  antes de 3 min? El registro de pasos del menú de pruebas te lo dice («Comprar» y «Dron»).
+- **El suministro aéreo**: con «Lanzar una caja de suministros». ¿Se ve la caja? ¿Apetece
+  abrirla?
 - Que los avisos de abajo se lean y no estorben (salen uno detrás de otro).
 - La noche 2: que veas la torreta casi vacía y sepas qué hacer.
 - Al final, la tarjeta «TU BASE NUNCA DUERME».
@@ -109,6 +130,9 @@ Preguntas para ti:
 - **El ritmo y la dificultad de la 0.4.0** (15/10/2026): «por ahora está bien».
 - **Guía con personaje** (15/10/2026): un sargento con el mismo casco que el comandante y
   condecoraciones, en el tutorial y en los momentos fuertes.
+- **Arranque rápido** (15/10/2026): las 5 primeras zonas, más baratas (ver 0.9.0).
+- **Suministro aéreo** (15/10/2026): sí, prudente: cada 4-5 min, solo de día, desde la
+  primera noche ganada, y desaparece a los 60 s si no se coge.
 - **Mientras no juegas** (15/10/2026): se programa ya, con **tope de 2 h** (funcional) y **tope
   de la caja fuerte** de la Exportación ($150 / $400 / $1.000): al volver, como mucho más o
   menos una zona (el doble con el vídeo). Sin la caja fuerte, 2 h darían ~$32.000, más que
@@ -121,8 +145,12 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
 - **Bucle básico**: estar entre dos vetas mina de las dos; la nave espera a que haya
   mercancía y no compra más de lo que cabe en la caja fuerte; para pagar hay que quedarse
   0,4 s encima; guardado automático.
-- **Precios**: P(n) = 50 × 1,15^n. El funcional pide subir un 18-25 % por zona; con más del
-  15 % el final de la región se hace eterno.
+- **Precios**: P(n) = 50 × 1,15^n (las 5 primeras, con descuento). El funcional pide subir un
+  18-25 % por zona; con más del 15 % el final de la región se hace eterno.
+- **Suministro aéreo**: el premio es «90 s de producción» = lo que ha vendido la base en los
+  últimos 3 minutos (o lo que vendería sola, si es más), con un mínimo de $25. Quien ve todos
+  los vídeos termina la región unos 8 min antes (el robot: 52 → 44 min); quien no, igual que
+  antes.
 - **Mapa de la región 1** (12 × 44 casillas): la base en el centro; el flanco sur ataca desde
   la noche 1; el norte se abre con la Expansión y **no ataca hasta la noche 3**.
 - **Calor**: solo sube mientras una máquina trabaja (Fundición 1/s, Fábrica de munición 1,5/s;
@@ -167,25 +195,26 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
     Gemas, los botones de Tienda y Misiones (minuto 5-7), el mapa con la región 2 iluminada y
     el permiso de notificaciones (este necesita la app de Android).
 
-## Simulador (versión 0.4.0)
+## Simulador (versión 0.9.0)
 
-16 partidas del robot (8 `balanced`, 4 `defense`, 4 `profit`): **todas conquistan la región**,
-en **55-70 min** (mediana ~57), con 12-16 noches y 0-3 derrotas. Noches de ~1 min, días de
-~3 min. Zona 5 a los 3 min, zona 15 a los 10, zona 29 a los 42. El robot defiende sin dudar:
-una persona perderá más. Desde la 0.6.0 el simulador también dice cuándo hace el robot cada
-paso del tutorial.
+Sin vídeos: 8 partidas `balanced` conquistan la región en **53-61 min** (mediana 55:33), con
+4 noches perdidas de 103; `defense` y `profit` quedan en 54-57 min. **Con vídeos** (×2 del
+informe, segunda oportunidad y suministro aéreo): **42-46 min**, sin noches perdidas. El robot
+defiende sin dudar: una persona perderá más. El simulador también dice cuándo hace el robot
+cada paso del tutorial, cuántas cajas de suministro caen y las Gemas que gana (150: los dos
+cofres).
 
 ## Lo siguiente
 
-1. **Tu prueba del tutorial** (0.6.0).
-2. **Suministro aéreo** (el último vídeo simulado, funcional 15.3 n.º 4): una caja cae en el
-   mapa cada 3-5 min y, con un vídeo, da 90 s de producción. **Dime si lo quieres**: también
-   regala dinero.
+1. **Tu prueba** de la 0.6.0 a la 0.9.0 (ver «Qué probar ahora»).
+2. **Preparar la prueba con 5 personas** (hito 7): evitar que alguien se quede atascado con la
+   pila llena de mineral, y compartir el enlace (el Artifact es privado: se comparte desde su
+   menú «Compartir»).
 3. **Arte con IA**: empieza por la Fundición con el prompt de `docs/ARTE_PROMPTS.md`. El
    sargento tiene sus tres prompts en el apartado 6 (primero la cara normal, y las otras dos
    en la misma conversación de Gemini, para que salga el mismo personaje).
-4. **Hito 7**: la prueba con 5 personas (con el registro de pasos del tutorial) y el vídeo de
-   30 s.
+4. **Hito 7**: la prueba con 5 personas (con el registro de pasos del tutorial) y el **vídeo
+   de 30 s**, que puedo grabar yo con el juego en piloto automático.
 
 ## Pendientes técnicos (no urgentes)
 

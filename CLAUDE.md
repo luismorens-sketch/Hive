@@ -63,8 +63,9 @@ Dos reglas que ya costaron disgustos en los otros juegos:
   (`git pull`). Lo que se prueba tiene que poder regenerarse desde `src/`.
 - **Las banderas en la dirección (`?algo=1`) no funcionan dentro de un Artifact**, porque la
   página va en un iframe. Lo que haya que probar va en el menú de ajustes (rueda dentada):
-  "Herramientas de prueba" tiene piloto automático, velocidad ×4, FPS, +$500 y "Simular 1 h
-  fuera" (la pantalla de regreso sin esperar).
+  "Herramientas de prueba" tiene piloto automático, velocidad ×4, FPS, +$500, "Abrir un cofre
+  de prueba", "Lanzar una caja de suministros", "Simular 1 h fuera" (la pantalla de regreso
+  sin esperar) y el registro de pasos del tutorial.
 
 ## Comandos
 
@@ -76,7 +77,7 @@ para recortar arte).
 |---|---|
 | `node tools/check.js` | Comprueba todo antes de comprometer: marcas de conflicto, sintaxis, textos en los dos idiomas, tablas y mapa (que nada se pise), una partida del robot, el guardado, lo producido mientras no juegas y el montaje |
 | `node tools/build.js` | Monta el juego en un solo HTML: `dist/hive_breaker.html` (doble clic para jugar en el ordenador) y `dist/hive_breaker_artifact.html` (para publicar) |
-| `node tools/sim_balance.js` | Simulador de balance: el robot juega la región y dice cuánto tarda en cada zona frente a los tiempos del funcional 6.3. `--k 1.2 --p0 15` prueba otra curva de precios sin tocar las tablas |
+| `node tools/sim_balance.js` | Simulador de balance: el robot juega la región y dice cuánto tarda en cada zona frente a los tiempos del funcional 6.3. `--k 1.2 --p0 15` prueba otra curva de precios y `--temprano 0.5,0.6` otro descuento de las primeras zonas, sin tocar las tablas; `--minutos 90` da más tiempo |
 | `node tools/capture.js` | Solo en la nube: abre el juego en un móvil simulado, lo juega en piloto automático y guarda capturas en `capturas/`. Sirve para que Claude vea lo que dibuja antes de publicar |
 | `node tools/sim_balance.js --partidas 6 --estrategia profit` | Varias partidas seguidas con otra estrategia (`balanced`, `profit`, `defense`); `--anuncios` hace que el robot vea los vídeos |
 | `python3 tools/recortar.py` | Arte con IA: quita el fondo de `arte/originales/` y deja los sprites en `assets/sprites/` (necesita Python con Pillow; en la nube ya está) |
@@ -90,7 +91,7 @@ Los archivos de `src/js/` se pegan en orden de número. La frontera importante e
 
 | Archivos | Qué son | Regla |
 |---|---|---|
-| `00_core` – `49` | **Lógica**: reglas, tablas, guardado, drones (`42`), la noche (`43`), lo producido mientras no juegas (`44`), el consejero (`45`), los cofres (`46`) | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
+| `00_core` – `49` | **Lógica**: reglas, tablas, guardado, drones (`42`), la noche (`43`), lo producido mientras no juegas (`44`), el consejero (`45`), los cofres (`46`), el suministro aéreo (`47`) | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
 | `50_audio` – `90_main` | **Presentación**: sonido, vista, efectos, arte (`65`, `66`, `67`), mundo (`70`), HUD y ventanas (`72`), sensación (`75`), dedo, menú, arranque | Leen el estado; no deciden reglas |
 
 Dónde se toca cada cosa:
@@ -108,6 +109,8 @@ Dónde se toca cada cosa:
   `src/js/45_advisor.js`. Es el mismo código para los tres.
 - **Cofres y Gemas** → la tabla `HB.CHESTS` (`20_data.js`), las reglas en `src/js/46_chests.js`
   y la ventana que tiembla y estalla en `72_hud.js`.
+- **Suministro aéreo** → `CONFIG.supply` (`20_data.js`), las reglas en `src/js/47_supply.js`;
+  la caja y su flecha en `70_render.js` y su ventana en `72_hud.js`.
 - **Tutorial** (funcional 12): la lista de pasos es `HB.FTUE` (`20_data.js`); la lógica apunta
   cuándo pasa cada uno con `HB.Logic.ftue(st, 'paso')`; los avisos de una sola vez están en
   `75_juice.js` (manejador `ftue`), las pistas y la tarjeta final en `72_hud.js` y la entrada

@@ -9,6 +9,7 @@
 //   node tools/sim_balance.js --estrategia profit    (balanced · profit · defense)
 //   node tools/sim_balance.js --anuncios       el robot ve los vídeos (×2 del informe, 2.ª oportunidad)
 //   node tools/sim_balance.js --p0 15 --k 1.2  probar otra curva de precios sin tocar las tablas
+//   node tools/sim_balance.js --temprano 0.5,0.6  descuento de las primeras zonas (sin tocar las tablas)
 //   node tools/sim_balance.js --partidas 10    varias partidas con semillas distintas (resumen)
 //   node tools/sim_balance.js --minutos 60     tiempo máximo de juego simulado
 //   node tools/sim_balance.js --json           salida en JSON (para otras herramientas)
@@ -27,6 +28,7 @@ function parseArgs(argv) {
     else if (k === '--seed') a.seed = parseInt(argv[++i], 10);
     else if (k === '--p0') a.p0 = parseFloat(argv[++i]);
     else if (k === '--k') a.k = parseFloat(argv[++i]);
+    else if (k === '--temprano') a.early = argv[++i].split(',').map(parseFloat);
     else if (k === '--estrategia') a.estrategia = argv[++i];
     else if (k === '--partidas') a.partidas = parseInt(argv[++i], 10);
   }
@@ -51,6 +53,7 @@ function run(opts) {
   const rdef = HB.REGIONS.r1;
   if (opts.p0) rdef.p0 = opts.p0;
   if (opts.k) rdef.k = opts.k;
+  if (opts.early) rdef.early = opts.early;
 
   const st = HB.State.newGame(opts.seed);
   const R = st.regions[st.cur];
@@ -61,12 +64,13 @@ function run(opts) {
   const bought = [];
   const nights = [];
   const taskTime = {};
-  let firstSale = null, nightStart = 0, cmdDowns = 0, ads = 0, destroyed = 0;
+  let firstSale = null, nightStart = 0, cmdDowns = 0, ads = 0, destroyed = 0, supplies = 0, drops = 0;
   let clearedAt = null;
 
   while (st.time < maxT && clearedAt === null) {
     const d = HB.Advisor.decide(st, mem);
-    if (d === 'x2' || d === 'second') ads++;
+    if (d === 'x2' || d === 'second' || d === 'supply') ads++;
+    if (d === 'supply') supplies++;
     const t = HB.Advisor.bot(st, mem, input);
     taskTime[t.kind] = (taskTime[t.kind] || 0) + dt;
     HB.Logic.step(st, input, dt);
@@ -77,6 +81,7 @@ function run(opts) {
       if (e.k === 'nightStart') nightStart = st.time;
       if (e.k === 'cmdDown') cmdDowns++;
       if (e.k === 'destroyed') destroyed++;
+      if (e.k === 'supplyDrop') drops++;
       if (e.k === 'nightEnd') {
         const r = e.a, H = R._byId.hq;
         nights.push({ n: r.n, at: nightStart, len: st.time - nightStart, won: r.won, kills: r.kills, loot: r.loot + r.bonus, lost: r.lostLoot, damage: r.damage, boss: r.boss, bossHp: r.bossHp, tip: r.tip, hq: Math.round(H.hp / HB.MACHINES.hq.hp * 100) });
@@ -119,6 +124,7 @@ function run(opts) {
     tasks: taskTime,
     ftue: st.ftue,
     gems: st.gems,
+    drops: drops, supplies: supplies,
   };
 }
 
@@ -148,6 +154,7 @@ function print(r) {
   out.push('');
   if (r.cleared !== null) out.push('REGIÓN CONQUISTADA en ' + mmss(r.cleared) + ' (el funcional pide 15-25 min para R1).');
   else out.push('Sin conquistar tras ' + mmss(r.total) + ' (' + r.zones.length + '/' + r.zonesTotal + ' zonas).');
+  out.push('Suministros aéreos: ' + r.drops + ' cajas lanzadas' + (r.ads ? ', ' + r.supplies + ' abiertas con vídeo' : ' (el robot sin vídeos no las abre)'));
   out.push('Gemas al final: ' + r.gems + ' (cofres de la primera noche y del jefe, y Swarmers dorados)');
   out.push('Ganado vendiendo: $' + r.earned + ' · bichos muertos: ' + r.kills + ' · comandante caído: ' + r.cmdDowns +
     ' veces · edificios destruidos: ' + r.destroyed + (r.ads ? ' · vídeos vistos: ' + r.adsWatched : ''));

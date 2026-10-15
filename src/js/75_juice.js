@@ -68,6 +68,7 @@
     power: ['tut_power', P.amber, 'alarm'],
     leaper: ['tut_leaper', P.acid, 'alarm'],
     boss: ['tut_boss', '#ff8a8a', 'alarm'],
+    supplyDrop: ['tut_supply', P.orangeL, 'normal'],
   };
 
   const H = {
@@ -425,6 +426,11 @@
       }
       HB.buzz(20);
     },
+
+    // suministro aéreo: la caja baja silbando; al cobrarla, los billetes vuelan al contador
+    supplyDrop: function (st, e) { Au.play('whoosh', { vol: volAt(st, e.a.x, e.a.y) }); },
+    supplyOpen: function () { Au.play('pop'); HB.buzz(15); },
+    supplyClaim: function (st, e) { rain(e.a); },
 
     // el Swarmer dorado suelta unas pocas Gemas (funcional 9.5)
     gems: function (st, e) { const p = V.w2s(e.a.x, e.a.y, {}); gemRain(e.b, p.x, p.y); },

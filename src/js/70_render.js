@@ -681,6 +681,45 @@
     V.blit(A.ship(), x, gy - alt);
   }
 
+  // ---------- Suministro aéreo: baja en paracaídas, luego espera con una baliza que parpadea ----------
+  function drawSupply(b) {
+    const g = V.ctx, Cs = HB.CONFIG.supply;
+    const fall = Math.max(0, 1 - b.t / Cs.fall), alt = fall * 6;
+    const left = Cs.life - b.t;
+    if (left < 10 && Math.floor(vis.clock * 6) % 2) return;   // a punto de irse: parpadea
+    g.fillStyle = 'rgba(20,15,10,' + (0.3 * (1 - fall * 0.7)) + ')';
+    D.ellipse(g, b.x, b.y + 0.05, 0.45 * (1 - fall * 0.5), 0.16 * (1 - fall * 0.5)); g.fill();
+    const y = b.y - alt + Math.sin(vis.clock * 3) * 0.03 * fall;
+    if (fall > 0) V.blit(A.parachute(), b.x, y - 0.5);
+    V.blit(A.supplyCrate(), b.x, y);
+    if (fall <= 0) {
+      // baliza naranja y algo de humo, para que se vea desde lejos
+      g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.45 + Math.sin(vis.clock * 8) * 0.3;
+      V.blit(glowSprite(P.orange), b.x + 0.35, b.y - 0.75, 0.9);
+      g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+      if (Math.random() < 0.05) HB.Fx.smoke(b.x + 0.35, b.y - 0.7, 0.2);
+      if (left < 15) vis.labels.push({ k: 'cash', x: b.x, y: b.y - 1.2, s: String(Math.ceil(left)) });
+    }
+  }
+
+  // Si la caja queda fuera de la pantalla, una flecha naranja en el borde dice dónde está.
+  function drawSupplyArrow(R) {
+    const b = R.supply && R.supply.box;
+    if (!b || b.t < HB.CONFIG.supply.fall) return;
+    const p = V.w2s(b.x, b.y, {}), m = 40;
+    if (p.x > V.gx + m && p.x < V.gx + V.gw - m && p.y > 120 && p.y < V.gh - m) return;
+    const cx = V.gx + V.gw / 2, cy = V.gh / 2, a = Math.atan2(p.y - cy, p.x - cx);
+    const hw = V.gw / 2 - m, hh = V.gh / 2 - m * 1.6;
+    const k = Math.min(Math.abs(hw / Math.cos(a)), Math.abs(hh / Math.sin(a)));
+    const g = V.ctx, x = cx + Math.cos(a) * k, y = cy + Math.sin(a) * k, s = 1 + Math.sin(vis.clock * 6) * 0.1;
+    g.save(); g.translate(x, y); g.rotate(a); g.scale(s, s);
+    g.beginPath(); g.moveTo(18, 0); g.lineTo(-8, -14); g.lineTo(-2, 0); g.lineTo(-8, 14); g.closePath();
+    g.fillStyle = P.orange; g.fill(); g.lineWidth = 3; g.strokeStyle = P.ink; g.stroke();
+    g.restore();
+    const cr = A.supplyCrate(), kk = V.tile * 0.7;
+    g.drawImage(cr.c, x - Math.cos(a) * 30 - cr.ax * kk, y - Math.sin(a) * 30 - cr.ay * kk + 6, cr.w * kk, cr.h * kk);
+  }
+
   // ---------- Entrada (funcional 12, minuto 0:00) ----------
   // La nave de la flota aterriza en la Plataforma, el comandante salta al suelo y la nave se va.
   // Mientras dura, el juego espera (90_main.js); un toque la salta (72_hud.js).
@@ -975,6 +1014,8 @@
         if (m.kind === 'export') list.push({ y: HB.Logic.padPos(e, 'pile').y + 0.2, k: 3, o: e });
       }
       for (const b of R._bugs || []) if (!b.dead && V.onScreen(b.x, b.y, 2)) list.push({ y: b.y + b.r * 0.5, k: 5, o: b });
+      const sb = R.supply && R.supply.box;
+      if (sb && V.onScreen(sb.x, sb.y, 3)) list.push({ y: sb.y + 0.1, k: 9, o: sb });
       const nestAt = HB.REGIONS[R.id].nestAt;
       if (nestAt && V.onScreen(nestAt.x, nestAt.y, 4)) list.push({ y: nestAt.y + 0.9, k: 6, o: nestAt });
       list.push({ y: y + 0.01, k: 4, o: c });
@@ -995,6 +1036,7 @@
         }
         else if (it.k === 7) drawTurret(st, R, it.o);
         else if (it.k === 8) drawWall(st, R, it.o);
+        else if (it.k === 9) drawSupply(it.o);
         else if (!intro) drawCommander(st, x, y, dt);
         else if (intro.cmd) drawCommander(st, x, y - intro.cmd.z, dt);
       }
@@ -1008,6 +1050,7 @@
       V.screen();
       drawNight(st, R);
       drawFlankArrows(st, R);
+      if (!intro) drawSupplyArrow(R);
       drawLabels(st);
       if (clip) g.restore();
       if (!intro) drawStackCounter(st);

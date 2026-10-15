@@ -7,7 +7,7 @@
 // 5. Prueba de humo: el robot del simulador juega la región entera sin que nada falle.
 // 6. Guardado: guardar y cargar devuelve la misma partida.
 // 7. Mientras no juegas: el cálculo cuadra con lo que la base vende de verdad, y los topes.
-// 8. Cofres: dan lo que dice la tabla y sobreviven a guardar y cargar.
+// 8. Cofres y suministro aéreo: dan lo que dicen las tablas y sobreviven a guardar y cargar.
 // 9. Arte hecho con IA: cada imagen tiene su sitio.
 // 10. Montaje: tools/build.js genera el HTML.
 // Si algo falla, termina con error (código 1) y dice qué.
@@ -270,7 +270,7 @@ if (HB) {
     if (failed === before) ok('ritmo calculado $' + rate.toFixed(2) + '/s · real $' + real.toFixed(2) + '/s · 1 h fuera = $' + a.amount + ' (caja fuerte) · topes de 2 h y de reloj bien');
   } catch (e) { bad('offline ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
 
-  console.log('[check] 8. Cofres');
+  console.log('[check] 8. Cofres y suministro aéreo');
   try {
     const before = failed;
     const st = HB.State.newGame(3), R = st.regions.r1;
@@ -289,6 +289,34 @@ if (HB) {
     if (back.gems !== st.gems) bad('cofres: las Gemas no se guardan');
     if (failed === before) ok(Object.keys(HB.CHESTS).length + ' cofres: dan lo que dice la tabla y se guardan (' + st.gems + ' Gemas en total)');
   } catch (e) { bad('los cofres han fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
+  try {
+    const before = failed, K = HB.CONFIG.supply;
+    const st = HB.State.newGame(4), R = st.regions.r1;
+    HB.Logic.ensure(R);
+    const dt = 1 / HB.CONFIG.tickHz;
+    // antes de la primera noche ganada no cae nada
+    for (let t = 0; t < K.every[1] + 5; t += dt) HB.Supply.step(st, R, dt);
+    if (R.supply.box) bad('suministro: cae una caja antes de la primera noche ganada');
+    R.nights = K.from;
+    let fell = null;
+    for (let t = 0; t < K.every[1] + 5 && !fell; t += dt) { HB.Supply.step(st, R, dt); if (R.supply.box) fell = t; }
+    if (fell === null) bad('suministro: en ' + K.every[1] + ' s de día no cae ninguna caja');
+    else {
+      const b = R.supply.box;
+      for (let t = 0; t < K.fall + 0.1; t += dt) HB.Supply.step(st, R, dt);
+      st.cmd.x = b.x; st.cmd.y = b.y;
+      HB.Supply.step(st, R, dt);
+      if (!st.supply || !(st.supply.amount >= K.min)) bad('suministro: al pisar la caja no sale la ventana con al menos $' + K.min);
+      else {
+        const back = HB.State.deserialize(HB.State.serialize(st));
+        if (!back.supply || back.supply.amount !== st.supply.amount) bad('suministro: la caja abierta no se guarda');
+        const c0 = R.credits, amount = st.supply.amount;
+        HB.Supply.claim(st, true);
+        if (R.credits - c0 !== amount || st.supply) bad('suministro: con el vídeo no da lo prometido');
+      }
+    }
+    if (failed === before) ok('suministro aéreo: cae tras la primera noche, se abre al pisarlo y paga con el vídeo');
+  } catch (e) { bad('el suministro aéreo ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
 }
 
 console.log('[check] 9. Arte hecho con IA (assets/sprites)');

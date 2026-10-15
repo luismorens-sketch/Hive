@@ -141,6 +141,7 @@
         },
         report: null,     // informe de la noche pendiente de cerrar
         away: null,       // lo producido mientras no jugabas, pendiente de cobrar (44_offline.js)
+        supply: null,     // caja del suministro aéreo abierta, pendiente de decidir (47_supply.js)
         savedAt: 0,       // hora real del último guardado (la pone 90_main.js)
         choice: null,     // torreta pagada pendiente de elegir tipo
         defeat: null,     // la Torre de mando ha caído: segunda oportunidad
@@ -219,6 +220,7 @@
       if (obj.away === undefined) obj.away = null;   // 0.5.0: pantalla de regreso pendiente
       if (obj.gems === undefined) obj.gems = 0;      // 0.8.0: Gemas y cofres
       if (!obj.chests) obj.chests = [];
+      if (obj.supply === undefined) obj.supply = null;   // 0.9.0: suministro aéreo
       return obj;
     },
   };

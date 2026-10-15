@@ -21,6 +21,10 @@ construido tiene que aguantar. Región a región, hasta matar a la Reina.
   además del tope de 2 h (5.5, 14.4).
 - **Guía con personaje**: el **Sargento Brass** habla en los avisos del tutorial y en los
   momentos fuertes (12, 19). El nombre es provisional.
+- **Las 5 primeras zonas, más baratas** (6.3), para cumplir el criterio de éxito 1 del
+  apartado 21 (primera zona en < 45 s, primer dron antes de 3 min).
+- **Suministro aéreo prudente** (15.3): cada 4-5 min, solo de día, desde la primera noche
+  ganada; si no se recoge en 60 s, desaparece.
 
 ### v0.3 (13/10/2026)
 - Cerradas las 10 decisiones abiertas (apartado 24).
@@ -309,6 +313,10 @@ cambie algo visible en la base.
 | Zonas 6-15 | 40-90 s |
 | Zonas 16-30 | 1,5-3 min |
 | Zonas 30+ | 3-6 min (aquí entran offline, turbos y ofertas) |
+
+- **Arranque rápido** (decidido 15/10/2026): las 5 primeras zonas cuestan menos
+  (×0,5 · ×0,55 · ×0,6 · ×0,6 · ×0,55 sobre la curva) para que la primera zona se pague en
+  menos de 45 s y el primer dron llegue antes de 3 min (criterio de éxito 1, apartado 21).
 
 ### 6.4 Duración objetivo por región
 
@@ -652,7 +660,7 @@ procedente de compras. Objetivo a
 | 1 | Informe nocturno | Tras ganar una noche | Botín ×2 | 15 | MVP (simulado) |
 | 2 | Regreso | Al abrir tras estar fuera | Producción offline ×2 | 3 | MVP (simulado) |
 | 3 | Segunda oportunidad | Cae la Torre de mando | Revive: muros al 50 %, torretas llenas | 1 por noche | MVP (simulado) |
-| 4 | Suministro aéreo | Cae una caja en el mapa cada 3-5 min (al azar) | Créditos = 90 s de producción | 8 | MVP (simulado) |
+| 4 | Suministro aéreo | Cae una caja en el mapa cada 4-5 min (al azar), solo de día y desde la primera noche ganada; dura 60 s (decidido 15/10/2026) | Créditos = 90 s de producción | 8 | MVP (simulado) |
 | 5 | Turbo | Botón en el HUD | Producción ×2 durante 10 min, acumulable hasta 2 h | 12 | F3 |
 | 6 | Pago al instante | En una zona, si te falta ≤ 25 % | Completa la zona | 5 | F3 |
 | 7 | Orbital extra | Sin cargas durante la noche | +1 carga | 1 por noche | F3 |
@@ -1000,6 +1008,8 @@ invertir en captación.
 | 10 | Comandante | **Fijo con skins** | 4 |
 | 11 | Tope offline (2) | También lo limita la **caja fuerte** de la Exportación (15/10/2026) | 5.5, 14.4 |
 | 12 | Guía con personaje | **Sargento Brass** (nombre provisional) en el tutorial y los momentos fuertes (15/10/2026) | 12, 19 |
+| 13 | Arranque | Las **5 primeras zonas, más baratas** (15/10/2026) | 6.3, 21 |
+| 14 | Suministro aéreo | **Prudente**: cada 4-5 min, solo de día, desde la primera noche ganada, 60 s en el suelo (15/10/2026) | 15.3 |
 
 ### 24.2 Abiertas
 Ninguna por ahora. Las próximas saldrán del simulador (hito 1) y de la primera prueba

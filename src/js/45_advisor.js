@@ -453,6 +453,12 @@
       return mk('pay', p.x, p.y, null, za.z);
     }
 
+    // 3b. El suministro aéreo: solo si se ven los vídeos (sin vídeo la caja no da nada).
+    if (mem.ads && !night && !threat && R.supply && R.supply.box && R.supply.box.t > HB.CONFIG.supply.fall) {
+      const b = R.supply.box;
+      return mk('supply', b.x, b.y);
+    }
+
     // 4. Reparar lo roto (de día), con placas de la pila; si no hay de dónde sacarlas, pagando.
     if (!night) {
       const broken = needsRepair(R);
@@ -559,6 +565,7 @@
       return mem.ads ? 'x2' : 'claim';
     }
     if (!st.report && HB.Chests.pending(st)) { HB.Chests.claim(st); return 'chest'; }
+    if (st.supply) { HB.Supply.claim(st, !!mem.ads); return mem.ads ? 'supply' : 'decline'; }
     // la tarjeta de «tu base nunca duerme» al conquistar la región: el robot la da por leída
     if (R.cleared && !st.report && st.ftue.offlineTip === undefined) { HB.Logic.ftue(st, 'offlineTip'); return 'tip'; }
     if (st.report) {

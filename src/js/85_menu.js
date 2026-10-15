@@ -70,6 +70,16 @@
       HB.Chests.give(G.st, 'first');
       G.save();
     });
+    row(T('test_supply'), null, function () {
+      close();
+      const R = G.st.regions[G.st.cur];
+      if (!R.supply) R.supply = { next: 0, box: null };
+      R.supply.box = null; R.supply.next = 0;
+      const was = R.nights;
+      if (R.nights < HB.CONFIG.supply.from) R.nights = HB.CONFIG.supply.from;   // para que caiga ya
+      HB.Supply.step(G.st, R, 0.01);
+      R.nights = was;
+    });
     row(T('sim_away'), null, function () {
       close();
       if (!G.checkAway(3600)) HB.HUD.showBanner(T('away_none_t'), HB.PAL.amber, 2.6, T('away_none'));
