@@ -640,7 +640,7 @@
     let hint = null;
     if (game.intro) hint = null;   // la nave está aterrizando
     else if (st.ftue.move === undefined) hint = 'hint_drag';
-    else if (tgt && tgt.hint && (learning || tgt.kind === 'refill' || (tgt.kind === 'pickup' && tgt.hint === 'hint_ammo') || tgt.kind === 'repair')) hint = tgt.hint;
+    else if (tgt && tgt.hint && (learning || tgt.kind === 'refill' || (tgt.kind === 'pickup' && tgt.hint === 'hint_ammo') || tgt.kind === 'repair' || tgt.kind === 'trash')) hint = tgt.hint;
     // de noche, lo que enseña el tutorial (funcional 12): quieto se dispara más; el Orbital
     if (!hint && !game.intro && R.phase === 'night' && R._night) {
       if (R._orbital > 0 && st.ftue.orbital === undefined && !H.aiming) hint = 'tut_orbital';

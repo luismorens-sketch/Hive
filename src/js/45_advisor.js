@@ -230,6 +230,20 @@
     return false;
   }
 
+  // ¿Nadie podrá aceptar nada de la pila? Todas las máquinas que quieren algo están llenas y sin
+  // poder fabricar (su salida también está llena), y no hay exportación ni torreta con hueco.
+  function stuck(R, stack) {
+    for (const e of R.ents) {
+      const d = def(e);
+      if (e.dead || !wantsAny(e, stack)) continue;
+      if (d.kind === 'turret') { if (HB.Logic.boxRoom(e)) return false; continue; }
+      if (acceptCount(e, stack) > 0) return false;
+      if (d.kind === 'export') return false;                       // la nave se lo lleva y hará hueco
+      if (d.kind === 'proc' && e.out < HB.Logic.level(e).outCap) return false;   // aún fabrica y hará hueco
+    }
+    return true;
+  }
+
   // Lo lleno que está la caja de munición de una torreta (0..1).
   function ammoFrac(e) { const d = def(e); return e.ammo / (d.box * d.shots); }
 
@@ -358,6 +372,7 @@
     if (kind === 'refill') return 'hint_refill';
     if (kind === 'repair') return 'hint_repair';
     if (kind === 'nest') return 'hint_nest';
+    if (kind === 'trash') return 'hint_trash';
     if (kind === 'deliver') {
       if (e.type === 'smelter') return 'hint_deposit';
       if (e.type === 'export') return 'hint_export';
@@ -536,6 +551,11 @@
       const s = bestSpot(st);
       if (s) return mk('mine', s.x, s.y);
     }
+
+    // 10b. Atascado: la pila llena y todo lo que la quiere está lleno por los dos lados (una
+    // Fundición sin hueco que tampoco puede soltar lo que fabrica). Al reciclador.
+    const tr = HB.REGIONS[R.id].trash;
+    if (tr && c.stack.length >= cap && stuck(R, c.stack)) return mk('trash', tr.x, tr.y);
 
     // 11. Nada que hacer con la pila llena: dinero, o esperar junto a quien la quiera.
     if (R.pile > 0 && ex) { const p = HB.Logic.padPos(ex, 'pile'); return mk('collect', p.x, p.y, ex); }

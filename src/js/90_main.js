@@ -59,6 +59,14 @@
     G.save();
   };
 
+  // ---------- Herramientas de prueba: solo en el móvil del autor ----------
+  // Se guardan aparte de la partida (borrar el progreso no las apaga). Si no se ha decidido nunca,
+  // se encienden donde ya había una partida con progreso (el móvil del autor) y se apagan en uno
+  // nuevo (el de quien prueba el juego). Cinco toques en la versión las cambian (85_menu.js).
+  const DEV_KEY = 'lmc_hb_dev';
+  function readDev() { try { const v = localStorage.getItem(DEV_KEY); return v === null ? null : v === '1'; } catch (e) { return null; } }
+  G.setDev = function (v) { G.dev = !!v; try { localStorage.setItem(DEV_KEY, G.dev ? '1' : '0'); } catch (e) { /* sin almacenamiento */ } };
+
   // ---------- Guardado (localStorage; en Android irá también a Preferences, hito F3) ----------
   function readSave() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
   function writeSave(text) { try { localStorage.setItem(KEY, text); return true; } catch (e) { return false; } }
@@ -172,6 +180,8 @@
     let st = null;
     if (hotData && hotData.save) st = HB.State.deserialize(hotData.save);
     if (!st) { const txt = readSave(); if (txt) st = HB.State.deserialize(txt); }
+    const dev = readDev();
+    if (dev === null) G.setDev(!!(st && st.time > 60)); else G.dev = dev;
     if (!st) st = HB.State.newGame(Date.now() & 0x7fffffff);
     G.st = st;
     setup();

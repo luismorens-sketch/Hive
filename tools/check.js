@@ -7,7 +7,8 @@
 // 5. Prueba de humo: el robot del simulador juega la región entera sin que nada falle.
 // 6. Guardado: guardar y cargar devuelve la misma partida.
 // 7. Mientras no juegas: el cálculo cuadra con lo que la base vende de verdad, y los topes.
-// 8. Cofres y suministro aéreo: dan lo que dicen las tablas y sobreviven a guardar y cargar.
+// 8. Cofres, suministro aéreo y reciclador: dan lo que dicen las tablas, se guardan, y con la
+//    pila atascada la flecha lleva al reciclador y se sale del atasco.
 // 9. Arte hecho con IA: cada imagen tiene su sitio.
 // 10. Montaje: tools/build.js genera el HTML.
 // Si algo falla, termina con error (código 1) y dice qué.
@@ -137,6 +138,7 @@ if (HB) {
         if (m.kind === 'turret') add('box', 'caja');
       }
       for (const z of d.zones) pads.push(Object.assign({ name: 'zona ' + z.id, zone: z.id }, HB.Logic.zonePadPos(z)));
+      if (d.trash) pads.push({ name: 'reciclador', x: d.trash.x, y: d.trash.y });
 
       for (const p of pads) {
         if (p.x < CR || p.x > d.w - CR || p.y > d.h - CR) bad(rid + ': ' + p.name + ' cae fuera del mapa');
@@ -270,7 +272,7 @@ if (HB) {
     if (failed === before) ok('ritmo calculado $' + rate.toFixed(2) + '/s · real $' + real.toFixed(2) + '/s · 1 h fuera = $' + a.amount + ' (caja fuerte) · topes de 2 h y de reloj bien');
   } catch (e) { bad('offline ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
 
-  console.log('[check] 8. Cofres y suministro aéreo');
+  console.log('[check] 8. Cofres, suministro aéreo y reciclador');
   try {
     const before = failed;
     const st = HB.State.newGame(3), R = st.regions.r1;
@@ -317,6 +319,23 @@ if (HB) {
     }
     if (failed === before) ok('suministro aéreo: cae tras la primera noche, se abre al pisarlo y paga con el vídeo');
   } catch (e) { bad('el suministro aéreo ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
+  try {
+    // El atasco: pila llena de mineral, Fundición llena por los dos lados y sin drones.
+    const before = failed, st = HB.State.newGame(6), R = st.regions.r1, sm = R._byId.smelter_1;
+    const L = HB.Logic.level(sm), cap = HB.CONFIG.cmd.stackCap;
+    sm.inBuf.ore = L.inCap; sm.out = L.outCap;
+    for (let i = 0; i < cap; i++) st.cmd.stack.push('ore');
+    const mem = {}, inp = { x: 0, y: 0 }, dt = 1 / HB.CONFIG.tickHz;
+    const t0 = HB.Advisor.target(st, mem);
+    if (t0.kind !== 'trash') bad('reciclador: con la pila atascada la flecha no lleva al reciclador (' + t0.kind + ')');
+    for (let i = 0; i < 30 * HB.CONFIG.tickHz && st.cmd.stack.length >= cap; i++) { HB.Advisor.bot(st, mem, inp); HB.Logic.step(st, inp, dt); st.ev.length = 0; }
+    if (st.cmd.stack.length >= cap) bad('reciclador: en 30 s no se vacía la pila');
+    // y con la pila ya vacía, vuelve a lo normal (recoger las Placas)
+    for (let i = 0; i < 5 * HB.CONFIG.tickHz && st.cmd.stack.length; i++) { HB.Advisor.bot(st, mem, inp); HB.Logic.step(st, inp, dt); st.ev.length = 0; }
+    const t1 = HB.Advisor.target(st, mem);
+    if (t1.kind === 'trash') bad('reciclador: con la pila vacía la flecha sigue en el reciclador');
+    if (failed === before) ok('reciclador: con la pila atascada, la flecha lleva a él y se sale del atasco');
+  } catch (e) { bad('el reciclador ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
 }
 
 console.log('[check] 9. Arte hecho con IA (assets/sprites)');

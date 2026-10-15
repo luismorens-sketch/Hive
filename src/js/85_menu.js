@@ -5,7 +5,7 @@
 
   let root = null, rows = null, resetArmed = false;
 
-  function T(k, a) { return HB.T(k, a); }
+  function T(k, a, b) { return HB.T(k, a, b); }
 
   function row(label, value, onClick, cls) {
     const b = document.createElement('button');
@@ -45,45 +45,54 @@
     row(T('sound'), onoff(s.sound), function () { s.sound = !s.sound; HB.Audio.enabled = s.sound; render(); });
     row(T('vibration'), onoff(s.vib), function () { s.vib = !s.vib; if (s.vib) HB.buzz(20); render(); });
     row(T('reduce_fx'), onoff(s.lowfx), function () { s.lowfx = !s.lowfx; render(); });
-    heading(T('debug'));
-    row(T('autopilot'), onoff(G.autopilot), function () { G.autopilot = !G.autopilot; render(); });
-    row(T('speed4'), onoff(G.speed > 1), function () { G.speed = G.speed > 1 ? 1 : 4; render(); });
-    row(T('show_fps'), onoff(G.showFps), function () { G.showFps = !G.showFps; render(); });
-    const log = G.st.ads && G.st.ads.log ? G.st.ads.log : {};
-    const total = Object.keys(log).reduce(function (a, k) { return a + log[k]; }, 0);
-    row(T('ads_log'), String(total), function () {}, 'info');
-    row(T('add_money'), null, function () {
-      const R = G.st.regions[G.st.cur];
-      R.credits += 500;
-      HB.Vis.credPulse = 1;
-      G.save();
-      close();
-    });
-    // Cuándo hizo cada cosa por primera vez (funcional 12 y 17): para ver dónde se atasca alguien.
+    // Tu partida (funcional 21, hito 7): resumen y cuándo hizo cada cosa por primera vez. Lo ve
+    // cualquiera, para que en la prueba con 5 personas baste una captura de esta ventana.
+    heading(T('game_log'));
+    const R0 = G.st.regions[G.st.cur], ads = G.st.ads && G.st.ads.log ? G.st.ads.log : {};
+    const nAds = Object.keys(ads).reduce(function (a, k) { return a + ads[k]; }, 0);
+    const sum = document.createElement('p');
+    sum.className = 'ftue-log';
+    sum.textContent = [T('sum_time', mmss(G.st.time)), T('sum_zones', Object.keys(R0.bought).length, HB.REGIONS[R0.id].zones.length),
+      T('sum_nights', R0.nights, G.st.stats.lost || 0), T('sum_ads', nAds)].join(' · ');
+    rows.appendChild(sum);
     const ft = G.st.ftue, done = HB.FTUE.filter(function (k) { return ft[k] !== undefined; });
     const ftLog = document.createElement('p');
     ftLog.className = 'ftue-log';
     ftLog.textContent = T('tut_log') + ': ' + (done.length ? done.map(function (k) { return T('ft_' + k) + ' ' + mmss(ft[k]); }).join(' · ') : T('tut_none'));
     rows.appendChild(ftLog);
-    row(T('test_chest'), null, function () {
-      close();
-      HB.Chests.give(G.st, 'first');
-      G.save();
-    });
-    row(T('test_supply'), null, function () {
-      close();
-      const R = G.st.regions[G.st.cur];
-      if (!R.supply) R.supply = { next: 0, box: null };
-      R.supply.box = null; R.supply.next = 0;
-      const was = R.nights;
-      if (R.nights < HB.CONFIG.supply.from) R.nights = HB.CONFIG.supply.from;   // para que caiga ya
-      HB.Supply.step(G.st, R, 0.01);
-      R.nights = was;
-    });
-    row(T('sim_away'), null, function () {
-      close();
-      if (!G.checkAway(3600)) HB.HUD.showBanner(T('away_none_t'), HB.PAL.amber, 2.6, T('away_none'));
-    });
+    // Herramientas de prueba: solo en el móvil del autor (5 toques en la versión las enciende o
+    // las apaga). Así quien prueba el juego no se las encuentra.
+    if (G.dev) {
+      heading(T('debug'));
+      row(T('autopilot'), onoff(G.autopilot), function () { G.autopilot = !G.autopilot; render(); });
+      row(T('speed4'), onoff(G.speed > 1), function () { G.speed = G.speed > 1 ? 1 : 4; render(); });
+      row(T('show_fps'), onoff(G.showFps), function () { G.showFps = !G.showFps; render(); });
+      row(T('ads_log'), String(nAds), function () {}, 'info');
+      row(T('add_money'), null, function () {
+        R0.credits += 500;
+        HB.Vis.credPulse = 1;
+        G.save();
+        close();
+      });
+      row(T('test_chest'), null, function () {
+        close();
+        HB.Chests.give(G.st, 'first');
+        G.save();
+      });
+      row(T('test_supply'), null, function () {
+        close();
+        if (!R0.supply) R0.supply = { next: 0, box: null };
+        R0.supply.box = null; R0.supply.next = 0;
+        const was = R0.nights;
+        if (R0.nights < HB.CONFIG.supply.from) R0.nights = HB.CONFIG.supply.from;   // para que caiga ya
+        HB.Supply.step(G.st, R0, 0.01);
+        R0.nights = was;
+      });
+      row(T('sim_away'), null, function () {
+        close();
+        if (!G.checkAway(3600)) HB.HUD.showBanner(T('away_none_t'), HB.PAL.amber, 2.6, T('away_none'));
+      });
+    }
     const rb = row(resetArmed ? T('reset_confirm') : T('reset'), null, function () {
       if (!resetArmed) { resetArmed = true; render(); return; }
       resetArmed = false;
@@ -115,6 +124,16 @@
       root = document.getElementById('menu');
       rows = document.getElementById('menu-rows');
       root.addEventListener('click', function (ev) { if (ev.target === root) close(); });
+      // cinco toques seguidos en la versión: herramientas de prueba sí / no
+      const ver = document.getElementById('menu-ver');
+      let taps = 0, last = 0;
+      ver.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        const now = Date.now();
+        taps = now - last < 1500 ? taps + 1 : 1;
+        last = now;
+        if (taps >= 5) { taps = 0; HB.Game.setDev(!HB.Game.dev); render(); }
+      });
       window.addEventListener('keydown', function (ev) {
         if (ev.key === 'Escape') { if (root.hidden) open(); else close(); }
       });

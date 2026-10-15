@@ -3,7 +3,7 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 15/10/2026 · **Versión publicada:** 0.9.0 ·
+**Última actualización:** 15/10/2026 · **Versión publicada:** 0.9.1 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
@@ -24,7 +24,23 @@ Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas.
+
+## Lo nuevo de la 0.9.1: preparado para la prueba con 5 personas
+
+- **Reciclador** (decisión provisional): un contenedor debajo de la Torre de mando; quedarse
+  encima vacía la pila. Evita el único atasco sin salida que había: la pila llena de mineral
+  con la Fundición llena por los dos lados (no puede fabricar y tú no puedes recoger). Solo
+  cuando estás atascado de verdad, la flecha te lleva a él con la pista «¿ATASCADO? VACÍA LA
+  PILA AQUÍ».
+- **Las herramientas de prueba solo salen en tu móvil.** En uno nuevo (el de quien prueba)
+  están escondidas, para que nadie toque «+$500» o el piloto automático. En tu móvil se
+  quedan, porque ya tenías una partida; si alguna vez no salen: **cinco toques seguidos en el
+  número de versión** (abajo, en la ventana de ajustes).
+- **«Tu partida»** en la ventana de ajustes, para todos: tiempo jugado, zonas, noches ganadas y
+  perdidas, vídeos, y cuándo hizo cada cosa por primera vez. En la prueba basta una captura.
+- **Guía de la prueba**: `docs/PRUEBA_5_PERSONAS.md` (qué mirar, qué capturas pedir, la tabla
+  de resultados y cómo decidir después).
 
 ## Lo nuevo de la 0.9.0: arranque rápido y suministro aéreo
 
@@ -96,7 +112,7 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.9.0)
+## Qué probar ahora (versión 0.9.1)
 
 **Para ver el tutorial hay que empezar de cero**: rueda dentada → «Borrar progreso» y otra vez
 para confirmar (se pierde la partida de prueba, nada más).
@@ -109,6 +125,9 @@ para confirmar (se pierde la partida de prueba, nada más).
   antes de 3 min? El registro de pasos del menú de pruebas te lo dice («Comprar» y «Dron»).
 - **El suministro aéreo**: con «Lanzar una caja de suministros». ¿Se ve la caja? ¿Apetece
   abrirla?
+- **El reciclador**: el contenedor debajo de la Torre de mando. Para verlo funcionar, llena la
+  pila de mineral con la Fundición llena y sin recoger sus Placas.
+- **Que en tu móvil sigan las herramientas de prueba** (si no, cinco toques en la versión).
 - Que los avisos de abajo se lean y no estorben (salen uno detrás de otro).
 - La noche 2: que veas la torreta casi vacía y sepas qué hacer.
 - Al final, la tarjeta «TU BASE NUNCA DUERME».
@@ -130,6 +149,8 @@ Preguntas para ti:
 - **El ritmo y la dificultad de la 0.4.0** (15/10/2026): «por ahora está bien».
 - **Guía con personaje** (15/10/2026): un sargento con el mismo casco que el comandante y
   condecoraciones, en el tutorial y en los momentos fuertes.
+- **El arte** (15/10/2026): se queda el dibujado con código, «me gusta tu estilo». El de
+  Gemini queda aparcado (los prompts siguen en `docs/ARTE_PROMPTS.md`).
 - **Arranque rápido** (15/10/2026): las 5 primeras zonas, más baratas (ver 0.9.0).
 - **Suministro aéreo** (15/10/2026): sí, prudente: cada 4-5 min, solo de día, desde la
   primera noche ganada, y desaparece a los 60 s si no se coge.
@@ -147,6 +168,8 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
   0,4 s encima; guardado automático.
 - **Precios**: P(n) = 50 × 1,15^n (las 5 primeras, con descuento). El funcional pide subir un
   18-25 % por zona; con más del 15 % el final de la región se hace eterno.
+- **Reciclador** (0.9.1): debajo de la Torre de mando; vacía la pila entera (lo tirado se
+  pierde, no da nada). La flecha solo lo señala cuando no hay otra salida.
 - **Suministro aéreo**: el premio es «90 s de producción» = lo que ha vendido la base en los
   últimos 3 minutos (o lo que vendería sola, si es más), con un mínimo de $25. Quien ve todos
   los vídeos termina la región unos 8 min antes (el robot: 52 → 44 min); quien no, igual que
@@ -207,14 +230,11 @@ cofres).
 ## Lo siguiente
 
 1. **Tu prueba** de la 0.6.0 a la 0.9.0 (ver «Qué probar ahora»).
-2. **Preparar la prueba con 5 personas** (hito 7): evitar que alguien se quede atascado con la
-   pila llena de mineral, y compartir el enlace (el Artifact es privado: se comparte desde su
-   menú «Compartir»).
-3. **Arte con IA**: empieza por la Fundición con el prompt de `docs/ARTE_PROMPTS.md`. El
-   sargento tiene sus tres prompts en el apartado 6 (primero la cara normal, y las otras dos
-   en la misma conversación de Gemini, para que salga el mismo personaje).
-4. **Hito 7**: la prueba con 5 personas (con el registro de pasos del tutorial) y el **vídeo
-   de 30 s**, que puedo grabar yo con el juego en piloto automático.
+2. **La prueba con 5 personas** (hito 7): todo listo; la guía está en
+   `docs/PRUEBA_5_PERSONAS.md`. Me mandas las capturas y saco los números.
+3. **El vídeo de 30 s** (hito 7 y test de mercado, funcional 21): lo grabo yo con el juego en
+   un móvil simulado y te lo paso.
+4. Arte con IA: aparcado (te gusta el dibujado con código).
 
 ## Pendientes técnicos (no urgentes)
 

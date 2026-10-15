@@ -145,6 +145,7 @@
       const z = d.zones.find(function (q) { return q.kind === 'nest'; });
       if (z) pads.push({ key: 'nest', kind: 'nest', x: z.x, y: z.y, z: z });
     }
+    if (d.trash) pads.push({ key: 'trash', kind: 'trash', x: d.trash.x, y: d.trash.y });
     R._pads = pads;
 
     const solids = [];
@@ -253,6 +254,15 @@
     ev(st, 'pickup', e, it, c.stack.length - 1);
     ftue(st, 'pickup');
     if (c.stack.length >= cap) ev(st, 'full');
+    return true;
+  }
+
+  // Reciclador: tira el objeto de arriba de la pila.
+  function trashOne(st, c) {
+    if (!c.stack.length) return false;
+    const i = c.stack.length - 1, it = c.stack.pop();
+    ev(st, 'trash', it, i);
+    ftue(st, 'trash');
     return true;
   }
 
@@ -457,6 +467,14 @@
       }
     } else if (p.kind === 'zone') {
       pay(st, R, c, p.z, dt);
+    } else if (p.kind === 'trash') {
+      // como pagar: hay que quedarse un momento encima, para no tirar nada sin querer
+      if (c.padT < HB.CONFIG.pay.dwell) return;
+      c.actT += dt;
+      while (c.actT >= K.depositInterval) {
+        c.actT -= K.depositInterval;
+        if (!trashOne(st, c)) { c.actT = 0; break; }
+      }
     } else if (p.kind === 'nest') {
       // Quedarse 1,5 s encima lanza la noche del jefe (solo de día).
       if (R.phase === 'day' && c.padT >= 1.5 && HB.Night) { HB.Night.startBoss(st, R); c.pad = null; }

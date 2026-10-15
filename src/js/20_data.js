@@ -9,7 +9,7 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.9.0',      // sube con cada versión que se publica para probar
+    version: '0.9.1',      // sube con cada versión que se publica para probar
     hito: 6,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
@@ -206,6 +206,9 @@
         n: { fromFog: true, x0: 1.5, x1: 10.5 },   // sale de la niebla
       },
       nestAt: { x: 6.0, y: 41.4 },
+      // Reciclador (decisión provisional): quedarse encima vacía la pila. Evita el atasco de
+      // tener la pila llena de mineral con la Fundición llena por los dos lados.
+      trash: { x: 6.0, y: 31.3 },
       start: [
         { id: 'hq',        type: 'hq',      x: 6.0, y: 29.0 },
         { id: 'smelter_1', type: 'smelter', x: 6.0, y: 22.8 },
@@ -290,7 +293,7 @@
   // los enseñan en este orden (sirve para ver dónde se atasca quien juega por primera vez).
   HB.FTUE = ['intro', 'move', 'mine', 'feed', 'pickup', 'sell', 'collect', 'buy', 'drone', 'heat',
     'warn', 'night', 'win', 'chest', 'refill', 'power', 'choice', 'leaper', 'orbitalReady', 'orbital', 'boss',
-    'cleared', 'offlineTip', 'away', 'supplyDrop', 'supply'];
+    'cleared', 'offlineTip', 'away', 'supplyDrop', 'supply', 'trash'];
 
   // Lugares de vídeo recompensado (funcional 15.3). En el prototipo son SIMULADOS: el botón da
   // la recompensa sin anuncio y se cuenta en el menú de pruebas.

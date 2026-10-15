@@ -526,6 +526,7 @@
       const H = hq(R);
       if (H) H.hp = Math.max(H.hp, def(H).hp * Cn.lostHq);
       R.lossStreak = (R.lossStreak || 0) + 1;
+      st.stats.lost = (st.stats.lost || 0) + 1;
     }
     R.phase = 'day'; R.heat = 0; R.dayT = 0;
     R._night = null; R._bugs = []; R._shots = []; R._strikes = []; R._orbital = 0;

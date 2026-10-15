@@ -645,6 +645,26 @@
     });
   };
 
+  // ---------- Reciclador: un contenedor con las flechas de reciclar (anclaje: centro de la base) ----------
+  HB.Art.recycler = function () {
+    return V.sprite('recycler', 1.3, 1.4, 0.65, 1.15, function (g) {
+      shadow(g, 0.04, 0.04, 0.5, 0.14, 0.28);
+      g.beginPath(); g.moveTo(-0.42, -0.62); g.lineTo(0.42, -0.62); g.lineTo(0.36, 0.02); g.lineTo(-0.36, 0.02); g.closePath();
+      D.fillStroke(g, '#3f5a3a', LW);
+      hazard(g, -0.39, -0.3, 0.78, 0.1);
+      D.rr(g, -0.48, -0.74, 0.96, 0.14, 0.05); D.fillStroke(g, '#2f4430', LW);   // borde de la boca
+      // flechas de reciclar (tres, en triángulo)
+      g.save(); g.translate(0, -0.47); g.strokeStyle = '#ffffff'; g.fillStyle = '#ffffff'; g.lineWidth = 0.045;
+      for (let i = 0; i < 3; i++) {
+        g.save(); g.rotate(i * Math.PI * 2 / 3);
+        g.beginPath(); g.moveTo(-0.08, -0.09); g.lineTo(0.06, -0.09); g.stroke();
+        g.beginPath(); g.moveTo(0.1, -0.09); g.lineTo(0.05, -0.13); g.lineTo(0.05, -0.05); g.closePath(); g.fill();
+        g.restore();
+      }
+      g.restore();
+    });
+  };
+
   // ---------- Gema (la moneda premium, funcional 5.2): un diamante turquesa con facetas ----------
   HB.Art.gem = function () {
     return V.sprite('gem', 0.7, 0.7, 0.35, 0.35, function (g) {

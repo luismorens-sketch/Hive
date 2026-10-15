@@ -248,6 +248,7 @@
   function drawPads(st, R) {
     for (const p of HB.Logic.pads(R)) {
       if (p.kind === 'zone' || p.kind === 'nest' || !V.onScreen(p.x, p.y)) continue;
+      if (p.kind === 'trash') { V.blit(A.pad('in', 0, null), p.x, p.y + 0.12); continue; }   // donde se pisa; el contenedor va detrás
       const e = p.e, def = HB.MACHINES[e.type];
       if (p.kind === 'pile') { V.blit(A.pad('pile', 0, null), p.x, p.y); continue; }
       if (p.kind === 'box') { V.blit(A.pad('box', 0, 'ammo'), p.x, p.y); continue; }
@@ -1014,6 +1015,8 @@
         if (m.kind === 'export') list.push({ y: HB.Logic.padPos(e, 'pile').y + 0.2, k: 3, o: e });
       }
       for (const b of R._bugs || []) if (!b.dead && V.onScreen(b.x, b.y, 2)) list.push({ y: b.y + b.r * 0.5, k: 5, o: b });
+      const tr = HB.REGIONS[R.id].trash;
+      if (tr && V.onScreen(tr.x, tr.y, 2)) list.push({ y: tr.y - 0.38, k: 10, o: tr });
       const sb = R.supply && R.supply.box;
       if (sb && V.onScreen(sb.x, sb.y, 3)) list.push({ y: sb.y + 0.1, k: 9, o: sb });
       const nestAt = HB.REGIONS[R.id].nestAt;
@@ -1037,6 +1040,7 @@
         else if (it.k === 7) drawTurret(st, R, it.o);
         else if (it.k === 8) drawWall(st, R, it.o);
         else if (it.k === 9) drawSupply(it.o);
+        else if (it.k === 10) V.blit(A.recycler(), it.o.x, it.o.y - 0.38);
         else if (!intro) drawCommander(st, x, y, dt);
         else if (intro.cmd) drawCommander(st, x, y - intro.cmd.z, dt);
       }

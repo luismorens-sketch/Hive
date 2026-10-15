@@ -64,8 +64,11 @@ Dos reglas que ya costaron disgustos en los otros juegos:
 - **Las banderas en la dirección (`?algo=1`) no funcionan dentro de un Artifact**, porque la
   página va en un iframe. Lo que haya que probar va en el menú de ajustes (rueda dentada):
   "Herramientas de prueba" tiene piloto automático, velocidad ×4, FPS, +$500, "Abrir un cofre
-  de prueba", "Lanzar una caja de suministros", "Simular 1 h fuera" (la pantalla de regreso
-  sin esperar) y el registro de pasos del tutorial.
+  de prueba", "Lanzar una caja de suministros" y "Simular 1 h fuera" (la pantalla de regreso
+  sin esperar). **Solo salen en el móvil del autor**: en uno nuevo (el de quien prueba el
+  juego) están escondidas; **cinco toques seguidos en el número de versión** (abajo, en la
+  ventana de ajustes) las encienden o las apagan. «Tu partida» (resumen y pasos del tutorial)
+  la ve cualquiera.
 
 ## Comandos
 
@@ -176,6 +179,7 @@ como fuente** y **buscar marcas antes de comprometer**.
 | `docs/HIVE_Funcional.md` | El funcional (v0.3.1). **Fuente única de verdad** del diseño. La versión va dentro del documento; git guarda las anteriores |
 | `docs/ESTADO.md` | Dónde estamos: hito, qué probar, opiniones del autor, decisiones provisionales, lo siguiente |
 | `docs/ARTE_PROMPTS.md` | Los prompts exactos para generar el arte con IA, y qué hacer con cada imagen que llegue |
+| `docs/PRUEBA_5_PERSONAS.md` | Cómo hacer la prueba con 5 personas del hito 7: qué mirar, qué capturas pedir y la tabla de resultados |
 | `arte/originales/` | Las imágenes tal como salen de la IA (se suben: son la fuente del arte) |
 | `assets/sprites/` | Las imágenes ya recortadas que usa el juego (las genera `tools/recortar.py`; se suben) |
 | `src/js/` | El código del juego (ver "Cómo está hecho el código") |

@@ -110,6 +110,16 @@
       });
     },
 
+    // reciclador: el objeto vuela al contenedor y desaparece con una nubecilla
+    trash: function (st, e) {
+      const it = e.a, idx = e.b, tr = HB.REGIONS[st.cur].trash;
+      HB.slot.stack(idx, tmp);
+      Fx.fly({
+        spr: A.item(it), x: tmp.x, y: tmp.y, z: 0, tx: tr.x, ty: tr.y - 1.0, tz: 0, dur: FX.depositFly, arc: 0.7,
+        land: function () { Fx.dust(tr.x, tr.y - 0.9, 2, 0.3); Au.play('drop', { step: -Au.step() }); },
+      });
+    },
+
     pickup: function (st, e) {
       const m = e.a, it = e.b, idx = e.c;
       HB.slot.out(m, Math.max(0, m.out), tmp);
