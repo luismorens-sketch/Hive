@@ -20,6 +20,7 @@
     credInFlight: 0,  // dinero que aún vuela hacia el contador
     credDisp: 0,      // cifra que enseña el contador (rueda hacia la real)
     credPulse: 0,
+    gemDisp: 0, gemInFlight: 0, gemPulse: 0,   // contador de Gemas (como el del dinero)
     lootPulse: 0,
     fogY: null,
     hist: new Float32Array(64 * 3), histN: 0, histI: 0,
@@ -50,6 +51,7 @@
     vis.ent = {}; vis.stackIn = 0; vis.inIn = {}; vis.outIn = {}; vis.goodsIn = {};
     const R = st.regions[st.cur];
     vis.pileShown = R.pile; vis.credInFlight = 0; vis.credDisp = R.credits; vis.fogY = R.fogY;
+    vis.gemDisp = st.gems || 0; vis.gemInFlight = 0;
     vis.histN = 0; vis.flash = 0; vis.hurt = 0; vis.ship = { st: 'away', t: 0 }; vis.tracers.length = 0;
     HB.Fx.clear();
   };

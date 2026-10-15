@@ -7,8 +7,9 @@
 // 5. Prueba de humo: el robot del simulador juega la región entera sin que nada falle.
 // 6. Guardado: guardar y cargar devuelve la misma partida.
 // 7. Mientras no juegas: el cálculo cuadra con lo que la base vende de verdad, y los topes.
-// 8. Arte hecho con IA: cada imagen tiene su sitio.
-// 9. Montaje: tools/build.js genera el HTML.
+// 8. Cofres: dan lo que dice la tabla y sobreviven a guardar y cargar.
+// 9. Arte hecho con IA: cada imagen tiene su sitio.
+// 10. Montaje: tools/build.js genera el HTML.
 // Si algo falla, termina con error (código 1) y dice qué.
 'use strict';
 const fs = require('fs');
@@ -209,7 +210,8 @@ if (HB) {
       if (r.zones.length === 0) bad('el robot no ha comprado ninguna zona');
       else if (!r.nights.length) bad('no ha llegado ninguna noche');
       else if (r.cleared === null) bad('el robot no conquista la región en ' + LIMIT + ' minutos (' + r.zones.length + '/' + r.zonesTotal + ' zonas, ' + r.nights.length + ' noches)');
-      else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos');
+      else if (!(r.gems >= 150)) bad('el robot conquista la región pero no recibe los dos cofres (Gemas: ' + r.gems + ')');
+      else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos · ' + r.gems + ' Gemas');
     } catch (e) { bad('el simulador ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
   }
 
@@ -267,9 +269,29 @@ if (HB) {
     if (R.credits !== c0 + a.amount * 2 || st.away) bad('offline: cobrar ×2 no da el doble');
     if (failed === before) ok('ritmo calculado $' + rate.toFixed(2) + '/s · real $' + real.toFixed(2) + '/s · 1 h fuera = $' + a.amount + ' (caja fuerte) · topes de 2 h y de reloj bien');
   } catch (e) { bad('offline ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
+
+  console.log('[check] 8. Cofres');
+  try {
+    const before = failed;
+    const st = HB.State.newGame(3), R = st.regions.r1;
+    for (const kind in HB.CHESTS) {
+      HB.Chests.give(st, kind);
+      const back = HB.State.deserialize(HB.State.serialize(st));
+      if (!back || back.chests[back.chests.length - 1] !== kind) bad('cofres: el cofre «' + kind + '» se pierde al guardar y cargar');
+      const c0 = R.credits, g0 = st.gems;
+      let wantC = 0, wantG = 0;
+      for (const p of HB.CHESTS[kind].prizes) { if (p.k === 'credits') wantC += p.n; else if (p.k === 'gems') wantG += p.n; else bad('cofres: premio desconocido «' + p.k + '»'); }
+      HB.Chests.claim(st);
+      if (R.credits - c0 !== wantC || st.gems - g0 !== wantG) bad('cofres: el cofre «' + kind + '» no da lo que dice la tabla');
+    }
+    if (st.chests.length) bad('cofres: quedan cofres sin abrir tras cobrarlos');
+    const back = HB.State.deserialize(HB.State.serialize(st));
+    if (back.gems !== st.gems) bad('cofres: las Gemas no se guardan');
+    if (failed === before) ok(Object.keys(HB.CHESTS).length + ' cofres: dan lo que dice la tabla y se guardan (' + st.gems + ' Gemas en total)');
+  } catch (e) { bad('los cofres han fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
 }
 
-console.log('[check] 8. Arte hecho con IA (assets/sprites)');
+console.log('[check] 9. Arte hecho con IA (assets/sprites)');
 {
   const dir = path.join(ROOT, 'assets', 'sprites');
   const specs = fs.readFileSync(path.join(ROOT, 'src', 'js', '67_art_images.js'), 'utf8');
@@ -282,7 +304,7 @@ console.log('[check] 8. Arte hecho con IA (assets/sprites)');
   if (!n) ok(files.length ? files.length + ' imágenes, todas con su sitio' : 'todavía ninguna (se usan los dibujos hechos con código)');
 }
 
-console.log('[check] 9. Montaje');
+console.log('[check] 10. Montaje');
 try {
   const { execFileSync } = require('child_process');
   execFileSync(process.execPath, [path.join(__dirname, 'build.js')], { stdio: 'pipe' });

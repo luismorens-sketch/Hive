@@ -100,6 +100,11 @@
     roar: function (t, o) { noise(t, 0.9, 0.22 * o.vol, 'lowpass', 500, 180, 3); tone('sawtooth', 70, 45, t, 0.9, 0.12 * o.vol); },
     hurt: function (t, o) { tone('square', 220, 110, t, 0.12, 0.08 * o.vol); },
     fanfare: function (t, o) { [523, 659, 784, 1046, 1318].forEach(function (f, i) { tone('triangle', f, 0, t + i * 0.09, 0.25, 0.13 * o.vol); }); },
+    // redoble del cofre: golpes cada vez más seguidos durante unos 0,8 s
+    roll: function (t, o) {
+      let tt = t;
+      for (let i = 0; i < 14; i++) { noise(tt, 0.05, (0.05 + i * 0.006) * o.vol, 'bandpass', 1800, 0, 1.5); tt += 0.09 - i * 0.005; }
+    },
     // la radio del sargento: chasquido y dos pitidos cortos
     radio: function (t, o) {
       noise(t, 0.06, 0.07 * o.vol, 'bandpass', 2600, 0, 3);

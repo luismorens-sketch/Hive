@@ -19,6 +19,22 @@
     v.sqv -= (amount === undefined ? FX.squash : amount) * 14;
   }
 
+  // Gemas que vuelan desde (x, y) de la pantalla a su contador.
+  function gemRain(n, x, y) {
+    if (!(n > 0)) return;
+    vis.gemInFlight += n;
+    const k = Math.min(10, Math.max(3, Math.ceil(n / 10))), share = n / k;
+    for (let i = 0; i < k; i++) {
+      const last = i === k - 1;
+      Fx.fly({
+        spr: A.gem(), screen: true, x: x + (Math.random() - 0.5) * 80, y: y + (Math.random() - 0.5) * 40, z: 0,
+        to: function (o) { const h = vis.hudGems || { x: V.gx + V.gw - 110, y: 37 }; o.x = h.x; o.y = h.y; o.z = 0; },
+        dur: 0.6, arc: 80, delay: i * 0.05, scale: 1.1, ease: HB.easeInOut,
+        land: function () { vis.gemInFlight = last ? 0 : Math.max(0, vis.gemInFlight - share); vis.gemPulse = 1; Au.play('cling', { step: 6 + (i % 6) }); },
+      });
+    }
+  }
+
   // Billetes que llueven desde el centro de la pantalla hacia el contador.
   function rain(amount) {
     if (!(amount > 0)) return;
@@ -49,7 +65,6 @@
     drone: ['tut_drone', P.tealL, 'normal'],
     heat: ['tut_heat', P.orangeL, 'normal'],
     warn: ['tut_warn', '#ff8a8a', 'alarm'],
-    win: ['tut_win', P.cashL, 'happy'],
     power: ['tut_power', P.amber, 'alarm'],
     leaper: ['tut_leaper', P.acid, 'alarm'],
     boss: ['tut_boss', '#ff8a8a', 'alarm'],
@@ -401,6 +416,18 @@
 
     // al cobrar lo producido mientras no jugabas (funcional 14.4), lo mismo
     awayClaim: function (st, e) { rain(e.a); },
+
+    // el cofre: los Créditos llueven al contador y las Gemas al suyo
+    chestClaim: function (st, e) {
+      for (const p of e.b) {
+        if (p.k === 'credits') rain(p.n);
+        else if (p.k === 'gems') gemRain(p.n, V.gx + V.gw / 2, V.gh * 0.55);
+      }
+      HB.buzz(20);
+    },
+
+    // el Swarmer dorado suelta unas pocas Gemas (funcional 9.5)
+    gems: function (st, e) { const p = V.w2s(e.a.x, e.a.y, {}); gemRain(e.b, p.x, p.y); },
 
     // ---------- Tutorial (funcional 12): el sargento Brass avisa la primera vez que pasa algo ----------
     // [clave del texto, color, cara]. También en los momentos fuertes: primera noche, primera

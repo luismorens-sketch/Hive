@@ -9,7 +9,7 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.7.1',      // sube con cada versión que se publica para probar
+    version: '0.8.0',      // sube con cada versión que se publica para probar
     hito: 6,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
@@ -159,7 +159,7 @@
     swarmer: { hp: 22,  speed: 1.5,  dmg: 8,  rate: 1.0, r: 0.28, cost: 1, loot: 3,  weight: 10, from: 1 },
     leaper:  { hp: 40,  speed: 1.8,  dmg: 8,  rate: 1.0, r: 0.32, cost: 3, loot: 6,  weight: 3,  from: 4, jump: true },
     crusher: { hp: 260, speed: 0.75, dmg: 25, rate: 0.6, r: 0.48, cost: 9, loot: 20, weight: 1.5, from: 6 },
-    gilded:  { hp: 30,  speed: 2.4,  dmg: 0,  rate: 0,   r: 0.28, cost: 0, loot: 60, chance: 1 / 150, flee: true },
+    gilded:  { hp: 30,  speed: 2.4,  dmg: 0,  rate: 0,   r: 0.28, cost: 0, loot: 60, chance: 1 / 150, flee: true, gems: 5 },
     brood:   { hp: 1800, speed: 0.45, dmg: 40, rate: 0.6, r: 1.0, cost: 0, loot: 400, boss: true,
                phases: [0.75, 0.5, 0.25], brood: 6 },
   };
@@ -262,11 +262,20 @@
     lowFpsLimit: 50, lowFpsTime: 3,  // modo ahorro si baja de 50 FPS durante 3 s (funcional 13.3)
   };
 
+  // Cofres (funcional 12, 13.2 y 9.5). En el prototipo son gratis y con premio fijo; las Gemas
+  // solo se ganan y se ven (funcional 21: «Gemas sólo para probar el cofre»).
+  // r = rareza, que da el color (funcional 13.1 regla 5): common blanco · rare azul ·
+  // epic violeta · legendary dorado.
+  HB.CHESTS = {
+    first: { prizes: [{ k: 'credits', n: 150, r: 'common' }, { k: 'gems', n: 50, r: 'epic' }] },     // tras la primera noche ganada
+    boss:  { prizes: [{ k: 'credits', n: 500, r: 'rare' }, { k: 'gems', n: 100, r: 'legendary' }] }, // al caer la Madre de la Prole
+  };
+
   // Pasos del tutorial (funcional 12), en el orden en que se esperan. La lógica apunta en st.ftue
   // el segundo de juego en que pasa cada uno por primera vez; el menú de pruebas y el simulador
   // los enseñan en este orden (sirve para ver dónde se atasca quien juega por primera vez).
   HB.FTUE = ['intro', 'move', 'mine', 'feed', 'pickup', 'sell', 'collect', 'buy', 'drone', 'heat',
-    'warn', 'night', 'win', 'refill', 'power', 'choice', 'leaper', 'orbitalReady', 'orbital', 'boss',
+    'warn', 'night', 'win', 'chest', 'refill', 'power', 'choice', 'leaper', 'orbitalReady', 'orbital', 'boss',
     'cleared', 'offlineTip', 'away'];
 
   // Lugares de vídeo recompensado (funcional 15.3). En el prototipo son SIMULADOS: el botón da

@@ -3,7 +3,7 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 15/10/2026 · **Versión publicada:** 0.7.1 ·
+**Última actualización:** 15/10/2026 · **Versión publicada:** 0.8.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
@@ -24,7 +24,19 @@ pendientes de tu prueba.
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas.
+
+## Lo nuevo de la 0.8.0: el cofre y las Gemas (funcional 12, 13.2 y 9.5)
+
+- **Cofre de suministros**: tras la **primera noche ganada** (el «primer cofre con 50 Gemas»
+  del tutorial) y al **caer la Madre de la Prole**. Lo entrega el Sargento Brass.
+- Como pide el funcional: **tiembla cada vez más** (0,8 s, con redoble), **estalla al
+  tocarlo** (destello y rayos) y los **premios salen en fila**, cada uno con el color de su
+  rareza; los raros, con rayos extra. Un toque acelera; «COBRAR» y todo vuela a su contador.
+- **Las Gemas** aparecen arriba, junto a la rueda dentada, en cuanto tienes alguna. Todavía
+  no se gastan en nada: en el prototipo solo se ganan (funcional 21).
+- El **Swarmer dorado** da ahora también 5 Gemas.
+- Para probarlo sin jugar: «Herramientas de prueba» → «Abrir un cofre de prueba».
 
 ## Lo nuevo de la 0.7.0: el Sargento Brass
 
@@ -67,13 +79,15 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.7.0)
+## Qué probar ahora (versión 0.8.0)
 
 **Para ver el tutorial hay que empezar de cero**: rueda dentada → «Borrar progreso» y otra vez
 para confirmar (se pierde la partida de prueba, nada más).
 
 - Que la entrada se vea bien y que un toque la salte; después, el saludo del sargento.
 - **El sargento**: que se entienda quién es, que se lea lo que dice y que no estorbe.
+- **El cofre**: con «Abrir un cofre de prueba» o ganando la primera noche. ¿Se siente como un
+  premio? ¿Se ven bien las Gemas arriba?
 - Que los avisos de abajo se lean y no estorben (salen uno detrás de otro).
 - La noche 2: que veas la torreta casi vacía y sepas qué hacer.
 - Al final, la tarjeta «TU BASE NUNCA DUERME».
@@ -140,6 +154,9 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
   de policía de la serie *CSI*). Alternativas: **Stomp** («pisotón», aplasta bichos) o
   **Swatter** («matamoscas»). Evité Sarge (*Army Men*), Brick (*Boom Beach*) y Hammer
   (*StarCraft*), que ya son de otros juegos.
+- **Cofres (0.8.0)**: el de la primera noche da $150 y 50 Gemas (el funcional dice 50); el del
+  jefe, $500 y 100 Gemas. Premio fijo, sin azar. Arriba, con las Gemas, la energía pierde el
+  «MW» si no cabe todo.
 - **Tutorial (0.6.0)**:
   - La **rueda dentada se ve desde el principio** (el funcional pide 5 min sin menús) porque
     ahí están las herramientas de prueba. En la versión de tienda se esconderá.

@@ -86,6 +86,9 @@ function run(opts) {
     st.ev.length = 0;
   }
 
+  // al caer el jefe, cerrar su informe y abrir su cofre (como haría el jugador)
+  for (let i = 0; i < 4; i++) HB.Advisor.decide(st, mem);
+
   const rows = bought.map(function (b, i) {
     const prev = i === 0 ? 0 : bought[i - 1].t;
     const wait = b.t - prev;
@@ -115,6 +118,7 @@ function run(opts) {
     machines: machines,
     tasks: taskTime,
     ftue: st.ftue,
+    gems: st.gems,
   };
 }
 
@@ -144,6 +148,7 @@ function print(r) {
   out.push('');
   if (r.cleared !== null) out.push('REGIÓN CONQUISTADA en ' + mmss(r.cleared) + ' (el funcional pide 15-25 min para R1).');
   else out.push('Sin conquistar tras ' + mmss(r.total) + ' (' + r.zones.length + '/' + r.zonesTotal + ' zonas).');
+  out.push('Gemas al final: ' + r.gems + ' (cofres de la primera noche y del jefe, y Swarmers dorados)');
   out.push('Ganado vendiendo: $' + r.earned + ' · bichos muertos: ' + r.kills + ' · comandante caído: ' + r.cmdDowns +
     ' veces · edificios destruidos: ' + r.destroyed + (r.ads ? ' · vídeos vistos: ' + r.adsWatched : ''));
   out.push('');

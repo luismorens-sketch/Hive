@@ -581,6 +581,57 @@
     });
   };
 
+  // ---------- Cofre de suministros (funcional 13.2): caja militar con correas y cierre dorado ----------
+  // open: abierto, con la tapa hacia atrás y el brillo dentro. Anclaje en el centro.
+  HB.Art.chest = function (open) {
+    return V.sprite('chest:' + (open ? 1 : 0), 2.4, 2.2, 1.2, 1.1, function (g) {
+      shadow(g, 0, 0.62, 0.95, 0.18, 0.3);
+      // cuerpo
+      D.rr(g, -0.85, -0.15, 1.7, 0.8, 0.12); D.fillStroke(g, P.olive, LW);
+      g.fillStyle = P.oliveD; g.fillRect(-0.85, 0.42, 1.7, 0.1);
+      // correas de peligro
+      for (const x of [-0.55, 0.37]) hazard(g, x, -0.15, 0.18, 0.8);
+      if (open) {
+        // dentro, la luz del premio
+        const gr = g.createRadialGradient(0, -0.2, 0, 0, -0.2, 0.9);
+        gr.addColorStop(0, '#fff6c0'); gr.addColorStop(0.4, 'rgba(255,210,63,0.8)'); gr.addColorStop(1, 'rgba(255,210,63,0)');
+        g.fillStyle = gr; D.ellipse(g, 0, -0.25, 0.9, 0.55); g.fill();
+        D.rr(g, -0.8, -0.3, 1.6, 0.2, 0.08); D.fillStroke(g, '#3f4a2a', 0.05);
+        // la tapa, echada hacia atrás
+        g.beginPath(); g.moveTo(-0.85, -0.32); g.lineTo(0.85, -0.32); g.lineTo(0.72, -0.95); g.lineTo(-0.72, -0.95); g.closePath();
+        D.fillStroke(g, P.oliveL, LW);
+        for (const x of [-0.5, 0.36]) { g.fillStyle = P.yellow; g.beginPath(); g.moveTo(x, -0.32); g.lineTo(x + 0.16, -0.32); g.lineTo(x + 0.13, -0.95); g.lineTo(x - 0.01, -0.95); g.closePath(); g.fill(); }
+      } else {
+        // tapa cerrada y abombada, con brillo
+        g.beginPath(); g.moveTo(-0.9, -0.12); g.lineTo(-0.9, -0.38); g.quadraticCurveTo(0, -0.78, 0.9, -0.38); g.lineTo(0.9, -0.12); g.closePath();
+        D.fillStroke(g, P.oliveL, LW);
+        for (const x of [-0.55, 0.37]) { g.save(); g.beginPath(); g.moveTo(-0.9, -0.12); g.lineTo(-0.9, -0.38); g.quadraticCurveTo(0, -0.78, 0.9, -0.38); g.lineTo(0.9, -0.12); g.closePath(); g.clip(); hazard(g, x, -0.8, 0.18, 0.7); g.restore(); }
+        g.fillStyle = 'rgba(255,255,255,0.35)'; D.ellipse(g, -0.3, -0.45, 0.28, 0.07); g.fill();
+        // cierre dorado
+        D.rr(g, -0.17, -0.3, 0.34, 0.36, 0.06); D.fillStroke(g, P.yellow, 0.05);
+        D.ellipse(g, 0, -0.1, 0.06, 0.07); g.fillStyle = P.ink; g.fill();
+        g.fillRect(-0.02, -0.08, 0.04, 0.1);
+      }
+      // remaches
+      g.fillStyle = P.ink;
+      for (const x of [-0.72, 0.72]) for (const y of [0.0, 0.4]) { D.ellipse(g, x, y, 0.035, 0.035); g.fill(); }
+    });
+  };
+
+  // ---------- Gema (la moneda premium, funcional 5.2): un diamante turquesa con facetas ----------
+  HB.Art.gem = function () {
+    return V.sprite('gem', 0.7, 0.7, 0.35, 0.35, function (g) {
+      g.beginPath(); g.moveTo(-0.26, -0.08); g.lineTo(-0.14, -0.22); g.lineTo(0.14, -0.22); g.lineTo(0.26, -0.08); g.lineTo(0, 0.26); g.closePath();
+      D.fillStroke(g, '#4fd2f0', 0.04);
+      g.beginPath(); g.moveTo(-0.26, -0.08); g.lineTo(0.26, -0.08); g.lineTo(0, 0.26); g.closePath(); g.fillStyle = '#2a9fd0'; g.fill();
+      g.beginPath(); g.moveTo(-0.1, -0.08); g.lineTo(0, 0.26); g.lineTo(0.1, -0.08); g.closePath(); g.fillStyle = '#7fe6ff'; g.fill();
+      g.beginPath(); g.moveTo(-0.14, -0.22); g.lineTo(-0.05, -0.08); g.lineTo(0.05, -0.08); g.lineTo(0.14, -0.22); g.closePath(); g.fillStyle = '#c9f6ff'; g.fill();
+      g.beginPath(); g.moveTo(-0.26, -0.08); g.lineTo(-0.14, -0.22); g.lineTo(0.14, -0.22); g.lineTo(0.26, -0.08); g.lineTo(0, 0.26); g.closePath();
+      g.lineWidth = 0.04; g.strokeStyle = P.ink; g.stroke();
+      g.fillStyle = '#ffffff'; g.fillRect(-0.12, -0.18, 0.05, 0.05);
+    });
+  };
+
   // Iconos de las zonas de pago de lo nuevo (blanco con contorno, como los demás).
   function icoStyle(g) { g.fillStyle = '#ffffff'; g.strokeStyle = P.ink; g.lineWidth = 0.05; g.lineJoin = 'round'; }
   const ZONE_ICONS = {

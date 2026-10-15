@@ -90,7 +90,7 @@ Los archivos de `src/js/` se pegan en orden de número. La frontera importante e
 
 | Archivos | Qué son | Regla |
 |---|---|---|
-| `00_core` – `49` | **Lógica**: reglas, tablas, guardado, drones (`42`), la noche (`43`), lo producido mientras no juegas (`44`), el consejero (`45`) | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
+| `00_core` – `49` | **Lógica**: reglas, tablas, guardado, drones (`42`), la noche (`43`), lo producido mientras no juegas (`44`), el consejero (`45`), los cofres (`46`) | **Nunca tocan el DOM ni el canvas.** Los usa también el simulador de Node, así el robot juega con las mismas reglas que el móvil |
 | `50_audio` – `90_main` | **Presentación**: sonido, vista, efectos, arte (`65`, `66`, `67`), mundo (`70`), HUD y ventanas (`72`), sensación (`75`), dedo, menú, arranque | Leen el estado; no deciden reglas |
 
 Dónde se toca cada cosa:
@@ -106,6 +106,8 @@ Dónde se toca cada cosa:
   `src/js/44_offline.js`. La hora real se la pasa `90_main.js`: la lógica no la lee.
 - **Qué toca hacer ahora** (flecha guía, piloto automático y robot del simulador) →
   `src/js/45_advisor.js`. Es el mismo código para los tres.
+- **Cofres y Gemas** → la tabla `HB.CHESTS` (`20_data.js`), las reglas en `src/js/46_chests.js`
+  y la ventana que tiembla y estalla en `72_hud.js`.
 - **Tutorial** (funcional 12): la lista de pasos es `HB.FTUE` (`20_data.js`); la lógica apunta
   cuándo pasa cada uno con `HB.Logic.ftue(st, 'paso')`; los avisos de una sola vez están en
   `75_juice.js` (manejador `ftue`), las pistas y la tarjeta final en `72_hud.js` y la entrada

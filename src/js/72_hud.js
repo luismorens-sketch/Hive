@@ -136,15 +136,19 @@
 
   // Energía junto al dinero (funcional 18): usada / disponible. Ámbar cerca del límite; roja y
   // latiendo si falta (brownout: todo va más lento).
-  function drawPowerPill(R, x, y, h) {
+  function drawPowerPill(R, x, y, h, maxW) {
     const p = R.power;
     if (!p) return;
     const g = V.ctx;
     const over = p.demand > p.supply, near = !over && p.demand >= p.supply * 0.85;
     const col = over ? '#ff5a5a' : (near ? P.amber : '#ffffff');
-    const txt = T('power_hud', p.demand, p.supply);
-    g.font = V.font(28);
-    const w = g.measureText(txt).width + 42;
+    let txt = T('power_hud', p.demand, p.supply), px = 28;
+    g.font = V.font(px);
+    // si no cabe junto a las Gemas, sin «MW»; y si aún no cabe, con letra más pequeña
+    if (maxW && g.measureText(txt).width + 42 > maxW) txt = T('power_hud_s', p.demand, p.supply);
+    let tw = g.measureText(txt).width;
+    if (maxW && tw + 42 > maxW) { px = Math.max(18, Math.floor(px * (maxW - 42) / tw)); g.font = V.font(px); tw = g.measureText(txt).width; }
+    const w = tw + 42;
     const blink = over && Math.floor(vis.clock * 4) % 2;
     D.rr(g, x, y, w, h, 14); g.fillStyle = blink ? 'rgba(120,20,30,0.9)' : P.hud; g.fill();
     g.lineWidth = 2; g.strokeStyle = over ? '#ff5a5a' : 'rgba(255,255,255,0.12)'; g.stroke();
@@ -153,7 +157,26 @@
     g.beginPath();
     g.moveTo(bx + 3, by - 13); g.lineTo(bx - 7, by + 2); g.lineTo(bx, by + 2); g.lineTo(bx - 3, by + 13); g.lineTo(bx + 8, by - 3); g.lineTo(bx + 1, by - 3);
     g.closePath(); g.fillStyle = over ? '#ff5a5a' : P.yellow; g.fill(); g.lineWidth = 2; g.strokeStyle = P.ink; g.stroke();
-    V.text(txt, x + 32, y + h / 2 + 3, 28, col, P.ink, 'left');
+    V.text(txt, x + 32, y + h / 2 + 3, px, col, P.ink, 'left');
+  }
+
+  // Gemas (funcional 5.2 y 18), junto a la rueda dentada: solo cuando ya tienes alguna.
+  function gemPillW(st) { const g = V.ctx; g.font = V.font(26); return g.measureText(HB.fmt(st.gems)).width + 46; }
+
+  function drawGemPill(st, x, y, h, w, dt) {
+    const g = V.ctx;
+    const target = st.gems - vis.gemInFlight;
+    if (Math.abs(target - vis.gemDisp) < 0.5) vis.gemDisp = target;
+    else vis.gemDisp += (target - vis.gemDisp) * Math.min(1, dt / (HB.FX.counterRoll / 4));
+    vis.gemPulse = Math.max(0, vis.gemPulse - dt * 5);
+    const sc = 1 + (HB.FX.counterPulse - 1) * vis.gemPulse;
+    g.save(); g.translate(x + 20, y + h / 2); g.scale(sc, sc); g.translate(-(x + 20), -(y + h / 2));
+    D.rr(g, x, y, w, h, 14); g.fillStyle = P.hud; g.fill(); g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,0.12)'; g.stroke();
+    const gm = A.gem(), k = 34 / 0.7;
+    g.drawImage(gm.c, x + 18 - gm.ax * k, y + h / 2 - gm.ay * k, gm.w * k, gm.h * k);
+    V.text(HB.fmt(Math.max(0, Math.round(vis.gemDisp))), x + 34, y + h / 2 + 3, 26, '#bff1ff', P.ink, 'left');
+    g.restore();
+    vis.hudGems = { x: x + 20, y: y + h / 2 };
   }
 
   function drawPower(R, y) {
@@ -349,6 +372,99 @@
     g.restore();
   }
 
+  // ---------- Cofre (funcional 13.2): tiembla cada vez más, estalla al tocarlo y salen los premios ----------
+  const RARITY = { common: '#ffffff', rare: '#5aa8ff', epic: '#b06cff', legendary: P.yellow };
+
+  // Rayos que giran (mezcla aditiva, sin filtros: pilar 9).
+  function rays(x, y, r, t, col, a) {
+    const g = V.ctx;
+    g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = a; g.fillStyle = col;
+    g.translate(x, y); g.rotate(t * 0.6);
+    for (let i = 0; i < 10; i++) {
+      g.rotate(Math.PI / 5);
+      g.beginPath(); g.moveTo(0, 0); g.lineTo(r, -r * 0.13); g.lineTo(r, r * 0.13); g.closePath(); g.fill();
+    }
+    g.restore();
+  }
+
+  function drawChest(st, game, dt) {
+    const kind = HB.Chests.pending(st);
+    let C = H.chest;
+    if (!C || C.kind !== kind || C.n !== st.chests.length) C = H.chest = { kind: kind, n: st.chests.length, t: 0, openT: -1, shown: 0 };
+    C.t += dt;
+    const g = V.ctx, prizes = HB.Chests.prizes(kind), Au = HB.Audio;
+    scrim(0.7);
+    const cx = V.gx + V.gw / 2, cy = V.gh * 0.47;
+    const pw = Math.min(V.gw - 24, 380), ph = 474, x0 = cx - pw / 2, y0 = cy - ph / 2;
+    const s = HB.easeOutBack(Math.min(1, H.pop));
+    g.save(); g.translate(cx, cy); g.scale(s, s); g.translate(-cx, -cy);
+    panel(cx, cy, pw, ph, P.yellow);
+    fitText(T('chest_title'), cx, y0 + 38, 34, P.yellow, pw - 40);
+    // lo entrega el sargento, contento
+    sergeant('happy', C.t < 1.2 && Math.floor(C.t / 0.12) % 2 === 1, x0 + 50, y0 + 150, 88);
+    let ly = y0 + 96;
+    for (const l of wrap(T(kind === 'boss' ? 'chest_boss' : 'chest_first'), 20, pw - 124, 500)) {
+      V.text(l, x0 + 102, ly, 20, '#ffffff', null, 'left', 500); ly += 25;
+    }
+    const chestY = cy + 30;
+    if (C.openT < 0) {
+      // anticipación (funcional 13.1 regla 4): cada vez tiembla más durante 0,8 s
+      if (!C.rolled) { C.rolled = true; Au.play('roll'); }
+      const k = Math.min(1, C.t / 0.8), amp = 1.5 + 5 * k;
+      const sx = Math.sin(C.t * 46) * amp, rot = Math.sin(C.t * 31) * 0.05 * k;
+      g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.3 + 0.3 * k;
+      const gl = HB.glowSprite(P.yellow), gk = 240;
+      g.drawImage(gl.c, cx - gk / 2, chestY - gk / 2, gk, gk); g.restore();
+      const spr = A.chest(false), kk = 180 / 2.4;
+      g.save(); g.translate(cx + sx, chestY); g.rotate(rot);
+      g.drawImage(spr.c, -spr.ax * kk, -spr.ay * kk, spr.w * kk, spr.h * kk); g.restore();
+      fitText(T('chest_tap'), cx, y0 + ph - 46, 30 * (1 + Math.sin(C.t * 6) * 0.06), P.yellow, pw - 40, 600, P.ink);
+      H.buttons.push({ x: x0, y: y0, w: pw, h: ph, fn: function () {
+        if (C.openT >= 0 || C.t < 0.25) return;
+        C.openT = C.t;
+        Au.play('boom'); Au.play('tada', { delay: 0.05 }); HB.buzz(40);
+      } });
+    } else {
+      // explosión y premios en fila
+      const ot = C.t - C.openT, n = prizes.length;
+      rays(cx, chestY - 30, 170, C.t, P.yellow, 0.22);
+      const spr = A.chest(true), kk = 130 / 2.4;
+      g.drawImage(spr.c, cx - spr.ax * kk, chestY - 60 - spr.ay * kk, spr.w * kk, spr.h * kk);
+      const cw = 106, gap = 14, total = n * cw + (n - 1) * gap;
+      for (let i = 0; i < n; i++) {
+        const a0 = 0.3 + i * 0.3;
+        if (ot < a0) continue;
+        if (C.shown <= i) { C.shown = i + 1; Au.play('up'); if (prizes[i].r === 'epic' || prizes[i].r === 'legendary') Au.play('chaching', { delay: 0.08 }); }
+        const p = prizes[i], col = RARITY[p.r] || '#ffffff';
+        const pop = HB.easeOutBack(Math.min(1, (ot - a0) / 0.3));
+        const px = cx - total / 2 + cw / 2 + i * (cw + gap), py = chestY + 62;
+        if (p.r === 'epic' || p.r === 'legendary') rays(px, py - 10, 80 * pop, C.t * 1.4 + i, col, 0.35);   // los raros, con rayos extra
+        g.save(); g.translate(px, py); g.scale(pop, pop);
+        D.rr(g, -cw / 2, -60, cw, 120, 14); g.fillStyle = '#262c33'; g.fill(); g.lineWidth = 3; g.strokeStyle = col; g.stroke();
+        const ic = p.k === 'gems' ? A.gem() : A.billHud(), ik = p.k === 'gems' ? 62 / 0.7 : 60 / 0.6;
+        g.drawImage(ic.c, -ic.ax * ik, -22 - ic.ay * ik, ic.w * ik, ic.h * ik);
+        V.text(p.k === 'gems' ? '+' + HB.fmt(p.n) : HB.money(p.n), 0, 26, 28, p.k === 'gems' ? '#bff1ff' : P.cashL, P.ink);
+        V.text(T('r_' + p.r), 0, 48, 15, col, null);
+        g.restore();
+      }
+      if (ot < 0.3) {   // destello del estallido
+        g.globalAlpha = (1 - ot / 0.3) * 0.85; g.fillStyle = '#ffffff';
+        D.rr(g, x0, y0, pw, ph, 20); g.fill(); g.globalAlpha = 1;
+      }
+      if (ot >= 0.3 + n * 0.3 + 0.2) {
+        button(cx, y0 + ph - 44, pw - 80, 56, T('collect'), P.yellow, P.ink, function () {
+          HB.Chests.claim(st);
+          H.chest = null;
+          game.save();
+        }, { size: 26 });
+      } else {
+        // un toque lo acelera (funcional 13.1 regla 5: siempre se salta tocando)
+        H.buttons.push({ x: x0, y: y0, w: pw, h: ph, fn: function () { C.openT -= 10; C.shown = n; } });
+      }
+    }
+    g.restore();
+  }
+
   // Avisos del tutorial: un concepto cada vez (funcional 12), abajo, sin parar el juego. Los da
   // el sargento Brass por radio: mood = su cara ('normal', 'alarm', 'happy'). Un toque los quita.
   H.tip = function (s, sub, col, mood) {
@@ -448,7 +564,7 @@
     g.fillStyle = 'rgba(255,255,255,0.8)'; g.fill(); g.lineWidth = 3; g.strokeStyle = P.ink; g.stroke();
   }
 
-  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || st.away || H.ad || offlineTip(st)); };
+  H.modal = function (st) { return !!(st.choice || st.report || st.defeat || st.away || H.ad || HB.Chests.pending(st) || offlineTip(st)); };
 
   H.showBanner = function (s, col, dur, sub) { H.banner = { s: s, col: col, t: 0, dur: dur || 1.8, sub: sub }; };
 
@@ -467,7 +583,10 @@
     const txt = HB.money(Math.max(0, Math.round(vis.credDisp)));
     g.font = V.font(34);   // se mide sin el latido: la escala ya la pone g.scale
     const w = Math.max(118, g.measureText(txt).width + 70);
-    drawPowerPill(R, x + w + 10, y, h);   // antes que el dinero: al latir, el dinero queda encima
+    const showGems = st.gems > 0 || vis.gemInFlight > 0;
+    const gemW = showGems ? gemPillW(st) : 0, gearLeft = V.gx + V.gw - 66;
+    drawPowerPill(R, x + w + 10, y, h, gearLeft - (showGems ? gemW + 8 : 0) - (x + w + 18));   // antes que el dinero: al latir, el dinero queda encima
+    if (showGems) drawGemPill(st, gearLeft - 6 - gemW, y, h, gemW, dt);
     g.save();
     g.translate(x + 30, y + h / 2); g.scale(sc, sc); g.translate(-(x + 30), -(y + h / 2));
     D.rr(g, x, y, w, h, 14); g.fillStyle = P.hud; g.fill(); g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,0.12)'; g.stroke();
@@ -534,6 +653,7 @@
     else if (st.defeat) drawDefeat(st, game);
     else if (st.report) drawReport(st, game);
     else if (st.away) drawAway(st, game, dt);
+    else if (HB.Chests.pending(st)) drawChest(st, game, dt);
     else if (offlineTip(st)) drawOfflineTip(st, game);
     if (!st.away) H.awayT = 0;
   };

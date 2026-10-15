@@ -127,6 +127,8 @@
         settings: { sound: true, vib: true, lowfx: false, lang: null },
         ftue: {},         // pasos del tutorial ya hechos (funcional 12)
         ads: { seen: 0, log: {} },   // vídeos simulados (funcional 15.3): para medir cuántos se usarían
+        gems: 0,          // Gemas (permanentes, de toda la cuenta; funcional 5.2)
+        chests: [],       // cofres ganados que faltan por abrir (46_chests.js)
         cur: rid,
         regions: {},
         cmd: {
@@ -215,6 +217,8 @@
       if (!obj.stats) obj.stats = { mined: 0, made: 0, sold: 0, earned: 0, zones: 0, idle: 0, kills: 0, m: {} };
       if (obj.stats.kills === undefined) obj.stats.kills = 0;
       if (obj.away === undefined) obj.away = null;   // 0.5.0: pantalla de regreso pendiente
+      if (obj.gems === undefined) obj.gems = 0;      // 0.8.0: Gemas y cofres
+      if (!obj.chests) obj.chests = [];
       return obj;
     },
   };

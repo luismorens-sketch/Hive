@@ -65,6 +65,11 @@
     ftLog.className = 'ftue-log';
     ftLog.textContent = T('tut_log') + ': ' + (done.length ? done.map(function (k) { return T('ft_' + k) + ' ' + mmss(ft[k]); }).join(' · ') : T('tut_none'));
     rows.appendChild(ftLog);
+    row(T('test_chest'), null, function () {
+      close();
+      HB.Chests.give(G.st, 'first');
+      G.save();
+    });
     row(T('sim_away'), null, function () {
       close();
       if (!G.checkAway(3600)) HB.HUD.showBanner(T('away_none_t'), HB.PAL.amber, 2.6, T('away_none'));

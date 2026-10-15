@@ -243,6 +243,7 @@
       R._loot.push({ x: b.x + Math.cos(a) * r, y: b.y + Math.sin(a) * r * 0.6, v: value / pieces, t: 0 });
     }
     ev(st, 'kill', b, value);
+    if (E.gems) { st.gems += E.gems; ev(st, 'gems', b, E.gems); }   // el dorado da unas pocas Gemas (funcional 9.5)
     if (E.boss) {
       R.cleared = true;
       if (N) N.bossDone = true;
@@ -645,7 +646,9 @@
       st.report = null;
       st.needSave = true;
       ev(st, 'claim', r, mult);
-      if (r.won && !r.cleared) HB.Logic.ftue(st, 'win');
+      // Cofres (funcional 12 y 9.5): uno tras la primera noche ganada y otro al caer el jefe.
+      if (r.won && !r.cleared && HB.Logic.ftue(st, 'win')) HB.Chests.give(st, 'first');
+      if (r.cleared) HB.Chests.give(st, 'boss');
     },
 
     secondChance: function (st) {
