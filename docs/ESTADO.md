@@ -270,14 +270,35 @@ defiende sin dudar: una persona perderá más. El simulador también dice cuánd
 cada paso del tutorial, cuántas cajas de suministro caen y las Gemas que gana (150: los dos
 cofres).
 
-## Lo siguiente
+## Lo siguiente (propuesta del 16/10/2026, pendiente de que decidas)
 
-1. **Tu prueba** de la 0.6.0 a la 0.9.2 (ver «Qué probar ahora»).
-2. **La prueba con 5 personas** (hito 7): todo listo; la guía está en
-   `docs/PRUEBA_5_PERSONAS.md`. Me mandas las capturas y saco los números.
-3. **El vídeo de 30 s** (hito 7 y test de mercado, funcional 21): lo grabo yo con el juego en
-   un móvil simulado y te lo paso.
-4. Arte con IA: aparcado (te gusta el dibujado con código).
+Te parece que el juego se queda corto de contenido («se aburrirán a los 3 minutos»). El
+simulador te da la razón en el fondo: **la última máquina nueva llega a los 7 minutos**. De ahí
+al jefe (unos 55 min) solo hay mejoras, más drones, muros y torretas. Lo nuevo lo ponen las
+noches (Leaper a los 13 min, Orbital a los 16, Crusher a los 20, jefe a los 55) y **después del
+jefe no hay nada**. El funcional (apartado 21) deja la fase 2 con «el contenido justo» a
+propósito, para probar el bucle antes de invertir meses. La propuesta es adelantar parte de la
+fase 3 **antes** de la prueba con 5 personas:
+
+1. **La región 1, de 15-25 min** (lo que pide el funcional 6.4) y el **mapa del planeta** para
+   viajar a la región 2 al vencer al jefe.
+2. **La región 2, The Mire** (funcional 10.1, 5.4 y 9.1): los bichos sueltan Biomasa →
+   Refinería → Combustible → Generador (energía); bicho nuevo, el Spitter; torretas Flak y
+   Flamer (esta gasta Combustible). Mapa nuevo, de pantano.
+3. **La investigación** (Laboratorio, funcional 10.3): los bichos sueltan Muestras y con ellas
+   se compran mejoras permanentes (pila, velocidad, drones blindados, Arsenal, Radar…). Es el
+   motivo para volver mañana.
+4. **La prueba con 5 personas** (la guía ya está: `docs/PRUEBA_5_PERSONAS.md`).
+5. **La región 3, Red Canyon**: Quitina + Placas → Taller → Blindaje; Tunneler; Mortero.
+6. **Los vídeos, el test de mercado y el camino a Google Play** (marca → identificador →
+   proyecto de Android).
+
+Preguntas pendientes: (a) ¿una cadena nueva por región, como dice el funcional, o más fábrica
+ya en la región 1? (b) ¿la región 1 vuelve a 15-25 min? (c) ¿la prueba con 5 personas,
+después de la región 2 y la investigación? (d) ¿te vale el nombre Sargento Brass?
+
+Mientras tanto, tu prueba de la 0.6.0 a la 0.9.2 sigue valiendo (ver «Qué probar ahora»).
+Arte con IA: aparcado (te gusta el dibujado con código).
 
 ## Pendientes técnicos (no urgentes)
 
