@@ -86,10 +86,28 @@
     setup();
   };
 
-  G.applyLang = function () {
-    const s = G.st.settings;
-    HB.lang = HB.pickLang(s.lang || (navigator.language || 'en'));
+  // ---------- Idioma (el sistema de CORE) ----------
+  // Se guarda en su propia clave, aparte de la partida: borrar el progreso no lo cambia. Orden:
+  // lo que eligió el jugador y, si no, el idioma del móvil; lo que no tengamos, en inglés.
+  const LANG_KEY = 'lmc_hb_lang_v1';
+  function readLang() { try { return localStorage.getItem(LANG_KEY) || ''; } catch (e) { return ''; } }
+  // force: el idioma que se acaba de elegir (por si el móvil no deja guardar nada).
+  G.applyLang = function (force) {
+    let want = force !== undefined ? force : readLang();
+    // Partidas de antes de la 0.9.2: el idioma iba dentro del guardado. Se pasa a su clave.
+    const old = G.st && G.st.settings && G.st.settings.lang;
+    if (!want && old) { want = old; try { localStorage.setItem(LANG_KEY, old); } catch (e) { /* sin almacenamiento */ } }
+    HB.lang = HB.pickLang(want || navigator.language || 'en');
+    try { document.documentElement.lang = HB.lang === 'qa' ? 'en' : HB.lang; } catch (e) { /* sin documento */ }
     if (HB.View.ctx) { HB.View.cache = {}; HB.View.gen++; }
+  };
+  // cod: 'en', 'es'... ; 'qa' enciende el pseudo-idioma; '' lo apaga y vuelve el que había.
+  G.setLang = function (cod) {
+    const s = G.st && G.st.settings;
+    if (cod && cod !== 'qa' && s) s.lang = cod;   // también en la partida, como respaldo
+    const keep = cod || (s && s.lang) || '';
+    try { if (keep) localStorage.setItem(LANG_KEY, keep); else localStorage.removeItem(LANG_KEY); } catch (e) { /* sin almacenamiento */ }
+    G.applyLang(keep);
   };
 
   function setup() {

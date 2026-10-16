@@ -105,10 +105,15 @@
       for (const b of R._bugs) if (!b.dead) left++;
       for (const gr of N.groups) if (!gr.done) left += gr.list.length;
       D.rr(g, x0, y, w, 34, 12); g.fillStyle = 'rgba(60,10,30,0.85)'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#ff5a7a'; g.stroke();
-      V.text(T('night_n', N.n) + ' · ' + T('bugs_left', left), x0 + 14, y + 19, 24, '#ffffff', null, 'left');
       const lp = 1 + vis.lootPulse * 0.15;
       vis.lootPulse = Math.max(0, vis.lootPulse - 0.06);
-      V.text(T('night_loot') + ' ' + HB.money(R.nightLoot), x0 + w - 12, y + 19, 24 * lp, P.cashL, null, 'right');
+      // El botín a la derecha, y la noche a la izquierda en lo que quede: en alemán (+30 %) y en un
+      // móvil estrecho no cabían los dos y se pisaban (lo enseñó el pseudo-idioma).
+      const loot = T('night_loot') + ' ' + HB.money(R.nightLoot);
+      g.font = V.font(24);
+      const lw = g.measureText(loot).width;
+      fitText(T('night_n', N.n) + ' · ' + T('bugs_left', left), x0 + 14, y + 19, 24, '#ffffff', w - lw - 40, 600, null, 'left');
+      V.text(loot, x0 + w - 12, y + 19, 24 * lp, P.cashL, null, 'right');
       vis.hudLoot = { x: x0 + w - 50, y: y + 17 };
       return y + 44;
     }

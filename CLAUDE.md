@@ -63,7 +63,7 @@ Dos reglas que ya costaron disgustos en los otros juegos:
   (`git pull`). Lo que se prueba tiene que poder regenerarse desde `src/`.
 - **Las banderas en la dirección (`?algo=1`) no funcionan dentro de un Artifact**, porque la
   página va en un iframe. Lo que haya que probar va en el menú de ajustes (rueda dentada):
-  "Herramientas de prueba" tiene piloto automático, velocidad ×4, FPS, +$500, "Abrir un cofre
+  "Herramientas de prueba" tiene piloto automático, velocidad ×4, FPS, pseudo-idioma, +$500, "Abrir un cofre
   de prueba", "Lanzar una caja de suministros" y "Simular 1 h fuera" (la pantalla de regreso
   sin esperar). **Solo salen en el móvil del autor**: en uno nuevo (el de quien prueba el
   juego) están escondidas; **cinco toques seguidos en el número de versión** (abajo, en la
@@ -103,7 +103,13 @@ Dónde se toca cada cosa:
 - **Balance y diseño en números** → `src/js/20_data.js`: `CONFIG`, `ITEMS`, `MACHINES`,
   `REGIONS` (con la lista de zonas de cada región) y `FX` (tiempos de la jugosidad). Añadir
   una zona = una fila; `tools/check.js` avisa si pisa algo.
-- **Textos** → `src/js/10_strings.js` (inglés y español, mismas claves).
+- **Textos** (sistema de idiomas de CORE) → el inglés, que es la fuente y el respaldo, en
+  `src/js/10_strings.js`; cada idioma en su archivo, `src/js/11_idioma_XX.js` (hoy el español).
+  Lo que le falte a un idioma sale en inglés. Añadir un idioma = copiar `11_idioma_es.js` y
+  traducir; `tools/check.js` avisa de claves que falten o sobren, de huecos `{0}`/`{1}` perdidos y
+  de textos que pide el código y no existen. El idioma elegido se guarda aparte de la partida
+  (`lmc_hb_lang_v1`). Para ver qué no cabe con idiomas largos (el alemán ocupa un 30 % más):
+  «Herramientas de prueba» → «Pseudo-idioma».
 - **Reglas** → `src/js/40_logic.js` (comandante, máquinas, energía, reparar),
   `42_drones.js` y `43_night.js` (Calor, oleadas, bichos, torretas, informe, jefe). La lógica
   avisa de lo que pasa con eventos (`st.ev`) y no sabe nada del dibujo.

@@ -51,19 +51,45 @@ globalThis.HB = globalThis.HB || {};
   };
   HB.money = function (n) { return '$' + HB.fmt(n); };
 
-  // ---------- Idiomas ----------
-  // Todo texto que ve el jugador sale de HB.STRINGS (10_strings.js). Inglés por defecto.
+  // ---------- Idiomas (el sistema de CORE; ver 10_strings.js) ----------
+  // Todo texto que ve el jugador sale de HB.STRINGS. Lo que le falte al idioma activo sale en
+  // inglés, clave a clave. Aquí no se lee ni se guarda nada: el idioma lo elige 90_main.js.
   HB.lang = 'en';
+
+  // Pseudo-idioma «qa»: el inglés un 30 % más largo (lo que crece el alemán) y entre corchetes.
+  // Lo que salga en pantalla SIN corchetes no pasa por HB.T y se quedaría sin traducir siempre.
+  const PSEUDO_EXTRA = 0.30;
+  function pseudo(s) {
+    if (typeof s !== 'string' || !s) return s;
+    return '[' + s + ' ' + new Array(Math.max(1, Math.round(s.length * PSEUDO_EXTRA)) + 1).join('x') + ']';
+  }
+
   HB.T = function (key, a, b) {
     const S = HB.STRINGS || {};
-    let s = (S[HB.lang] && S[HB.lang][key]) || (S.en && S.en[key]) || key;
-    if (a !== undefined) s = s.replace('{0}', a);
-    if (b !== undefined) s = s.replace('{1}', b);
+    const en = S.en ? S.en[key] : undefined;
+    let s;
+    if (HB.lang === 'qa') s = pseudo(en !== undefined ? en : key);
+    else {
+      const d = S[HB.lang];
+      s = d && typeof d[key] === 'string' ? d[key] : (typeof en === 'string' ? en : key);
+    }
+    // todos los huecos, no solo el primero (una frase puede repetir uno)
+    if (a !== undefined) s = s.split('{0}').join(a);
+    if (b !== undefined) s = s.split('{1}').join(b);
     return s;
   };
+
+  // El idioma que se usará para lo que pida el jugador o el móvil: el código de dos letras si
+  // hay diccionario (o «qa»); si no, inglés.
   HB.pickLang = function (wanted) {
     const S = HB.STRINGS || {};
     const l = String(wanted || 'en').slice(0, 2).toLowerCase();
-    return S[l] ? l : 'en';
+    return S[l] || l === 'qa' ? l : 'en';
+  };
+  // Idiomas de verdad (sin el de pruebas), en el orden del selector: el inglés primero.
+  HB.langs = function () {
+    const out = ['en'];
+    for (const k in HB.STRINGS || {}) if (k !== 'en') out.push(k);
+    return out;
   };
 })(globalThis.HB);

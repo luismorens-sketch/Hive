@@ -2,7 +2,8 @@
 //
 // 1. Marcas de conflicto de git (lo que rompió CORE y Mafia).
 // 2. Errores de sintaxis en src/js y tools.
-// 3. Textos: inglés y español tienen las mismas claves.
+// 3. Textos (sistema de idiomas de CORE): todos los idiomas con las mismas claves y los mismos
+//    huecos {0}/{1}, y todo texto que pide el código existe.
 // 4. Tablas: zonas bien escritas, nada pisando nada en el mapa.
 // 5. Prueba de humo: el robot del simulador juega la región entera sin que nada falle.
 // 6. Guardado: guardar y cargar devuelve la misma partida.
@@ -66,12 +67,31 @@ try { HB = loadLogic(); } catch (e) { bad('la lógica no carga en Node: ' + e.me
 if (HB) {
   console.log('[check] 3. Textos');
   {
+    // El sistema de idiomas de CORE: cada idioma completo, sin claves de más, sin huecos perdidos,
+    // y todo lo que pide el código existe (si no, en pantalla saldría el nombre de la clave).
     const S = HB.STRINGS, langs = Object.keys(S);
     let n = 0;
     for (const a of langs) for (const b of langs) {
-      for (const k in S[a]) if (!(k in S[b])) { bad('falta "' + k + '" en ' + b); n++; }
+      for (const k in S[a]) if (!(k in S[b])) { bad('falta "' + k + '" en ' + b + (a === 'en' ? '' : ' (¿clave mal escrita en ' + a + '?)')); n++; }
     }
-    if (!n) ok(langs.join(' + ') + ' con las mismas ' + Object.keys(S.en).length + ' claves');
+    const holes = function (str) { return (String(str).match(/\{\d\}/g) || []).sort().join(''); };
+    for (const l of langs) for (const k in S[l]) {
+      if (typeof S[l][k] !== 'string' || !S[l][k]) { bad(l + '/' + k + ': texto vacío'); n++; }
+      else if (S.en[k] !== undefined && holes(S[l][k]) !== holes(S.en[k])) { bad(l + '/' + k + ': huecos distintos del inglés (' + holes(S.en[k]) + ' → ' + holes(S[l][k]) + ')'); n++; }
+    }
+    let used = 0;
+    for (const f of fs.readdirSync(path.join(ROOT, 'src', 'js'))) {
+      // sin las líneas de comentario; y solo claves enteras (las que se arman, como 't_' + tipo, no)
+      const txt = fs.readFileSync(path.join(ROOT, 'src', 'js', f), 'utf8').split('\n')
+        .filter(function (l) { return !/^\s*\/\//.test(l); }).join('\n');
+      const re = /(?:HB\.T|[^A-Za-z_.$]T)\('([a-z_0-9]+)'\s*[,)]/g;
+      let m;
+      while ((m = re.exec(txt))) { used++; if (!(m[1] in S.en)) { bad(f + ': pide el texto "' + m[1] + '", que no existe'); n++; } }
+    }
+    HB.lang = 'qa';
+    if (HB.T('max').charAt(0) !== '[') { bad('el pseudo-idioma no marca los textos'); n++; }
+    HB.lang = 'en';
+    if (!n) ok(langs.join(' + ') + ' con las mismas ' + Object.keys(S.en).length + ' claves y los mismos huecos · ' + used + ' textos pedidos en el código, todos existen');
   }
 
   console.log('[check] 4. Tablas y mapa');

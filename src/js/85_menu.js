@@ -36,10 +36,12 @@
     root.querySelector('#menu-title').textContent = T('settings');
     root.querySelector('#menu-ver').textContent = T('build', HB.CONFIG.version + ' · ' + (HB.BUILD || 'dev'));
     rows.textContent = '';
+    // Idioma: cada uno con su nombre en su propio idioma, y la etiqueta en varios idiomas a la
+    // vez, para quien abra esto sin entender el idioma en el que está el juego (como en CORE).
     row(T('language'), T('lang_name'), function () {
-      const langs = Object.keys(HB.STRINGS);
-      s.lang = langs[(langs.indexOf(HB.lang) + 1) % langs.length];
-      G.applyLang();
+      const langs = HB.langs();
+      const i = langs.indexOf(HB.lang);
+      G.setLang(langs[(i < 0 ? 0 : i + 1) % langs.length]);
       render();
     });
     row(T('sound'), onoff(s.sound), function () { s.sound = !s.sound; HB.Audio.enabled = s.sound; render(); });
@@ -67,6 +69,9 @@
       row(T('autopilot'), onoff(G.autopilot), function () { G.autopilot = !G.autopilot; render(); });
       row(T('speed4'), onoff(G.speed > 1), function () { G.speed = G.speed > 1 ? 1 : 4; render(); });
       row(T('show_fps'), onoff(G.showFps), function () { G.showFps = !G.showFps; render(); });
+      // Pseudo-idioma: textos un 30 % más largos y entre corchetes, para ver qué no cabe y qué no
+      // pasa por el sistema de idiomas. Al apagarlo vuelve el idioma del móvil.
+      row(T('pseudo_lang'), onoff(HB.lang === 'qa'), function () { G.setLang(HB.lang === 'qa' ? '' : 'qa'); render(); });
       row(T('ads_log'), String(nAds), function () {}, 'info');
       row(T('add_money'), null, function () {
         R0.credits += 500;

@@ -24,7 +24,26 @@ Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento (lecciones de CORE).
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE).
+
+## Lo nuevo de la 0.9.2: el sistema de idiomas de CORE
+
+El funcional (apartado 20) pide el sistema de idiomas de CORE. Ya está:
+
+- **Un archivo por idioma**: el inglés (la fuente) en `src/js/10_strings.js` y el español en
+  `src/js/11_idioma_es.js`. Para el lanzamiento (portugués, alemán, francés, japonés y
+  coreano) cada idioma será un archivo más.
+- **El idioma elegido se guarda aparte de la partida**: «Borrar progreso» ya no lo cambia. Si
+  nunca has elegido, el del móvil.
+- **La fila del idioma dice «Language · Idioma»** en todos los idiomas, para quien abra los
+  ajustes sin entender el idioma puesto.
+- **Pseudo-idioma** en «Herramientas de prueba»: alarga cada texto un 30 % (lo que crece el
+  alemán) y lo pone entre corchetes. Ya encontró un fallo: en un móvil estrecho, la barra de la
+  noche y el botín se pisaban. Arreglado. Lo que sale sin corchetes es solo dinero, cifras y la
+  «H» de las bases de drones: no hay ningún texto que se quede sin traducir.
+- **`tools/check.js`** comprueba ahora que ninguna traducción se coma un hueco (`{0}`), que no
+  haya claves de más (una errata al copiar) y que todo texto que pide el código exista (si no,
+  en pantalla saldría su nombre interno). Probado rompiéndolo a propósito: lo detecta.
 
 ## Lo nuevo de la 0.9.2: rendimiento, con las lecciones de CORE
 
