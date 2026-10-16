@@ -1,4 +1,4 @@
-# HIVE BREAKER — Funcional v0.3.2
+# HIVE BREAKER — Funcional v0.4
 
 Arcade Idle Tycoon para Android. Aterrizas como comandante en un planeta infestado:
 recoges mineral con tus propias manos, lo fundes, lo vendes a la flota y con cada
@@ -15,6 +15,19 @@ construido tiene que aguantar. Región a región, hasta matar a la Reina.
 ---
 
 ## 0. Cambios
+
+### v0.4 (16/10/2026)
+- **Más materiales y edificios.** Regla para todas las regiones: cada región trae un material
+  nuevo que se combina con los anteriores (5.4). La región 1 suma un segundo metal: **Copper →
+  Bobinadora → Coil**; **Coil + Plate → Taller de celdas → Cell**; la Cell alimenta la nueva
+  **torreta Shock**, que frena a los bichos (5.1, 9.1).
+- **Construir cuesta materiales**: las zonas grandes piden Créditos y materiales (6.2). El
+  **Arsenal** y el **Radar** pasan a ser edificios de la región 1 que se construyen con Coils; la
+  investigación los mejora (9.1, 10.3).
+- **La región 1 dura unos 25 min** (por ahora), con el tutorial ampliado (6.4, 12).
+- **El prototipo crece**: entran la región 2 (The Mire), el mapa del planeta y una primera
+  investigación. **Fuera la prueba con 5 personas**: se probará en la prueba cerrada de Play
+  Console (21, 22).
 
 ### v0.3.2 (16/10/2026)
 - **El nombre del guía, decidido**: el **Sargento Brass** (12, 24.1).
@@ -170,7 +183,7 @@ Velocidad inicial: 4 casillas/s.
 | Depositar | Pisar la zona de entrada de una máquina: salen de la pila los objetos que acepta |
 | Recoger | Pisar la zona de salida de una máquina |
 | Cobrar | Pisar el montón de billetes de la plataforma de exportación |
-| Pagar | Pisar una zona de pago: los Créditos vuelan a ella con velocidad creciente |
+| Pagar | Pisar una zona de pago: los Créditos vuelan a ella con velocidad creciente; si pide materiales, saltan de la pila |
 | Rellenar torreta | Pisar su caja de munición con Munición en la pila |
 | Reparar | Pisar un muro o edificio dañado (gasta Placas de la pila) |
 
@@ -213,8 +226,11 @@ Cada objeto tiene **forma y color propios** (legible para daltónicos).
 | Objeto (UI) | Aspecto | Origen | Uso | Desde |
 |---|---|---|---|---|
 | Ore | Roca gris azulada | Veta (a mano o dron minero) | Fundición | R1 |
-| Plate | Lingote plateado | Fundición (1 Ore) | Munición, exportar, reparar | R1 |
+| Plate | Lingote plateado | Fundición (1 Ore) | Munición, Cells, exportar, reparar, construir | R1 |
 | Ammo | Caja oliva con franja amarilla | Fáb. de munición (2 Plate) | Torretas, exportar | R1 |
+| Copper | Pepita cobriza con vetas verdes | Veta de cobre (a mano o dron minero) | Bobinadora | R1 |
+| Coil | Carrete de hilo cobrizo | Bobinadora (1 Copper) | Cells, construir, exportar | R1 |
+| Cell | Pila cian con un rayo | Taller de celdas (1 Coil + 1 Plate) | Torreta Shock, exportar | R1 |
 | Biomass | Gota verde | Bichos muertos | Refinería | R2 |
 | Fuel | Bidón naranja | Refinería (2 Biomass) | Generadores, Flamer | R2 |
 | Chitin | Esquirla violeta | Bichos élite | Taller de blindaje | R3 |
@@ -245,13 +261,24 @@ Reglas:
 ```
 R1  Veta ─► Ore ─► Fundición ─► Plate ─┬─► Fáb. munición ─► Ammo ─┬─► Torretas
                                        │                          └─► Exportación ($$)
-                                       └─► Exportación ($)
+                                       ├─► Exportación ($) · reparar · construir
+                                       └─► Taller de celdas (+ Coil) ─► Cell ─┬─► Torreta Shock
+                                                                              └─► Exportación ($$)
+    Veta de cobre ─► Copper ─► Bobinadora ─► Coil ─┬─► Taller de celdas
+                                                   └─► Exportación ($) · construir
 R2  Bichos ─► Biomass ─► Refinería ─► Fuel ─► Generador ─► Energía
 R3  Élites ─► Chitin + Plate ─► Taller ─► Armor ─► Muros reforzados / Exportación ($$$)
 ```
 
-**La decisión central:** cada Plate o caja de Ammo puede venderse (crecer) o quedarse
-(defender). En la salida de la Fundición y de la Fáb. de munición hay un
+**Regla de materiales** (decidida 16/10/2026, por ahora): cada región trae **un material
+nuevo** y una o dos máquinas que lo combinan con los anteriores; ninguno se queda inútil al
+cambiar de región. Cada material nuevo repite el bucle «primero a mano, luego un dron»
+(pilar 1). Las recetas concretas de cada región se deciden al llegar a ella; R2 y R3
+también usarán Copper y Coil para construir y en alguna receta.
+
+**La decisión central:** cada Plate, Coil, Cell o caja de Ammo puede venderse (crecer),
+quedarse (defender) o gastarse en construir (6.2). En la salida de la Fundición, la Fáb. de
+munición y el Taller de celdas hay un
 **interruptor de prioridad** para los drones: **DEFENSE / BALANCED / PROFIT**
 (un solo ajuste, tres opciones, como en v0.1).
 
@@ -259,7 +286,8 @@ R3  Élites ─► Chitin + Plate ─► Taller ─► Armor ─► Muros reforz
 - Una nave de la flota aterriza cada 20 s (mejorable) y compra lo que haya.
 - Paga con un **montón de billetes** junto a la plataforma, con tope (Caja fuerte,
   mejorable). Pisar el montón = los billetes vuelan al contador.
-- Precios iniciales R1: Plate $3 · Ammo $10 · Armor $40 (R3).
+- Precios iniciales R1: Plate $3 · Coil $4 · Ammo $10 · Cell $12 · Armor $40 (R3). Los
+  ajusta el simulador.
 - Offline la nave sigue comprando: el montón crece hasta el tope de tiempo offline o hasta
   llenar la caja fuerte, lo que llegue antes (decidido 15/10/2026).
 
@@ -281,6 +309,7 @@ Esquema de R1 (orientativo):
             NORTE  (flanco 2: se abre con la Expansión 1)
    ░░░░░░░░░░░░░░░░ niebla ░░░░░░░░░░░░░░░░░░
    ═════[T]═══════════════════[T]═════════   muros + pads de torreta
+   (cobre) (cobre)  [Bobinadora]  [Taller de celdas]  [Radar*]
       [Solar]        [Fáb. munición]
    (veta) (veta)       [Fundición]    [EXPORT] ◄ nave
         (veta)      [HQ / Torre de mando]
@@ -289,7 +318,8 @@ Esquema de R1 (orientativo):
             SUR  (flanco 1: desde la noche 1)
 ```
 
-`*` = se desbloquea más adelante (investigación).
+`*` = edificio avanzado: se construye con materiales (6.2). El cobre está al norte, cerca
+del flanco que se abre con la Expansión: rinde más, pero está más expuesto.
 
 ### 6.2 Tipos de zona
 
@@ -302,6 +332,12 @@ Esquema de R1 (orientativo):
 | Contratación | Dron minero, Dron de carga | Aparece un dron con su ruta fija |
 | Mejora | Junto a cada máquina, pad o torreta | Sube un nivel (máx. 3): velocidad · capacidad · menos Calor |
 | Nido | Última zona | Abre la noche del jefe |
+
+**Zonas con materiales** (decidido 16/10/2026): las zonas grandes (máquinas avanzadas,
+torretas nuevas, Arsenal, Radar…) piden Créditos **y** materiales, por ejemplo $300 +
+10 Plate. Se pagan igual, quedándose encima: los Créditos vuelan a la zona y los materiales
+saltan de la pila. Lo pagado se guarda. El letrero enseña cuánto falta de cada cosa, y en
+ámbar lo que no llevas encima.
 
 Regla de diseño: **cada 3-4 zonas, una «grande»** (torreta nueva, dron, expansión) que
 cambie algo visible en la base.
@@ -325,7 +361,7 @@ cambie algo visible en la base.
 
 | Región | Duración |
 |---|---|
-| R1 | 15-25 min (se termina en la primera sesión) |
+| R1 | ~25 min, por ahora (decidido 16/10/2026; se termina en la primera sesión) |
 | R2 | 45-75 min |
 | R3 | 2-3 h |
 | R4-R6 | 4-12 h (con offline) |
@@ -335,7 +371,8 @@ cambie algo visible en la base.
 
 ## 7. Automatización: drones
 
-- **Dron minero:** mina una veta y lleva el Ore a la Fundición.
+- **Dron minero:** mina una veta y lleva el mineral a su máquina (Ore → Fundición,
+  Copper → Bobinadora).
 - **Dron de carga:** ruta fija entre dos puntos marcados en su pad
   (p. ej. Fundición → Fáb. munición, o Fáb. munición → Exportación).
 - **Dron artillero** (fase 3): rellena torretas desde el Arsenal.
@@ -351,7 +388,8 @@ cambie algo visible en la base.
 ## 8. Calor, amenaza y energía
 
 ### 8.1 Calor
-- Cada máquina activa suma Calor/s: Fundición 1,0 · Fáb. munición 1,5 · Refinería 2,0 ·
+- Cada máquina activa suma Calor/s: Fundición 1,0 · Bobinadora 1,0 · Fáb. munición 1,5 ·
+  Taller de celdas 1,5 · Refinería 2,0 ·
   Generador de combustión 2,5 · Solar 0. El nivel 3 de una máquina emite −30 %.
 - **Disipador:** −2 Calor/s; consume 3 MW.
 - Tamaño de la barra en la noche *n* de la región *r*: `B(n) = B0(r) × (1 + 0,25·n)`.
@@ -368,7 +406,7 @@ por noche, sino **más noches**.
 ### 8.3 Energía
 - Fuentes: Solar (R1, 5 MW, 0 Calor) · Generador de combustión (R2, 15 MW, consume
   Fuel) · Geotérmica (R4, gratis) · Baterías (R5).
-- Consumidores: máquinas, Disipadores y torretas de energía (Railgun, Tesla).
+- Consumidores: máquinas, Disipadores, Radar y torretas de energía (Railgun, Tesla).
 - Brownout proporcional a todo (5.3). Es el fallo más dramático: una noche con
   brownout duele.
 
@@ -382,6 +420,7 @@ por noche, sino **más noches**.
 |---|---|---|---|---|
 | Gatling | Un objetivo, rápida | 1 Ammo / 25 disparos | Crusher, Leaper | R1 |
 | Cannon | Daño en área | 1 Ammo / 6 disparos | Swarmers en masa | R1 |
+| Shock | Descarga en área que **frena** (−50 % de velocidad durante 2 s), poco daño | 1 Cell / 8 descargas | Masas y Crusher: los sujeta delante de los Cañones | R1 |
 | Flak | Golpea en el aire | Ammo | Leaper saltando | R2 |
 | Flamer | Cono corto, quema | Fuel | Masas, interior de la base | R2 |
 | Mortar | Largo alcance, área | Ammo | Spitter | R3 |
@@ -390,8 +429,11 @@ por noche, sino **más noches**.
 
 - Cada torreta tiene una **caja de munición** (5 cajas) con indicador. Vacía =
   icono «NO AMMO» y deja de disparar.
-- Se rellena con el comandante, con drones artilleros o con el **Arsenal** (rellena
-  en un radio; investigación).
+- Se rellena con el comandante, con drones artilleros o con el **Arsenal**: edificio de R1
+  que se construye con Coils (6.2) y rellena solo las torretas de su radio con la munición
+  que se le lleve. La investigación lo mejora.
+- **Radar** (edificio de R1, se construye con Coils): avisa por qué flanco viene la
+  oleada. La investigación le da más antelación.
 - 3 niveles por pad: daño · cadencia · alcance.
 
 ### 9.2 Muros y rutas
@@ -438,7 +480,7 @@ noche (no la partida).
 
 | # | Región (UI) | Bioma | Novedad de cadena | Bicho nuevo | Regla especial |
 |---|---|---|---|---|---|
-| R1 | Dust Flats | Llanura árida | Ore → Plate → Ammo, Exportación, Solar | Swarmer, Leaper, Crusher | Tutorial, Ore abundante |
+| R1 | Dust Flats | Llanura árida | Ore → Plate → Ammo; Copper → Coil → Cell; Exportación, Solar | Swarmer, Leaper, Crusher | Tutorial, Ore abundante |
 | R2 | The Mire | Pantano | Biomass → Fuel → Generador | Spitter | Mucha Biomass, poco Ore, muchos Leapers |
 | R3 | Red Canyon | Cañón | Chitin + Plate → Armor | Tunneler | Pasillos naturales: defender es fácil, pero salen por dentro |
 | R4 | Cinder Peak | Volcán | Geotérmica gratis | Crusher élite | Calor ×2 |
@@ -467,8 +509,8 @@ Se puede volver a cualquier región conquistada (su base y su cartera se conserv
   - Entre nodo clave y nodo clave, 2-3 nodos de porcentaje, para que el progreso se
     sienta continuo.
   - Una estadística se compra en un solo sitio.
-- Ejemplos: Pila +5 · Velocidad +10 % · Imán +1 casilla · Drones blindados · Arsenal ·
-  Flak · Railgun · Disipador II · Radar (avisa los flancos 10 s antes) · Reparación
+- Ejemplos: Pila +5 · Velocidad +10 % · Imán +1 casilla · Drones blindados · Arsenal II
+  (más radio) · Flak · Railgun · Disipador II · Radar II (avisa 10 s antes) · Reparación
   automática · Tope offline +1 h · Gilded Swarmer ×2 de frecuencia · Provocar noche +25 % ·
   Orbital II (2 cargas).
 
@@ -517,11 +559,14 @@ Lo que más decide la retención del día 1. Cada paso es un evento de analític
 | 3:30 | Aparece la barra de Calor. Noche 1 guionizada: 8 Swarmers por un flanco; **no se puede perder** | La noche existe |
 | 4:30 | Informe: lluvia de botín y **primer vídeo gratis** («THIS ONE'S ON US»: x2 sin anuncio) | Lo que vale un vídeo |
 | 5:00-7:00 | Primer cofre (con 50 Gemas) y primera mejora de máquina. Aparecen los botones de Tienda y Misiones | Gemas y mejoras |
-| 7:00-9:00 | Noche 2: una torreta se queda sin munición a propósito y hay que rellenarla | La fábrica es el arma |
-| 9:00-11:00 | Paneles solares; demasiadas máquinas → brownout guionizado | Energía |
-| 11:00-13:00 | Primer pad con elección (Gatling / Cannon); los Leapers saltan el muro | Elegir defensa |
-| 13:00-15:00 | Se desbloquea el Orbital Strike en la noche 5 | Habilidades |
-| 15:00-20:00 | Nido: Brood Mother. Victoria → «REGION CLEARED» → mapa con R2 iluminada → explicación del offline y petición de permiso de notificaciones | Motivo para volver |
+| 7:00-8:30 | Noche 2: una torreta se queda sin munición a propósito y hay que rellenarla | La fábrica es el arma |
+| 8:30-10:30 | **Vetas de cobre** y **Bobinadora**: Copper → Coil, primero a mano y luego con dron. Primera zona que pide materiales | Un material nuevo, el mismo bucle; construir cuesta materiales |
+| 10:30-12:00 | Paneles solares; demasiadas máquinas → brownout guionizado | Energía |
+| 12:00-14:00 | **Taller de celdas** (Coil + Plate → Cell) y primera **torreta Shock** | Combinar dos materiales; frenar en lugar de matar |
+| 14:00-16:00 | Primer pad con elección (Gatling / Cannon / Shock); los Leapers saltan el muro | Elegir defensa |
+| 16:00-18:00 | Se desbloquea el Orbital Strike en la noche 5 | Habilidades |
+| 18:00-20:00 | **Arsenal** y **Radar** (se construyen con Coils) | Edificios avanzados |
+| 20:00-25:00 | Nido: Brood Mother. Victoria → «REGION CLEARED» → mapa con R2 iluminada → explicación del offline y petición de permiso de notificaciones | Motivo para volver |
 
 Reglas del tutorial:
 - Sin menús durante los primeros 5 minutos. Sin textos largos: mano animada + flecha.
@@ -848,9 +893,10 @@ revivir sin vídeo · niveles del pase · cosméticos · cofres de **contenido f
   brillante. Tipografía Teko.
 - Pipeline: Gemini + extracción. **Ojo:** bichos violeta y rosa → generar sobre
   **fondo verde puro**, no magenta (mismo caso que el neón de MFP).
-- Sprites mínimos del MVP: comandante (4 direcciones, andar y disparar), 3 objetos,
-  billete, 6 edificios, 2 drones, 2 torretas, muro, 3 bichos + jefe, veta, nave,
-  zona de pago, cofre y el retrato del Sargento Brass (3 caras, apartado 12).
+- Sprites mínimos del MVP: comandante (4 direcciones, andar y disparar), 6 objetos de R1
+  (más los de R2), billete, 10 edificios, 2 drones, 3 torretas, muro, 3 bichos + jefe, 2
+  vetas (mineral y cobre), nave, zona de pago, cofre y el retrato del Sargento Brass (3
+  caras, apartado 12). Lo que añada R2, con su bioma.
 
 ---
 
@@ -892,14 +938,20 @@ revivir sin vídeo · niveles del pase · cosméticos · cofres de **contenido f
 **Objetivo:** demostrar que el bucle «cargar → automatizar → defender» es divertido y
 provoca **«una más»**. Contenido, el justo.
 
-**Dentro:**
-- R1 completa: ~25 zonas, 2 flancos, 1 Expansión, Nido.
+**Dentro** (ampliado el 16/10/2026: con sólo la R1 de tres objetos, la fábrica dejaba de
+crecer a los 7 minutos):
+- R1 completa: ~30 zonas, 2 flancos, 1 Expansión, Nido. Unos 25 minutos (6.4).
+- **Mapa del planeta** y **R2 (The Mire)** completa, con su jefe.
+- **Investigación**, primera versión: pocos nodos de las 4 ramas, con Muestras (10.3).
 - Comandante: joystick, pila, minado, auto-disparo, reaparición.
-- Objetos: Ore, Plate, Ammo. Moneda: Créditos (Gemas sólo para probar el cofre).
-- Máquinas: Fundición, Fáb. munición, Exportación, Solar, Disipador + Torre de mando.
+- Objetos: Ore, Plate, Ammo, Copper, Coil, Cell (R1) y Biomass, Fuel (R2). Monedas:
+  Créditos y Muestras (Gemas sólo para probar el cofre).
+- Máquinas: Fundición, Fáb. munición, Bobinadora, Taller de celdas, Exportación, Solar,
+  Disipador, Arsenal, Radar + Torre de mando (R1); Refinería y Generador (R2).
+- Zonas con materiales (6.2).
 - Drones: minero y de carga.
-- Defensa: Gatling, Cannon, muros.
-- Bichos: Swarmer, Leaper, Crusher + Brood Mother.
+- Defensa: Gatling, Cannon, Shock, muros (R1); Flak y Flamer (R2).
+- Bichos: Swarmer, Leaper, Crusher + Brood Mother (R1); Spitter (R2).
 - Calor-reloj con «provocar», energía con brownout, prioridad DEFENSE / BALANCED /
   PROFIT, iconos de cuello de botella.
 - 1 habilidad (Orbital Strike).
@@ -913,18 +965,20 @@ provoca **«una más»**. Contenido, el justo.
 - Arte: formas sencillas + un primer pase de sprites de comandante, pila y billetes
   (la sensación depende de ellos).
 
-**Fuera (después):** R2+, Biomass/Fuel/Chitin, investigación, Outposts, resto de
+**Fuera (después):** R3+, Chitin/Armor, investigación completa, Outposts, resto de
 torretas y bichos, misiones, pase, tienda real, anuncios reales, Firebase, Reina.
 
-**Criterios de éxito (medibles):**
-1. 4 de 5 probadores pagan su primera zona en < 45 s y contratan el primer dron
-   antes de 3 min sin ayuda.
-2. 3 de 5 siguen jugando por su cuenta más de 15 min y terminan R1.
+**Criterios de éxito (medibles).** Sin prueba con 5 personas (decidido 16/10/2026): los
+criterios de jugadores se miden en la **prueba cerrada de Play Console**, con la analítica
+(17); los demás, con el simulador y en un móvil real.
+1. El 80 % de los probadores paga su primera zona en < 45 s y contrata el primer dron
+   antes de 3 min, sin ayuda.
+2. El 60 % sigue jugando por su cuenta más de 15 min y termina R1.
 3. Entienden un cuello de botella («MAX» o «NO INPUT») en < 2 min desde que aparece.
 4. Dos estrategias distintas llegan al jefe; en el simulador ninguna de las tres
    gana más del 60 % de las partidas.
 5. 60 FPS en Galaxy A34 con el presupuesto del apartado 20.
-6. R1 dura entre 15 y 25 min en el simulador y en las pruebas.
+6. R1 dura unos 25 min en el simulador y en la prueba cerrada.
 
 **Hitos:**
 1. Simulador económico + tablas en Node (zonas de R1 y curva de ritmo).
@@ -934,7 +988,13 @@ torretas y bichos, misiones, pase, tienda real, anuncios reales, Firebase, Reina
 4. Drones + torretas + munición + bichos + campo de flujo + noche.
 5. Calor-reloj + energía + brownout + jefe.
 6. Tutorial + guardado/offline + vídeos simulados.
-7. Balance con simulador, prueba con 5 personas y vídeo de 30 s → decisión go/no-go.
+7. R1 con dos metales: Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar y
+   zonas con materiales; R1 de unos 25 min en el simulador.
+8. Mapa del planeta + R2 (The Mire): Biomass → Refinería → Fuel → Generador, Spitter,
+   Flak y Flamer.
+9. Investigación, primera versión.
+10. Balance con simulador, vídeos de 15-30 s y prueba cerrada en Play Console (antes:
+    comprobar la marca y fijar el identificador de la app, 16) → decisión go/no-go.
 
 **Fase 2.5 (decidido: sí) — test de mercado:** 2-3 vídeos de 15-30 s del prototipo en una
 campaña pequeña (Meta o TikTok, ~150-300 €) hacia una ficha de Play en prueba abierta.
@@ -947,7 +1007,7 @@ vídeo no engancha, falla el tema o el gancho, no el código: mejor saberlo ante
 
 | Fase | Contenido | Salida |
 |---|---|---|
-| F3 Producción | R2-R3, Biomass/Fuel/Generador, Chitin/Armor, Spitter y Tunneler, Flak/Flamer/Mortar, investigación (~30 nodos), rango, bestiario, Outposts, misiones, cofre gratis, calendario, notificaciones, AdMob + UMP, facturación, tienda (No Ads, Starter, Gemas, ofertas), Firebase, nube, pase v1 | Build de soft launch |
+| F3 Producción | R3, Chitin/Armor, Tunneler, Mortar, investigación completa (~30 nodos), rango, bestiario, Outposts, misiones, cofre gratis, calendario, notificaciones, AdMob + UMP, facturación, tienda (No Ads, Starter, Gemas, ofertas), Firebase, nube, pase v1 | Build de soft launch |
 | F4 Soft launch | 2 países de prueba durante 4-6 semanas; ajuste remoto de tutorial y economía | Go/no-go con los KPIs de abajo |
 | F5 Global + LiveOps | R4-R12, Reina, prestigio, eventos, temporadas, más idiomas; VIP si los KPIs lo justifican (15.9) | Lanzamiento mundial |
 
@@ -971,8 +1031,9 @@ invertir en captación.
 
 ## 23. Riesgos conocidos
 
-1. **Complejidad que aleja al móvil.** Mitigación: R1 sólo tiene 3 objetos; cada
-   sistema entra guionizado (12); máximo 4 cosas parpadeando.
+1. **Complejidad que aleja al móvil.** Mitigación: R1 empieza con 3 objetos y suma los
+   otros 3 de uno en uno (12); cada sistema entra guionizado y lo presenta el Sargento
+   Brass; máximo 4 cosas parpadeando.
 2. **Dos juegos pegados** (tycoon + defensa). Los puentes son Calor, munición y botín:
    si alguno falta, la tesis se rompe.
 3. **Idle puro.** Si el jugador sólo espera, no es arcade. Medir el % de noches ganadas
@@ -1005,7 +1066,7 @@ invertir en captación.
 | 4 | Logros y Gemas | Los logros **no dan Gemas** (regla de Hyper Drill) | 5.2 |
 | 5 | Tope offline | **2 h** base → 6 h con investigación | 14.4 |
 | 6 | Suscripción VIP | **Aplazada** hasta después del soft launch, si la retención lo justifica | 15.9 |
-| 7 | Test de mercado | **Sí**, tras el hito 7 del prototipo | 21 |
+| 7 | Test de mercado | **Sí**, al terminar el prototipo (hito 10) | 21 |
 | 8 | Idiomas | Sistema de idiomas de CORE desde el inicio; **inglés + español** en el MVP; portugués (Brasil), alemán, francés, japonés y coreano para el lanzamiento | 20, 21 |
 | 9 | Repositorio | `Hive` (GitHub) | 20 |
 | 10 | Comandante | **Fijo con skins** | 4 |
@@ -1013,6 +1074,10 @@ invertir en captación.
 | 12 | Guía con personaje | **Sargento Brass** en el tutorial y los momentos fuertes (15/10/2026; el nombre, el 16/10/2026) | 12, 19 |
 | 13 | Arranque | Las **5 primeras zonas, más baratas** (15/10/2026) | 6.3, 21 |
 | 14 | Suministro aéreo | **Prudente**: cada 4-5 min, solo de día, desde la primera noche ganada, 60 s en el suelo (15/10/2026) | 15.3 |
+| 15 | Más materiales | **Un material nuevo por región** que se combina con los anteriores (por ahora; las recetas, región a región). R1 con Copper → Coil → Cell y la torreta Shock (16/10/2026) | 5, 9.1 |
+| 16 | Construir | Las zonas grandes piden **Créditos y materiales**; Arsenal y Radar, edificios de R1 (16/10/2026) | 6.2, 9.1 |
+| 17 | Duración de R1 | **~25 min**, por ahora (16/10/2026) | 6.4 |
+| 18 | Pruebas | **Sin prueba con 5 personas**: se prueba en la prueba cerrada de Play Console. El prototipo suma R2 e investigación (16/10/2026) | 21 |
 
 ### 24.2 Abiertas
 Ninguna por ahora. Las próximas saldrán del simulador (hito 1) y de la primera prueba
@@ -1039,6 +1104,7 @@ en el móvil (hito 2).
 | Hitstop | Pausa de milisegundos en un golpe para que se sienta |
 | Pool | Reserva de objetos reutilizables para no crear y destruir en cada frame |
 | UMP / CMP | Ventana de consentimiento de privacidad para anuncios, exigida en la UE |
+| Prueba cerrada | Prueba de Google Play con un grupo de probadores invitados, antes de publicar el juego para todos |
 
 ---
 

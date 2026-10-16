@@ -8,8 +8,10 @@
 
 ## Dónde estamos
 
-Fase 2 del funcional (prototipo jugable): **hito 6 terminado** (0.9.0). Toca el hito 7: la
-prueba con 5 personas y el vídeo de 30 s. Pendientes de tu prueba: el tutorial (0.6.0), el
+Fase 2 del funcional (prototipo jugable), **ampliada el 16/10/2026** (funcional v0.4): más
+materiales y edificios, la región 2 y una primera investigación; sin prueba con 5 personas
+(se probará en la prueba cerrada de Play Console). **Hito 6 terminado** (0.9.0). **Toca el
+hito 7: la región 1 con dos metales.** Pendientes de tu prueba: el tutorial (0.6.0), el
 Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro aéreo (0.9.0).
 
 | Hito (funcional 21) | Estado |
@@ -20,7 +22,10 @@ Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro
 | 4. Drones, torretas, munición, bichos, campo de flujo, noche | Hecho y probado (0.3.0) |
 | 5. Calor-reloj, energía, brownout, jefe | Hecho y probado (0.3.0) |
 | 6. Tutorial, guardado/offline, vídeos simulados | **Hecho**: guardado, mientras no juegas (0.5.0), tutorial (0.6.0) con el Sargento Brass (0.7.0), cofre (0.8.0) y los 4 vídeos simulados (0.9.0) |
-| 7. Balance, prueba con 5 personas, vídeo de 30 s | Primer pase de ritmo y dificultad hecho (0.4.0) |
+| 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **Lo siguiente** |
+| 8. Mapa del planeta + región 2 (The Mire) | Pendiente |
+| 9. Investigación, primera versión | Pendiente |
+| 10. Balance, vídeos y prueba cerrada en Play Console → seguir o no | Pendiente. Primer pase de ritmo y dificultad hecho (0.4.0) |
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
@@ -184,10 +189,17 @@ Preguntas para ti:
 
 ## Decidido por el autor
 
-- **Duración de la región 1** (15/10/2026): el apartado 6.3 del funcional suma unos 50 min y
-  el 6.4 pide 15-25. Se sigue la 6.3 (el robot tarda 55-70 min) **y se queda así por ahora**;
-  se recalibra cuando entren más elementos, y entonces se ajusta también la 6.4. Que el código
-  no cumpla la 6.4 **no es un error**.
+- **Más materiales y edificios** (16/10/2026, funcional v0.4):
+  - Regla para todas las regiones, **por ahora**: cada región trae un material nuevo que se
+    combina con los anteriores; las recetas, región a región.
+  - **Región 1 con dos metales**: Copper → Bobinadora → Coil; Coil + Plate → Taller de celdas
+    → Cell; la Cell alimenta la **torreta Shock**, que frena a los bichos.
+  - **Construir cuesta materiales**: las zonas grandes piden dinero y materiales.
+- **Duración de la región 1** (16/10/2026): **unos 25 min, por ahora**. Sustituye a lo del
+  15/10 (dejarla en 55 min «hasta que entren más elementos»): ahora entran. Hasta que se
+  programe el hito 7, el código sigue en 55 min.
+- **Sin prueba con 5 personas** (16/10/2026): se probará en la prueba cerrada de Play Console.
+  El prototipo suma la región 2 y una primera investigación antes de esa prueba.
 - **El ritmo y la dificultad de la 0.4.0** (15/10/2026): «por ahora está bien».
 - **El nombre del sargento** (16/10/2026): **Brass**. Ya está en el funcional.
 - **Guía con personaje** (15/10/2026): un sargento con el mismo casco que el comandante y
@@ -211,6 +223,19 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
   0,4 s encima; guardado automático.
 - **Precios**: P(n) = 50 × 1,15^n (las 5 primeras, con descuento). El funcional pide subir un
   18-25 % por zona; con más del 15 % el final de la región se hace eterno.
+- **Detalles de la v0.4 del funcional** (los concreté yo al escribirla; dime si cambias algo):
+  - Nombres: Bobinadora, Taller de celdas y torreta Shock (en inglés: Copper, Coil, Cell,
+    Shock).
+  - Precios de venta: Coil $4 y Cell $12 (Plate $3, Ammo $10). Calor: Bobinadora 1,0/s,
+    Taller de celdas 1,5/s.
+  - La Shock frena un 50 % durante 2 s, hace poco daño y gasta 1 Cell cada 8 descargas.
+  - El **Arsenal** y el **Radar** pasan de la investigación a ser edificios de la región 1
+    (se construyen con Coils); la investigación los mejora (Arsenal II, Radar II).
+  - El cobre está al norte, junto al flanco que abre la Expansión: más expuesto.
+  - El tutorial (funcional 12) se alarga a 25 min: cobre a los 8:30, Shock a los 12:00,
+    Arsenal y Radar a los 18:00, jefe a los 20-25.
+  - Los criterios de éxito «4 de 5» y «3 de 5» pasan a 80 % y 60 % de los probadores de la
+    prueba cerrada, medidos con la analítica.
 - **Reciclador** (0.9.1): debajo de la Torre de mando; vacía la pila entera (lo tirado se
   pierde, no da nada). La flecha solo lo señala cuando no hay otra salida.
 - **Suministro aéreo**: el premio es «90 s de producción» = lo que ha vendido la base en los
@@ -264,60 +289,25 @@ defiende sin dudar: una persona perderá más. El simulador también dice cuánd
 cada paso del tutorial, cuántas cajas de suministro caen y las Gemas que gana (150: los dos
 cofres).
 
-## Lo siguiente (propuesta del 16/10/2026, pendiente de que decidas)
+## Lo siguiente
 
-Te parece que el juego se queda corto de contenido («se aburrirán a los 3 minutos»). El
-simulador te da la razón en el fondo: **la última máquina nueva llega a los 7 minutos**. De ahí
-al jefe (unos 55 min) solo hay mejoras, más drones, muros y torretas. Lo nuevo lo ponen las
-noches (Leaper a los 13 min, Orbital a los 16, Crusher a los 20, jefe a los 55) y **después del
-jefe no hay nada**. El funcional (apartado 21) deja la fase 2 con «el contenido justo» a
-propósito, para probar el bucle antes de invertir meses. La propuesta es adelantar parte de la
-fase 3 **antes** de la prueba con 5 personas:
-
-1. **La región 1, de 15-25 min** (lo que pide el funcional 6.4) y el **mapa del planeta** para
-   viajar a la región 2 al vencer al jefe.
-2. **La región 2, The Mire** (funcional 10.1, 5.4 y 9.1): los bichos sueltan Biomasa →
-   Refinería → Combustible → Generador (energía); bicho nuevo, el Spitter; torretas Flak y
-   Flamer (esta gasta Combustible). Mapa nuevo, de pantano.
-3. **La investigación** (Laboratorio, funcional 10.3): los bichos sueltan Muestras y con ellas
-   se compran mejoras permanentes (pila, velocidad, drones blindados, Arsenal, Radar…). Es el
-   motivo para volver mañana.
-4. **La prueba con 5 personas** (la guía ya está: `docs/PRUEBA_5_PERSONAS.md`).
-5. **La región 3, Red Canyon**: Quitina + Placas → Taller → Blindaje; Tunneler; Mortero.
-6. **Los vídeos, el test de mercado y el camino a Google Play** (marca → identificador →
-   proyecto de Android).
-
-Preguntas pendientes: (a) ¿una cadena nueva por región, como dice el funcional, o más fábrica
-ya en la región 1? (b) ¿la región 1 vuelve a 15-25 min? (c) ¿la prueba con 5 personas,
-después de la región 2 y la investigación?
-
-### Propuesta: más materiales y edificios (16/10/2026, pendiente de que decidas)
-
-Lo pediste tú: más minerales y edificios, en el funcional y en todas las regiones; por ejemplo
-un segundo metal que, combinado con otra cosa, dé torretas nuevas y sirva para construir.
-Propuesta (no está en el funcional hasta que la apruebes):
-
-- **Regla para todas las regiones**: cada región trae un material nuevo y una o dos máquinas
-  que lo combinan con los anteriores; nada se queda inútil. Cada material nuevo repite el
-  bucle «primero a mano, luego un dron» (pilar 1).
-- **Construir cuesta materiales**: las zonas grandes piden dinero **y** materiales (por ejemplo
-  $300 + 10 Placas); se pagan igual, quedándote encima. Nueva decisión: vender, defender o
-  construir.
-- **Región 1 con dos metales**: a los ~8 min, la Expansión norte descubre **vetas de Cobre**.
-  **Bobinadora**: Cobre → **Bobinas**. **Taller de celdas**: Bobina + Placa → **Celda de
-  energía** (la primera receta con dos ingredientes). **Torreta de choque**: gasta Celdas y
-  frena a los bichos cercanos (distinta de todas: no mata, sujeta, y combina con el Cañón).
-  Edificios que piden Bobinas para construirse: Arsenal (rellena las torretas de alrededor) y
-  Radar (avisa por dónde vienen). Bobinas y Celdas también se venden, y caras.
-- **Regiones 2 y 3**: como el funcional (Biomasa → Combustible; Quitina + Placa → Blindaje),
-  pero usando también Cobre y Bobinas para construir y en alguna receta. Las recetas
-  concretas, región a región.
-- El cobre es un metal real y sale en cientos de juegos (Minecraft, Terraria, Satisfactory):
-  no es de Factorio. Copiar sería usar sus recetas (hierro + cable de cobre → circuito), sus
-  cintas o sus brazos; la propuesta no usa nada de eso.
+1. **Hito 7: la región 1 con dos metales** (funcional v0.4: 5.1, 5.4, 6.2, 9.1 y 12). En 2-3
+   versiones que irás probando: primero el cobre, la Bobinadora y las zonas con materiales;
+   luego el Taller de celdas y la torreta Shock; al final el Arsenal, el Radar y el ritmo de
+   unos 25 min con el simulador.
+2. **Hito 8**: el mapa del planeta y la región 2 (The Mire).
+3. **Hito 9**: la investigación, primera versión.
+4. **Hito 10**: balance, vídeos y prueba cerrada en Play Console (antes: comprobar la marca y
+   fijar el identificador de la app).
 
 Mientras tanto, tu prueba de la 0.6.0 a la 0.9.2 sigue valiendo (ver «Qué probar ahora»).
 Arte con IA: aparcado (te gusta el dibujado con código).
+
+Preguntas pendientes:
+- El **test de mercado** con anuncios (funcional 21, fase 2.5: 150-300 € en Meta o TikTok)
+  sigue en el funcional, ahora tras el hito 10. ¿Se queda o lo quitamos también?
+- `docs/PRUEBA_5_PERSONAS.md` ya no hace falta. ¿Lo borro, o lo guardo para preparar la
+  prueba cerrada?
 
 ## Pendientes técnicos (no urgentes)
 

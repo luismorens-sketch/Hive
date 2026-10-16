@@ -183,10 +183,10 @@ como fuente** y **buscar marcas antes de comprometer**.
 | Carpeta / archivo | Qué es |
 |---|---|
 | `CLAUDE.md` | Este archivo: cómo se trabaja aquí |
-| `docs/HIVE_Funcional.md` | El funcional (v0.3.2). **Fuente única de verdad** del diseño. La versión va dentro del documento; git guarda las anteriores |
+| `docs/HIVE_Funcional.md` | El funcional (v0.4). **Fuente única de verdad** del diseño. La versión va dentro del documento; git guarda las anteriores |
 | `docs/ESTADO.md` | Dónde estamos: hito, qué probar, opiniones del autor, decisiones provisionales, lo siguiente |
 | `docs/ARTE_PROMPTS.md` | Los prompts exactos para generar el arte con IA, y qué hacer con cada imagen que llegue |
-| `docs/PRUEBA_5_PERSONAS.md` | Cómo hacer la prueba con 5 personas del hito 7: qué mirar, qué capturas pedir y la tabla de resultados |
+| `docs/PRUEBA_5_PERSONAS.md` | Guía de la prueba con 5 personas. **Ya no está en el plan** (funcional v0.4: se prueba en la prueba cerrada de Play Console); pendiente de si se borra o sirve para preparar esa prueba |
 | `arte/originales/` | Las imágenes tal como salen de la IA (se suben: son la fuente del arte) |
 | `assets/sprites/` | Las imágenes ya recortadas que usa el juego (las genera `tools/recortar.py`; se suben) |
 | `src/js/` | El código del juego (ver "Cómo está hecho el código") |
