@@ -154,7 +154,7 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.9.1)
+## Qué probar ahora (versión 0.9.2)
 
 **Para ver el tutorial hay que empezar de cero**: rueda dentada → «Borrar progreso» y otra vez
 para confirmar (se pierde la partida de prueba, nada más).
@@ -173,7 +173,8 @@ para confirmar (se pierde la partida de prueba, nada más).
 - Que los avisos de abajo se lean y no estorben (salen uno detrás de otro).
 - La noche 2: que veas la torreta casi vacía y sepas qué hacer.
 - Al final, la tarjeta «TU BASE NUNCA DUERME».
-- El registro de pasos en «Herramientas de prueba».
+- El registro de pasos, ahora en «Tu partida» (rueda dentada), a la vista de cualquiera.
+- El idioma (0.9.2): cámbialo, borra el progreso y comprueba que no se pierde.
 - Lo de la 0.5.0 sigue ahí: «Simular 1 h fuera».
 
 Preguntas para ti:
@@ -271,7 +272,7 @@ cofres).
 
 ## Lo siguiente
 
-1. **Tu prueba** de la 0.6.0 a la 0.9.0 (ver «Qué probar ahora»).
+1. **Tu prueba** de la 0.6.0 a la 0.9.2 (ver «Qué probar ahora»).
 2. **La prueba con 5 personas** (hito 7): todo listo; la guía está en
    `docs/PRUEBA_5_PERSONAS.md`. Me mandas las capturas y saco los números.
 3. **El vídeo de 30 s** (hito 7 y test de mercado, funcional 21): lo grabo yo con el juego en
@@ -296,5 +297,3 @@ cofres).
   permiso de notificaciones: necesitan la app de Android.
 - **El funcional no está marcado** con PENDIENTE/ACTUAL: lo hago cuando validemos el balance.
 - **El sonido** está sintetizado y no lo he podido oír: dime si algo suena mal o molesta.
-- **El robot se atasca a veces con la pila llena de mineral** cuando las Fundiciones están
-  llenas (no hay forma de tirar cosas de la pila). Si te pasa a ti, pensamos una papelera.
