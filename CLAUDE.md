@@ -81,6 +81,7 @@ para recortar arte).
 | `node tools/check.js` | Comprueba todo antes de comprometer: marcas de conflicto, sintaxis, textos en los dos idiomas, tablas y mapa (que nada se pise), una partida del robot, el guardado, lo producido mientras no juegas y el montaje |
 | `node tools/build.js` | Monta el juego en un solo HTML: `dist/hive_breaker.html` (doble clic para jugar en el ordenador) y `dist/hive_breaker_artifact.html` (para publicar) |
 | `node tools/sim_balance.js` | Simulador de balance: el robot juega la región y dice cuánto tarda en cada zona frente a los tiempos del funcional 6.3. `--k 1.2 --p0 15` prueba otra curva de precios y `--temprano 0.5,0.6` otro descuento de las primeras zonas, sin tocar las tablas; `--minutos 90` da más tiempo |
+| `node tools/bench.js` | Banco de rendimiento del dibujo: mide cuánto tarda un fotograma de día y en una noche dura, en un móvil simulado (412 × 915). Las cifras solo valen para comparar dos versiones en el mismo banco, alternándolas dos veces (`--archivo` mide otra copia montada). Necesita Playwright: en la nube ya está; en el ordenador, `NODE_PATH=C:/GitHub/Mafia/node_modules` |
 | `node tools/capture.js` | Solo en la nube: abre el juego en un móvil simulado, lo juega en piloto automático y guarda capturas en `capturas/`. Sirve para que Claude vea lo que dibuja antes de publicar |
 | `node tools/sim_balance.js --partidas 6 --estrategia profit` | Varias partidas seguidas con otra estrategia (`balanced`, `profit`, `defense`); `--anuncios` hace que el robot vea los vídeos |
 | `python3 tools/recortar.py` | Arte con IA: quita el fondo de `arte/originales/` y deja los sprites en `assets/sprites/` (necesita Python con Pillow; en la nube ya está) |
@@ -184,7 +185,7 @@ como fuente** y **buscar marcas antes de comprometer**.
 | `assets/sprites/` | Las imágenes ya recortadas que usa el juego (las genera `tools/recortar.py`; se suben) |
 | `src/js/` | El código del juego (ver "Cómo está hecho el código") |
 | `src/style.css`, `src/body.html` | La página que envuelve el canvas y la ventana de ajustes |
-| `tools/` | `build.js`, `check.js`, `sim_balance.js`, `capture.js`, `recortar.py` y `load_logic.js` (carga la lógica en Node) |
+| `tools/` | `build.js`, `check.js`, `sim_balance.js`, `bench.js` (rendimiento), `capture.js`, `recortar.py` y `load_logic.js` (carga la lógica en Node) |
 | `package.json` | Solo atajos (`npm run build`, `check`, `sim`); no hay dependencias |
 | `dist/`, `capturas/` | Se generan; **no se suben** |
 | `.claude/` | Los ganchos: trae lo último de GitHub al arrancar y recuerda subir al terminar |

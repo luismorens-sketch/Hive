@@ -130,9 +130,16 @@
     if (real > 0.25) real = 0.25;
     if (real > 0) G.fps = G.fps * 0.95 + Math.min(120, 1 / real) * 0.05;
 
-    // Modo ahorro automático: menos de 50 FPS durante 3 s (funcional 13.3).
-    if (G.fps < HB.FX.lowFpsLimit) { G.lowT += real; if (G.lowT >= HB.FX.lowFpsTime) HB.autoLow = true; }
-    else G.lowT = Math.max(0, G.lowT - real);
+    // Modo ahorro automático: menos de 50 FPS durante 3 s (funcional 13.3). Y se quita solo si el
+    // móvil se recupera (lección 18 de CORE: una calidad que solo sabe bajar se queda abajo hasta
+    // cerrar la app, aunque el bajón fuera de un momento, como al volver de otra app).
+    if (!HB.autoLow) {
+      if (G.fps < HB.FX.lowFpsLimit) { G.lowT += real; if (G.lowT >= HB.FX.lowFpsTime) { HB.autoLow = true; G.okT = 0; } }
+      else G.lowT = Math.max(0, G.lowT - real);
+    } else if (G.fps >= HB.FX.lowFpsBack) {
+      G.okT = (G.okT || 0) + real;
+      if (G.okT >= HB.FX.lowFpsBackTime) { HB.autoLow = false; G.lowT = 0; }
+    } else G.okT = 0;
 
     const dt = 1 / HB.CONFIG.tickHz;
     let vdt = 0;
@@ -188,7 +195,12 @@
     G.checkAway();
 
     window.addEventListener('resize', function () { HB.View.resize(); });
-    document.addEventListener('visibilitychange', function () { if (document.hidden) G.save(); else G.checkAway(); });
+    document.addEventListener('visibilitychange', function () {
+      // El sonido se para fuera del juego (lección 20 de CORE: en el WebView de Android sigue
+      // sonando en segundo plano). Al volver se reanuda; si el móvil no deja, en el primer toque.
+      HB.Audio.sleep(document.hidden);
+      if (document.hidden) G.save(); else G.checkAway();
+    });
     window.addEventListener('pagehide', function () { G.save(); });
 
     // La tipografía Teko llega por internet: al cargar, se rehacen los dibujos con texto.

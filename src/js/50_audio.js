@@ -151,6 +151,12 @@
       } catch (e) { ac = null; }
     },
 
+    // Fuera del juego (pestaña o app en segundo plano) el sonido se duerme; al volver, se despierta.
+    sleep: function (hidden) {
+      if (!ac) return;
+      try { if (hidden) ac.suspend(); else if (HB.userActed) ac.resume(); } catch (e) { /* si no se puede, ya se hará en el próximo toque */ }
+    },
+
     // name: clave de SFX. o: { vol, step, p, delay }.
     play: function (name, o) {
       if (!this.enabled || !ac || ac.state !== 'running') return;

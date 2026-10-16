@@ -71,9 +71,13 @@
   HB.glowSprite = glowSprite;
 
   // ---------- Suelo (se dibuja una vez por tamaño de pantalla) ----------
+  // Se hornea a los mismos píxeles por casilla que la pantalla (V.S), para copiarlo tal cual en
+  // cada fotograma sin reescalar (lección 07 de CORE: reescalar el suelo entero costaba casi la
+  // mitad del fotograma). Tope de 100 px por casilla para no gastar memoria en un ordenador.
+  const GROUND_MAX = 100;
   function buildGround(R) {
     const d = HB.REGIONS[R.id];
-    const gs = Math.min(V.S, 64);
+    const gs = Math.min(V.S, GROUND_MAX);
     const c = document.createElement('canvas');
     c.width = Math.ceil(d.w * gs); c.height = Math.ceil(d.h * gs);
     const g = c.getContext('2d');
@@ -225,10 +229,34 @@
   // ---------- Suelo, niebla y lo que está pegado al suelo ----------
   function drawGround(R) {
     const g = V.ctx, d = HB.REGIONS[R.id];
+    if (vis.groundGen !== V.gen) buildGround(R);
+    const gs = vis.groundS;
+    if (gs === V.S) {
+      // Copia 1:1 en píxeles enteros de la pantalla: sin reescalar ni mezclar.
+      const c = V.cam, S = V.S, dp = V.dpr, G = vis.ground;
+      const ox = Math.round(dp * (V.gx + V.gw / 2 + c.ox) - c.x * S), oy = Math.round(dp * (V.gh / 2 + c.oy) - c.y * S);
+      const cx0 = Math.round(V.gx * dp), cx1 = Math.round((V.gx + V.gw) * dp), ch = V.cv.height;
+      const sx = Math.max(0, cx0 - ox), sy = Math.max(0, -oy);
+      const sx1 = Math.min(G.width, cx1 - ox), sy1 = Math.min(G.height, ch - oy);
+      g.save();
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      if (sx1 > sx && sy1 > sy) {
+        g.drawImage(G, sx, sy, sx1 - sx, sy1 - sy, sx + ox, sy + oy, sx1 - sx, sy1 - sy);
+        // fuera del mapa (el borde de abajo, o un temblor de cámara): tierra oscura, solo esa franja
+        g.fillStyle = '#3a2f22';
+        const dx0 = sx + ox, dy0 = sy + oy, dx1 = sx1 + ox, dy1 = sy1 + oy;
+        if (dy0 > 0) g.fillRect(cx0, 0, cx1 - cx0, dy0);
+        if (dy1 < ch) g.fillRect(cx0, dy1, cx1 - cx0, ch - dy1);
+        if (dx0 > cx0) g.fillRect(cx0, dy0, dx0 - cx0, dy1 - dy0);
+        if (dx1 < cx1) g.fillRect(dx1, dy0, cx1 - dx1, dy1 - dy0);
+      } else { g.fillStyle = '#3a2f22'; g.fillRect(cx0, 0, cx1 - cx0, ch); }
+      g.restore();
+      return;
+    }
+    // Pantallas enormes (más de GROUND_MAX px por casilla): se reescala, como antes.
     g.fillStyle = '#3a2f22';
     g.fillRect(-6, -6, d.w + 12, d.h + 12);
-    if (vis.groundGen !== V.gen) buildGround(R);
-    const gs = vis.groundS, vw = V.viewW(), vh = V.viewH();
+    const vw = V.viewW(), vh = V.viewH();
     const x0 = Math.max(0, V.cam.x - vw / 2 - 1), y0 = Math.max(0, V.cam.y - vh / 2 - 1);
     const x1 = Math.min(d.w, V.cam.x + vw / 2 + 1), y1 = Math.min(d.h, V.cam.y + vh / 2 + 1);
     if (x1 <= x0 || y1 <= y0) return;
@@ -822,7 +850,7 @@
     if (night) { g.fillStyle = 'rgba(10,20,60,0.3)'; g.fillRect(V.gx, 0, ww, hh); }
     const pulse = 0.5 + Math.sin(vis.clock * (warn ? 6 : 3)) * 0.5;
     g.globalAlpha = (warn ? 0.35 : 0.22) + pulse * (warn ? 0.4 : 0.18);
-    g.drawImage(A.vignette(ww, hh), V.gx, 0, ww, hh);
+    V.stamp(A.vignette(ww, hh), V.gx, 0);
     g.globalAlpha = 1;
   }
 
@@ -984,8 +1012,12 @@
       updateCamera(st, x, y, dt);
 
       V.screen();
-      g.fillStyle = '#121519';
-      g.fillRect(0, 0, V.cssW, V.cssH);
+      // Fondo solo en las bandas de los lados (si las hay): la columna la tapa entera el suelo.
+      if (V.gx > 0) {
+        g.fillStyle = '#121519';
+        g.fillRect(0, 0, V.gx, V.cssH);
+        g.fillRect(V.gx + V.gw, 0, V.cssW - V.gx - V.gw, V.cssH);
+      }
 
       // En pantallas más anchas que el juego (ordenador, móvil en horizontal) el mundo se recorta
       // a la columna: si no, se veía lo de fuera del mapa moverse con la cámara. En un móvil en
@@ -1067,7 +1099,7 @@
       }
       if (vis.hurt > 0) {
         g.globalAlpha = vis.hurt * 0.5;
-        g.drawImage(A.vignette(V.gw, V.gh), V.gx, 0, V.gw, V.gh); g.globalAlpha = 1;
+        V.stamp(A.vignette(V.gw, V.gh), V.gx, 0); g.globalAlpha = 1;
       }
     },
   };

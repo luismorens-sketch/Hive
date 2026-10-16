@@ -35,16 +35,19 @@
     I.x = dx / len * s; I.y = dy / len * s;
   }
 
-  function pos(ev, cv) {
-    const r = cv.getBoundingClientRect();
-    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  // La posición del lienzo se lee al apoyar el dedo, no en cada movimiento (lección 02 de CORE:
+  // leer del DOM a 60-120 veces por segundo obliga al navegador a recalcular la página).
+  let rect = null;
+  function pos(ev, cv, fresh) {
+    if (fresh || !rect) rect = cv.getBoundingClientRect();
+    return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
   }
 
   I.attach = function (cv) {
     cv.addEventListener('pointerdown', function (ev) {
       HB.userActed = true;
       HB.Audio.unlock();
-      const p = pos(ev, cv);
+      const p = pos(ev, cv, true);
       ev.preventDefault();
       if (I.down) return;   // un solo dedo manda
       const G = HB.Game;

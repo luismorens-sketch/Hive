@@ -6,6 +6,7 @@
 
   const V = HB.View, P = HB.PAL, A = HB.Art, Fx = HB.Fx, Au = HB.Audio, vis = HB.Vis, FX = HB.FX;
   const tmp = {};
+  const dmgWin = { t: -9, n: 0 };   // números de daño del último segundo
   let lastPayBill = -1;
   let clingCount = 0;
 
@@ -318,7 +319,13 @@
 
     bugHit: function (st, e) {
       const b = e.a, dmg = e.b;
-      if (dmg >= 8 && V.onScreen(b.x, b.y, 0)) Fx.text({ s: String(Math.round(dmg)), x: b.x + (Math.random() - 0.5) * 0.4, y: b.y - 0.6, col: dmg >= 25 ? P.yellow : '#ffffff', size: dmg >= 25 ? V.tile * 0.6 : V.tile * 0.42, dur: 0.55, rise: 0.8 });
+      // Números de daño: solo los golpes fuertes y con tope por segundo (lecciones 10 y 11 de
+      // CORE: con muchas torretas salían decenas que nadie leía).
+      if (vis.clock - dmgWin.t > 1) { dmgWin.t = vis.clock; dmgWin.n = 0; }
+      if (dmg >= 8 && dmgWin.n < FX.dmgTextsPerSec && V.onScreen(b.x, b.y, 0)) {
+        dmgWin.n++;
+        Fx.text({ s: String(Math.round(dmg)), x: b.x + (Math.random() - 0.5) * 0.4, y: b.y - 0.6, col: dmg >= 25 ? P.yellow : '#ffffff', size: dmg >= 25 ? V.tile * 0.6 : V.tile * 0.42, dur: 0.55, rise: 0.8 });
+      }
       Au.play('thwip', { vol: volAt(st, b.x, b.y) * 0.6 });
     },
 

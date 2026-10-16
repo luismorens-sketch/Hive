@@ -9,7 +9,7 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.9.1',      // sube con cada versión que se publica para probar
+    version: '0.9.2',      // sube con cada versión que se publica para probar
     hito: 6,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
@@ -276,7 +276,9 @@
     hitstop: 0.12,          // pausa de los golpes grandes (élite y jefe)
     slowmo: 0.8, slowmoScale: 0.3,   // muerte del jefe: cámara lenta al 30 % durante 0,8 s
     pools: { particles: 400, flyers: 60, texts: 30 },
-    lowFpsLimit: 50, lowFpsTime: 3,  // modo ahorro si baja de 50 FPS durante 3 s (funcional 13.3)
+    lowFpsLimit: 50, lowFpsTime: 3,  // modo ahorro si baja de 50 FPS durante 3 s (funcional 13.3)...
+    lowFpsBack: 57, lowFpsBackTime: 20,  // ...y se quita si vuelve a 57 FPS durante 20 s seguidos
+    dmgTextsPerSec: 6,      // como mucho 6 números de daño por segundo (lección 10 de CORE)
   };
 
   // Cofres (funcional 12, 13.2 y 9.5). En el prototipo son gratis y con premio fijo; las Gemas

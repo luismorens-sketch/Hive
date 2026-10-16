@@ -261,12 +261,14 @@
   };
 
   // Viñeta de la noche (bordes rojos que laten) en píxeles de pantalla: se rehace al cambiar de tamaño.
+  // Se hornea a los píxeles reales de la pantalla y se pinta con V.stamp, 1:1 (antes iba a un
+  // cuarto de resolución y se reescalaba entero en cada fotograma de noche: lección 07 de CORE).
   A.vignette = function (w, h) {
     const key = 'vig:' + Math.round(w) + 'x' + Math.round(h);
     let c = V.cache[key];
     if (c) return c;
     c = document.createElement('canvas');
-    c.width = Math.max(1, Math.round(w / 2)); c.height = Math.max(1, Math.round(h / 2));
+    c.width = Math.max(1, Math.round(w * V.dpr)); c.height = Math.max(1, Math.round(h * V.dpr));
     const g = c.getContext('2d');
     const gr = g.createRadialGradient(c.width / 2, c.height / 2, Math.min(c.width, c.height) * 0.35, c.width / 2, c.height / 2, Math.max(c.width, c.height) * 0.72);
     gr.addColorStop(0, 'rgba(160,0,40,0)'); gr.addColorStop(1, 'rgba(190,10,50,0.75)');

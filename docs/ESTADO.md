@@ -3,7 +3,7 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 15/10/2026 · **Versión publicada:** 0.9.1 ·
+**Última actualización:** 16/10/2026 · **Versión publicada:** 0.9.2 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
@@ -24,7 +24,30 @@ Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento (lecciones de CORE).
+
+## Lo nuevo de la 0.9.2: rendimiento, con las lecciones de CORE
+
+Repasadas las 23 lecciones de `C:GitHubCORELECCIONES-RENDIMIENTO.md` contra el código, midiendo
+antes y después con un banco nuevo (`node tools/bench.js`): **el dibujo cuesta un 40 % menos**,
+de día y de noche. No cambia nada de lo que se ve.
+
+- **El suelo** (casi la mitad del fotograma): se guardaba a menos resolución que la pantalla y
+  se reescalaba entero en cada fotograma. Ahora se guarda al tamaño exacto y se copia tal cual
+  (lección 07). Fuera los dos rellenos de fondo que el suelo ya tapaba (lección 03).
+- **El borde rojo de la noche**: se guardaba a un cuarto de resolución y se reescalaba. Ahora,
+  al tamaño exacto (lección 07).
+- **Números de daño**: como mucho 6 por segundo (lecciones 10 y 11).
+- **Modo ahorro**: se quita solo si el móvil se recupera; antes, una vez puesto, no se iba
+  hasta cerrar el juego (lección 18).
+- **El sonido se para** cuando sales del juego (lección 20).
+- **El dedo**: la posición del lienzo se lee al apoyarlo, no en cada movimiento (lección 02).
+
+Banco (ordenador, sin GPU; las cifras solo valen para comparar): día 8,4-9,7 → 4,5-6,5 ms;
+noche dura con 47 bichos 18-19 → 10-12 ms. Lo que ya cumplía: sin `shadowBlur`, sin filtros
+ni `backdrop-filter`, la interfaz no lee del DOM en cada fotograma, los degradados se hornean,
+el bucle no se frena por debajo de 30 FPS y solo se dibuja lo que se ve. **El número de verdad
+(criterio 5: 60 FPS en un Galaxy A34) solo se puede medir en un Android real.**
 
 ## Lo nuevo de la 0.9.1: preparado para la prueba con 5 personas
 
@@ -237,6 +260,12 @@ cofres).
 4. Arte con IA: aparcado (te gusta el dibujado con código).
 
 ## Pendientes técnicos (no urgentes)
+
+- **Al empaquetar para Android** (lecciones 19 y 20 de CORE, fallan sin avisar):
+  `domStorageEnabled = true` (si no, el guardado se borra en cada arranque), `configChanges`
+  en el manifiesto (si no, girar el móvil recarga el juego), suspender el sonido en `onPause`,
+  y que Gradle copie el HTML montado y aborte si no coincide con el del repositorio. Y medir
+  con `adb shell dumpsys gfxinfo` en un móvil real (lección 13).
 
 - **Proyecto de Android**: no se crea hasta comprobar la marca y fijar el identificador
   (propuesta `com.lmcadvisors.hivebreaker`; no se puede cambiar nunca después).

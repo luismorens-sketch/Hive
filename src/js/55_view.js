@@ -82,6 +82,16 @@
 
   V.screen = function () { V.ctx.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); };
 
+  // Copia un lienzo ya horneado a píxeles reales, 1:1 y en píxeles enteros (sin reescalar).
+  // x, y en píxeles CSS de la pantalla. Respeta globalAlpha y el recorte que haya puestos.
+  V.stamp = function (c, x, y) {
+    const g = V.ctx;
+    g.save();
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.drawImage(c, Math.round(x * V.dpr), Math.round(y * V.dpr));
+    g.restore();
+  };
+
   // Mundo (casillas) → pantalla (píxeles CSS).
   V.w2s = function (wx, wy, out) {
     out = out || {};
