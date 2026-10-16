@@ -1,4 +1,4 @@
-# HIVE BREAKER — Funcional v0.3.1
+# HIVE BREAKER — Funcional v0.3.2
 
 Arcade Idle Tycoon para Android. Aterrizas como comandante en un planeta infestado:
 recoges mineral con tus propias manos, lo fundes, lo vendes a la flota y con cada
@@ -15,6 +15,9 @@ construido tiene que aguantar. Región a región, hasta matar a la Reina.
 ---
 
 ## 0. Cambios
+
+### v0.3.2 (16/10/2026)
+- **El nombre del guía, decidido**: el **Sargento Brass** (12, 24.1).
 
 ### v0.3.1 (15/10/2026)
 - **Offline**: lo ganado fuera tampoco supera lo que cabe en la caja fuerte de la Exportación,
@@ -528,7 +531,7 @@ Reglas del tutorial:
 - El permiso de notificaciones se pide cuando tiene sentido (al explicar el offline),
   nunca al abrir el juego.
 
-**Guía: el Sargento Brass** (decidido 15/10/2026; el nombre es provisional). Un sargento
+**Guía: el Sargento Brass** (decidido 15/10/2026; el nombre, el 16/10/2026). Un sargento
 veterano de la flota que habla por radio: retrato de busto con el mismo casco que el
 comandante (gafas turquesa subidas), cascos de radio, bigote, galones y condecoraciones.
 Tres caras: normal, alarmado y contento.
@@ -1007,7 +1010,7 @@ invertir en captación.
 | 9 | Repositorio | `Hive` (GitHub) | 20 |
 | 10 | Comandante | **Fijo con skins** | 4 |
 | 11 | Tope offline (2) | También lo limita la **caja fuerte** de la Exportación (15/10/2026) | 5.5, 14.4 |
-| 12 | Guía con personaje | **Sargento Brass** (nombre provisional) en el tutorial y los momentos fuertes (15/10/2026) | 12, 19 |
+| 12 | Guía con personaje | **Sargento Brass** en el tutorial y los momentos fuertes (15/10/2026; el nombre, el 16/10/2026) | 12, 19 |
 | 13 | Arranque | Las **5 primeras zonas, más baratas** (15/10/2026) | 6.3, 21 |
 | 14 | Suministro aéreo | **Prudente**: cada 4-5 min, solo de día, desde la primera noche ganada, 60 s en el suelo (15/10/2026) | 15.3 |
 

@@ -181,7 +181,6 @@ Preguntas para ti:
 
 1. ¿Se entiende el juego sin que nadie te explique nada?
 2. ¿Hay demasiados avisos, o falta alguno?
-3. ¿Te gusta el nombre **Sargento Brass**? Es provisional (ver abajo).
 
 ## Decidido por el autor
 
@@ -190,6 +189,7 @@ Preguntas para ti:
   se recalibra cuando entren más elementos, y entonces se ajusta también la 6.4. Que el código
   no cumpla la 6.4 **no es un error**.
 - **El ritmo y la dificultad de la 0.4.0** (15/10/2026): «por ahora está bien».
+- **El nombre del sargento** (16/10/2026): **Brass**. Ya está en el funcional.
 - **Guía con personaje** (15/10/2026): un sargento con el mismo casco que el comandante y
   condecoraciones, en el tutorial y en los momentos fuertes.
 - **El arte** (15/10/2026): se queda el dibujado con código, «me gusta tu estilo». El de
@@ -242,12 +242,6 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
 - **Al conquistar la región**: las noches siguen, sin jefe; sale el aviso de la región 2.
 - **Mientras no juegas**: la pantalla sale tras 2 min fuera como mínimo. Los topes diarios de
   vídeos (funcional 15.3) todavía no se aplican: los vídeos son simulados y solo se cuentan.
-- **El nombre del sargento: «Brass»** (0.7.0). En inglés es el latón de los casquillos de
-  bala y también «los mandos» (*the brass*); suena igual en los dos idiomas. He comprobado que
-  no hay ningún personaje de videojuego conocido con ese nombre (el más parecido es un capitán
-  de policía de la serie *CSI*). Alternativas: **Stomp** («pisotón», aplasta bichos) o
-  **Swatter** («matamoscas»). Evité Sarge (*Army Men*), Brick (*Boom Beach*) y Hammer
-  (*StarCraft*), que ya son de otros juegos.
 - **Cofres (0.8.0)**: el de la primera noche da $150 y 50 Gemas (el funcional dice 50); el del
   jefe, $500 y 100 Gemas. Premio fijo, sin azar. Arriba, con las Gemas, la energía pierde el
   «MW» si no cabe todo.
@@ -295,7 +289,32 @@ fase 3 **antes** de la prueba con 5 personas:
 
 Preguntas pendientes: (a) ¿una cadena nueva por región, como dice el funcional, o más fábrica
 ya en la región 1? (b) ¿la región 1 vuelve a 15-25 min? (c) ¿la prueba con 5 personas,
-después de la región 2 y la investigación? (d) ¿te vale el nombre Sargento Brass?
+después de la región 2 y la investigación?
+
+### Propuesta: más materiales y edificios (16/10/2026, pendiente de que decidas)
+
+Lo pediste tú: más minerales y edificios, en el funcional y en todas las regiones; por ejemplo
+un segundo metal que, combinado con otra cosa, dé torretas nuevas y sirva para construir.
+Propuesta (no está en el funcional hasta que la apruebes):
+
+- **Regla para todas las regiones**: cada región trae un material nuevo y una o dos máquinas
+  que lo combinan con los anteriores; nada se queda inútil. Cada material nuevo repite el
+  bucle «primero a mano, luego un dron» (pilar 1).
+- **Construir cuesta materiales**: las zonas grandes piden dinero **y** materiales (por ejemplo
+  $300 + 10 Placas); se pagan igual, quedándote encima. Nueva decisión: vender, defender o
+  construir.
+- **Región 1 con dos metales**: a los ~8 min, la Expansión norte descubre **vetas de Cobre**.
+  **Bobinadora**: Cobre → **Bobinas**. **Taller de celdas**: Bobina + Placa → **Celda de
+  energía** (la primera receta con dos ingredientes). **Torreta de choque**: gasta Celdas y
+  frena a los bichos cercanos (distinta de todas: no mata, sujeta, y combina con el Cañón).
+  Edificios que piden Bobinas para construirse: Arsenal (rellena las torretas de alrededor) y
+  Radar (avisa por dónde vienen). Bobinas y Celdas también se venden, y caras.
+- **Regiones 2 y 3**: como el funcional (Biomasa → Combustible; Quitina + Placa → Blindaje),
+  pero usando también Cobre y Bobinas para construir y en alguna receta. Las recetas
+  concretas, región a región.
+- El cobre es un metal real y sale en cientos de juegos (Minecraft, Terraria, Satisfactory):
+  no es de Factorio. Copiar sería usar sus recetas (hierro + cable de cobre → circuito), sus
+  cintas o sus brazos; la propuesta no usa nada de eso.
 
 Mientras tanto, tu prueba de la 0.6.0 a la 0.9.2 sigue valiendo (ver «Qué probar ahora»).
 Arte con IA: aparcado (te gusta el dibujado con código).

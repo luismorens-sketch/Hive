@@ -183,7 +183,7 @@ como fuente** y **buscar marcas antes de comprometer**.
 | Carpeta / archivo | Qué es |
 |---|---|
 | `CLAUDE.md` | Este archivo: cómo se trabaja aquí |
-| `docs/HIVE_Funcional.md` | El funcional (v0.3.1). **Fuente única de verdad** del diseño. La versión va dentro del documento; git guarda las anteriores |
+| `docs/HIVE_Funcional.md` | El funcional (v0.3.2). **Fuente única de verdad** del diseño. La versión va dentro del documento; git guarda las anteriores |
 | `docs/ESTADO.md` | Dónde estamos: hito, qué probar, opiniones del autor, decisiones provisionales, lo siguiente |
 | `docs/ARTE_PROMPTS.md` | Los prompts exactos para generar el arte con IA, y qué hacer con cada imagen que llegue |
 | `docs/PRUEBA_5_PERSONAS.md` | Cómo hacer la prueba con 5 personas del hito 7: qué mirar, qué capturas pedir y la tabla de resultados |
