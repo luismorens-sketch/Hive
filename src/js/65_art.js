@@ -76,6 +76,31 @@
       g.fillStyle = P.yellow; g.fillRect(-0.19, -0.1, 0.38, 0.045);
       g.strokeStyle = P.ink; g.lineWidth = 0.02; g.strokeRect(-0.19, -0.1, 0.38, 0.045);
     },
+    // Cobre: pepita cobriza con manchas verdes (la misma silueta de roca que el Ore, otro color)
+    copper: function (g) {
+      g.beginPath();
+      g.moveTo(-0.19, -0.02); g.lineTo(-0.21, -0.12); g.lineTo(-0.12, -0.22); g.lineTo(0.06, -0.24);
+      g.lineTo(0.2, -0.16); g.lineTo(0.21, -0.04); g.lineTo(0.05, 0.02);
+      g.closePath();
+      D.fillStroke(g, P.copper, 0.035);
+      g.beginPath();
+      g.moveTo(-0.1, -0.21); g.lineTo(0.06, -0.22); g.lineTo(0.02, -0.12); g.lineTo(-0.12, -0.11);
+      g.closePath(); g.fillStyle = P.copperL; g.fill();
+      g.fillStyle = P.verdigris;
+      D.ellipse(g, 0.11, -0.07, 0.05, 0.035); g.fill();
+      D.ellipse(g, -0.13, -0.06, 0.03, 0.025); g.fill();
+      g.fillStyle = '#fff1d6'; g.fillRect(0.07, -0.19, 0.045, 0.045);
+    },
+    // Bobina: un carrete de hilo de cobre de pie, con sus dos discos
+    coil: function (g) {
+      D.ellipse(g, 0, -0.03, 0.17, 0.06); D.fillStroke(g, P.steelD, 0.03);
+      D.rr(g, -0.12, -0.24, 0.24, 0.2, 0.03); D.fillStroke(g, P.copper, 0.03);
+      g.strokeStyle = P.copperD; g.lineWidth = 0.018;
+      for (let y = -0.21; y < -0.05; y += 0.045) { g.beginPath(); g.moveTo(-0.11, y); g.lineTo(0.11, y + 0.015); g.stroke(); }
+      g.fillStyle = 'rgba(255,236,205,0.6)'; g.fillRect(-0.07, -0.23, 0.04, 0.17);
+      D.ellipse(g, 0, -0.25, 0.17, 0.06); D.fillStroke(g, P.steel, 0.03);
+      D.ellipse(g, 0, -0.25, 0.04, 0.018); g.fillStyle = P.ink; g.fill();
+    },
     bill: function (g) {
       D.rr(g, -0.24, -0.14, 0.48, 0.14, 0.025); D.fillStroke(g, P.cashD, 0.03);
       D.rr(g, -0.24, -0.2, 0.48, 0.08, 0.025); D.fillStroke(g, P.cash, 0.03);
@@ -105,8 +130,10 @@
     },
 
     // ---------- Veta: un montón del MISMO mineral que se recoge (se entiende sin explicarlo) ----------
-    vein: function () {
-      return V.sprite('vein', 1.9, 1.7, 0.95, 1.15, function (g) {
+    vein: function (item) {
+      item = item || 'ore';
+      const cu = item === 'copper';
+      return V.sprite('vein:' + item, 1.9, 1.7, 0.95, 1.15, function (g) {
         shadow(g, 0.05, 0.36, 0.78, 0.2, 0.28);
         // suelo removido alrededor
         g.fillStyle = 'rgba(120,90,55,0.45)';
@@ -115,20 +142,20 @@
         g.beginPath();
         g.moveTo(-0.72, 0.36); g.lineTo(-0.62, 0.02); g.lineTo(-0.34, -0.2); g.lineTo(0.3, -0.22);
         g.lineTo(0.66, 0.02); g.lineTo(0.74, 0.36); g.closePath();
-        D.fillStroke(g, '#5d5a5e', LW);
-        // trozos de mineral (la misma forma que el objeto Ore, en grande)
+        D.fillStroke(g, cu ? '#6a5246' : '#5d5a5e', LW);
+        // trozos de mineral (la misma forma que el objeto, en grande)
         const rocks = [[-0.38, 0.28, 1.25], [0.34, 0.3, 1.2], [-0.02, 0.18, 1.6], [-0.22, -0.06, 1.15], [0.22, -0.08, 1.2], [0.0, -0.3, 1.25]];
         for (const r of rocks) {
           g.save(); g.translate(r[0], r[1]); g.scale(r[2], r[2]);
-          ITEM_ART.ore(g);
+          ITEM_ART[item](g);
           g.restore();
         }
         // chispas de mineral
-        g.fillStyle = P.glint;
+        g.fillStyle = cu ? '#ffe2b8' : P.glint;
         for (const q of [[-0.45, 0.1], [0.5, 0.12], [0.1, -0.42], [-0.1, 0.32]]) g.fillRect(q[0], q[1], 0.06, 0.06);
         // pedazos sueltos por el suelo
         for (const q of [[-0.85, 0.42, 0.55], [0.82, 0.44, 0.5], [0.55, 0.55, 0.45]]) {
-          g.save(); g.translate(q[0], q[1]); g.scale(q[2], q[2]); ITEM_ART.ore(g); g.restore();
+          g.save(); g.translate(q[0], q[1]); g.scale(q[2], q[2]); ITEM_ART[item](g); g.restore();
         }
       });
     },
@@ -224,6 +251,48 @@
         // rodillos de salida
         for (let i = 0; i < 3; i++) { D.ellipse(g, w / 2 - 0.15 + i * 0.16, fy - 0.42, 0.06, 0.06); D.fillStroke(g, P.steel, 0.03); }
         levelPips(g, flip, lvl, -w / 2 + 0.25, top + 0.12);
+      });
+    },
+
+    // ---------- Bobinadora: un gran carrete de cobre sobre su bancada (funcional v0.4) ----------
+    // El carrete gira cuando trabaja: el brillo que lo recorre lo dibuja 70_render.js.
+    winder: function (flip, lvl) {
+      const m = HB.MACHINES.winder, w = m.w, h = m.h, z = m.z;
+      return V.sprite('winder:' + (flip ? 1 : 0) + ':' + lvl, w + 1.2, z + h * 0.75 + 2.2, (w + 1.2) / 2, z + h * 0.75 + 1.6 - h / 2, function (g) {
+        if (flip) g.scale(-1, 1);
+        const fy = h / 2;
+        shadow(g, 0.15, fy + 0.02, w / 2 + 0.3, 0.28, 0.28);
+        D.rr(g, -w / 2 - 0.1, fy - 0.3, w + 0.2, 0.36, 0.06); D.fillStroke(g, P.conc, LW);
+        D.box(g, 0, fy - 0.12, w - 0.1, h, z, '#93b7bc', '#5b828a', LW);
+        const top = fy - 0.12 - z;
+        hazard(g, -w / 2 + 0.1, fy - 0.36, w - 0.3, 0.16);
+        // franja turquesa (militar) y emblema: una bobina en un círculo
+        g.fillStyle = P.teal; g.fillRect(-w / 2 + 0.08, top + 0.02, w - 0.26, 0.08);
+        D.ellipse(g, -0.3, top + 0.48, 0.3, 0.26); D.fillStroke(g, P.copperL, LW);
+        g.save(); g.translate(-0.3, top + 0.62); g.scale(1.1, 1.1); ITEM_ART.coil(g); g.restore();
+        // tolva de entrada (lado de la entrada, como las demás máquinas)
+        g.beginPath();
+        g.moveTo(-w / 2 + 0.02, top - 1.0); g.lineTo(-w / 2 + 0.8, top - 1.0); g.lineTo(-w / 2 + 0.7, top - 0.45); g.lineTo(-w / 2 + 0.12, top - 0.45);
+        g.closePath(); D.fillStroke(g, P.steelD, LW);
+        g.fillStyle = '#3f474c'; g.fillRect(-w / 2 + 0.1, top - 0.95, 0.62, 0.14);
+        // soportes y el tambor de cobre, tumbado
+        const cx = WINDER.cx, cy = top + WINDER.cy, L = WINDER.len, rr = WINDER.r;
+        for (const px of [cx - L / 2 - 0.13, cx + L / 2 + 0.03]) { D.rr(g, px, cy - 0.05, 0.1, 0.6, 0.02); D.fillStroke(g, '#3d4a50', 0.04); }
+        D.rr(g, cx - L / 2, cy - rr, L, rr * 2, 0.06); D.fillStroke(g, P.copper, LW);
+        g.strokeStyle = P.copperD; g.lineWidth = 0.025;
+        for (let x = cx - L / 2 + 0.08; x < cx + L / 2 - 0.04; x += 0.085) { g.beginPath(); g.moveTo(x, cy - rr + 0.04); g.lineTo(x + 0.02, cy + rr - 0.04); g.stroke(); }
+        g.fillStyle = 'rgba(255,232,200,0.5)'; g.fillRect(cx - L / 2 + 0.05, cy - rr + 0.07, L - 0.1, 0.07);
+        for (const ex of [cx - L / 2, cx + L / 2]) {
+          D.ellipse(g, ex, cy, 0.1, rr + 0.1); D.fillStroke(g, P.steelD, LW);
+          D.ellipse(g, ex, cy, 0.035, 0.07); g.fillStyle = P.ink; g.fill();
+        }
+        // el hilo baja de la tolva al tambor
+        g.strokeStyle = P.copperL; g.lineWidth = 0.04;
+        g.beginPath(); g.moveTo(-w / 2 + 0.55, top - 0.5); g.quadraticCurveTo(-0.35, top - 1.05, cx - L / 2 + 0.12, cy - rr + 0.06); g.stroke();
+        // conducto de salida
+        g.beginPath(); g.moveTo(w / 2 - 0.12, fy - 0.75); g.lineTo(w / 2 + 0.42, fy - 0.45); g.lineTo(w / 2 + 0.42, fy - 0.25); g.lineTo(w / 2 - 0.12, fy - 0.5); g.closePath();
+        D.fillStroke(g, P.steelD, LW);
+        levelPips(g, flip, lvl, w / 2 - 0.6, top + 0.3);
       });
     },
 
@@ -389,13 +458,13 @@
 
     // Icono en el centro de una zona de pago.
     zoneIcon: function (z) {
-      const key = z.kind === 'machine' ? 'm:' + z.type : z.kind;
+      const key = z.kind === 'machine' ? 'm:' + z.type : (z.kind === 'vein' ? 'vein:' + (z.item || 'ore') : z.kind);
       const custom = ZONE_ICONS[z.kind === 'machine' ? z.type : z.kind];
       if (custom) return V.sprite('zicon:' + key, 1.0, 1.0, 0.5, 0.5, custom);
       return V.sprite('zicon:' + key, 1.0, 1.0, 0.5, 0.5, function (g) {
         g.fillStyle = '#ffffff'; g.strokeStyle = P.ink; g.lineWidth = 0.05;
         if (z.kind === 'vein') {
-          g.save(); g.translate(0, 0.14); g.scale(1.4, 1.4); ITEM_ART.ore(g); g.restore();
+          g.save(); g.translate(0, 0.14); g.scale(1.4, 1.4); ITEM_ART[z.item || 'ore'](g); g.restore();
         } else if (z.kind === 'upgrade') {
           for (let i = 0; i < 2; i++) {
             const y = 0.12 - i * 0.22;
@@ -713,6 +782,9 @@
       g.beginPath(); g.moveTo(0, -0.2); g.lineTo(0, 0.12); g.moveTo(-0.28, -0.04); g.lineTo(0.28, -0.04); g.stroke();
       D.rr(g, -0.04, 0.12, 0.08, 0.16, 0.02); g.fillStyle = '#ffffff'; g.fill(); g.stroke();
     },
+    winder: function (g) {
+      g.save(); g.translate(0, 0.2); g.scale(1.55, 1.55); ITEM_ART.coil(g); g.restore();
+    },
     dissipator: function (g) {
       icoStyle(g);
       D.rr(g, -0.26, -0.2, 0.52, 0.42, 0.05); g.fill(); g.stroke();
@@ -726,7 +798,9 @@
   const RECIPES = {
     smelter: [['ore'], ['plate']],
     ammo_fab: [['plate', 'plate'], ['ammo']],
+    winder: [['copper'], ['coil']],
     export: [['ammo', 'plate'], ['$']],
+    export_cu: [['ammo', 'coil', 'plate'], ['$']],   // con la Bobinadora, las Bobinas también se venden
     solar: [['bolt'], ['+5']],
     dissipator: [['heat'], ['-2']],
   };
@@ -762,6 +836,10 @@
       for (const it of r[1]) draw(it);
     });
   };
+
+  // Dónde está el tambor de la Bobinadora (respecto al tejado): lo usa también 70_render.js.
+  const WINDER = { cx: 0.25, cy: -0.5, len: 0.95, r: 0.34 };
+  HB.Art.WINDER = WINDER;
 
   function levelPips(g, flip, lvl, x, y) {
     // Puntitos de nivel en la fachada (1, 2 o 3). Se dibujan sin voltear.

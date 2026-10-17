@@ -75,7 +75,11 @@
         const b = inflow[id] || (inflow[id] = {});
         b[it] = (b[it] || 0) + n;
       };
-      for (const p of pads) if (p.route.kind === 'miner') add(p.route.to, 'ore', caps[p.id]);
+      for (const p of pads) {
+        if (p.route.kind !== 'miner') continue;
+        const v = minerVein(R, p.route, 0);
+        if (v) add(p.route.to, v.item || 'ore', caps[p.id]);
+      }
       const left = {};
       for (const id in prod) left[id] = prod[id];
       for (const p of pads) {

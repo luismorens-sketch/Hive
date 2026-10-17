@@ -19,6 +19,7 @@
     conc: '#a3abae', concL: '#c3cacc', concD: '#737c80',
     steel: '#d5dee2', steelD: '#93a3aa',
     ore: '#7d93ab', oreL: '#b2c7dc', oreD: '#506279', glint: '#9fe3ff',
+    copper: '#d07a3c', copperL: '#f2ab6e', copperD: '#8c4a22', verdigris: '#5fc9a2',
     cash: '#4fc768', cashL: '#9be8a8', cashD: '#2c8a43',
     bug: '#8e3fd0', acid: '#ff4fa3',
     fog: '#191d23',

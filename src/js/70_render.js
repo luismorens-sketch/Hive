@@ -105,7 +105,7 @@
       g.fillStyle = P.sandL; D.ellipse(g, x - r * 0.3, y - r * 0.4, r * 0.6, r * 0.4); g.fill();
     }
     // más allá del muro sur: tierra de bichos, cada vez más morada hacia el Nido
-    const sy = 36.5;
+    const sy = d.bugLand || d.h - 8;
     const gr = g.createLinearGradient(0, sy, 0, d.h);
     gr.addColorStop(0, 'rgba(90,40,90,0)'); gr.addColorStop(1, 'rgba(70,25,80,0.6)');
     g.fillStyle = gr; g.fillRect(0, sy, d.w, d.h - sy);
@@ -323,7 +323,10 @@
       const p = HB.Logic.zonePadPos(z);
       if (!V.onScreen(p.x, p.y, 4)) continue;
       const pr = HB.Logic.price(R, z), paid = R.paid[z.id] || 0;
-      const can = R.credits >= pr - paid;
+      const need = HB.Logic.matsLeft(R, z);
+      let carries = !need;
+      if (need) for (const it of st.cmd.stack) if (need[it]) { carries = true; break; }
+      const can = R.credits >= pr - paid && carries;
       // plano fantasma de lo que se va a construir
       const L = HB.State.layout(R.id).ents[z.id];
       if (z.kind === 'machine') {
@@ -335,7 +338,7 @@
         g.strokeRect(z.x - m.w / 2, z.y - m.h / 2, m.w, m.h); g.setLineDash([]);
         g.globalAlpha = 1;
       } else if (z.kind === 'vein') {
-        g.globalAlpha = 0.25; V.blit(A.vein(), z.x, z.y); g.globalAlpha = 1;
+        g.globalAlpha = 0.25; V.blit(A.vein(z.item), z.x, z.y); g.globalAlpha = 1;
       } else if (z.kind === 'wall' && L) {
         g.globalAlpha = 0.25; V.blit(A.wall(L.opts.w), L.x, L.y); g.globalAlpha = 1;
       } else if (z.kind === 'turret') {
@@ -358,7 +361,11 @@
         const e = R._byId[z.target];
         if (e) sub = HB.T('lvl', e.level + 1);
       } else if (z.kind === 'nest') sub = HB.T('b_nest');
-      vis.labels.push({ k: 'price', x: p.x, y: p.y + 0.2, s: HB.money(pr - paid), can: can, sub: sub, subY: p.y + 0.98 });
+      // materiales que faltan (funcional v0.4, 6.2): debajo, en ámbar los que no llevas encima
+      const left = need;
+      if (left) drawMatsRow(st, left, p.x, p.y + 1.02);
+      const showPrice = pr - paid > 0 || !left;
+      vis.labels.push({ k: 'price', x: p.x, y: p.y + 0.2, s: showPrice ? HB.money(pr - paid) : '', can: can, sub: sub, subY: p.y + (left ? 1.62 : 0.98) });
     }
     // el Nido ya pagado: zona para lanzar el asalto, con el poder recomendado
     if (R.nestReady && !R.cleared && R.phase === 'day') {
@@ -378,6 +385,21 @@
         V.blit(A.zoneIcon(z), z.x, z.y - 0.05, 0.7);
         vis.labels.push({ k: 'nest', x: z.x, y: z.y - 1.15, s: HB.T('assault'), col: col, sub: HB.T('power_rec') });
       }
+    }
+  }
+
+  // Fila de materiales que pide una obra: icono del objeto y cuántos faltan.
+  function drawMatsRow(st, left, x, y) {
+    const g = V.ctx, its = Object.keys(left), step = 1.05;
+    const w = its.length * step + 0.15;
+    D.rr(g, x - w / 2, y - 0.32, w, 0.62, 0.31);
+    g.fillStyle = 'rgba(20,24,28,0.8)'; g.fill();
+    let x0 = x - (its.length - 1) * step / 2;
+    for (const it of its) {
+      V.blit(A.item(it), x0 - 0.22, y + 0.15, 1.0);
+      const has = st.cmd.stack.indexOf(it) >= 0;
+      vis.labels.push({ k: 'mat', x: x0 + 0.08, y: y, s: '×' + left[it], col: has ? '#ffffff' : P.amber });
+      x0 += step;
     }
   }
 
@@ -404,6 +426,7 @@
     if (e.dead) { const m = HB.Logic.dims(e); return A.rubble(m.w, m.h); }
     if (t === 'smelter') return A.smelter(e.flip, e.level);
     if (t === 'ammo_fab') return A.ammo_fab(e.flip, e.level);
+    if (t === 'winder') return A.winder(e.flip, e.level);
     if (t === 'export') return A.export();
     if (t === 'solar') return A.solar();
     if (t === 'dissipator') return A.dissipator();
@@ -430,7 +453,7 @@
     return HB.lerp(1.15, 1.0, (k - 0.5) / 0.5);
   }
 
-  const RECIPE_Y = { smelter: -2.2, ammo_fab: -2.25, export: -1.75, solar: -1.65, dissipator: -2.15 };
+  const RECIPE_Y = { smelter: -2.2, ammo_fab: -2.25, winder: -2.25, export: -1.75, solar: -1.65, dissipator: -2.15 };
 
   function drawMachine(st, R, e) {
     const g = V.ctx, m = HB.MACHINES[e.type], dm = HB.Logic.dims(e), ve = HB.entVis(e.id);
@@ -468,6 +491,14 @@
         const k = e.busy ? Math.abs(Math.sin(vis.clock * 7)) : 0;
         const hx = e.x + side * 0.55, hy = top - 1.25 + k * 0.62;
         D.rr(g, hx - 0.3, hy, 0.6, 0.2, 0.04); D.fillStroke(g, P.steelD, 0.05);
+      } else if (e.type === 'winder' && e.busy && !flick) {
+        // el tambor gira: un brillo lo recorre de arriba abajo
+        const W = HB.Art.WINDER, cx = e.x + side * W.cx, cy = top + W.cy;
+        const k = (vis.clock * 1.8 + e.x) % 1;
+        g.globalAlpha = 0.55 * Math.sin(k * Math.PI);
+        g.fillStyle = '#fff3dc';
+        g.fillRect(cx - W.len / 2 + 0.05, cy - W.r + 0.04 + k * (W.r * 2 - 0.14), W.len - 0.1, 0.06);
+        g.globalAlpha = 1;
       }
     } else if (m.kind === 'export') {
       let i = 0;
@@ -507,7 +538,7 @@
       g.globalAlpha = 1;
     }
     // cartel de receta: qué entra y qué sale
-    const rec = A.recipe(e.type);
+    const rec = A.recipe(e.type === 'export' && R._byId.winder ? 'export_cu' : e.type);
     if (rec) {
       const near = HB.dist(st.cmd.x, st.cmd.y, e.x, e.y) < 4.5;
       g.globalAlpha = near ? 1 : 0.6;
@@ -892,6 +923,8 @@
         const fs = T * (L.s.length > 4 ? 0.48 : 0.56);
         V.text(L.s, pt.x, pt.y + 2, fs, L.can ? '#ffffff' : '#d9dde0', P.ink);
         if (L.sub) { const q = V.w2s(L.x, L.subY, {}); V.text(L.sub, q.x, q.y, T * 0.4, P.yellow, P.ink); }
+      } else if (L.k === 'mat') {
+        V.text(L.s, pt.x, pt.y + 1, T * 0.48, L.col, P.ink, 'left');
       } else if (L.k === 'warn') {
         const bob = Math.sin(vis.clock * 4) * 2;
         g.font = V.font(T * 0.42);
@@ -1056,7 +1089,7 @@
       list.push({ y: y + 0.01, k: 4, o: c });
       list.sort(function (a, b) { return a.y - b.y; });
       for (const it of list) {
-        if (it.k === 0) V.blit(A.vein(), it.o.x, it.o.y);
+        if (it.k === 0) V.blit(A.vein(it.o.item), it.o.x, it.o.y);
         else if (it.k === 1) drawMachine(st, R, it.o);
         else if (it.k === 2) drawOutPile(it.o);
         else if (it.k === 3) drawBills(R, it.o);

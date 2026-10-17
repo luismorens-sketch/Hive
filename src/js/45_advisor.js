@@ -134,22 +134,24 @@
     return false;
   }
 
-  // ---------- Dónde minar: el punto que alcanza más vetas ----------
-  function mineSpots(R) {
+  // ---------- Dónde minar: el punto que alcanza más vetas del mineral que hace falta ----------
+  function mineSpots(R, item) {
     const N = nav(R);
-    if (N.spots && N.spotsN === R.veins.length) return N.spots;
+    if (!N.spots || N.spotsN !== R.veins.length) { N.spots = {}; N.spotsN = R.veins.length; }
+    if (N.spots[item]) return N.spots[item];
     const K = HB.CONFIG.cmd, range = K.mineRange - 0.1;
     const pads = HB.Logic.pads(R);
+    const veins = R.veins.filter(function (v) { return (v.item || 'ore') === item; });
     const cand = [];
-    for (const v of R.veins) {
+    for (const v of veins) {
       for (let a = 0; a < 8; a++) {
         const ang = a * Math.PI / 4;
         cand.push({ x: v.x + Math.cos(ang) * 1.0, y: v.y + Math.sin(ang) * 1.0 });
       }
     }
-    for (let i = 0; i < R.veins.length; i++) {
-      for (let j = i + 1; j < R.veins.length; j++) {
-        const a = R.veins[i], b = R.veins[j];
+    for (let i = 0; i < veins.length; i++) {
+      for (let j = i + 1; j < veins.length; j++) {
+        const a = veins[i], b = veins[j];
         const dd = HB.dist(a.x, a.y, b.x, b.y);
         if (dd > 2 * range) continue;
         const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
@@ -165,18 +167,22 @@
       let onPad = false;
       for (const q of pads) if (HB.dist2(p.x, p.y, q.x, q.y) < 1.0) { onPad = true; break; }
       if (onPad) continue;
-      let n = 0;
-      for (const v of R.veins) if (HB.dist(p.x, p.y, v.x, v.y) <= range) n++;
-      if (n > 0) spots.push({ x: p.x, y: p.y, n: n });
+      // un sitio que alcance también vetas de otro mineral llenaría la pila de lo que no hace falta
+      let n = 0, other = false;
+      for (const v of R.veins) {
+        if (HB.dist(p.x, p.y, v.x, v.y) > range) continue;
+        if ((v.item || 'ore') === item) n++; else other = true;
+      }
+      if (n > 0 && !other) spots.push({ x: p.x, y: p.y, n: n });
     }
-    N.spots = spots; N.spotsN = R.veins.length;
+    N.spots[item] = spots;
     return spots;
   }
 
-  function bestSpot(st) {
+  function bestSpot(st, item) {
     const R = st.regions[st.cur], c = st.cmd;
     let best = null, bs = -1e9;
-    for (const s of mineSpots(R)) {
+    for (const s of mineSpots(R, item)) {
       const score = s.n * 100 - HB.dist(c.x, c.y, s.x, s.y);
       if (score > bs) { bs = score; best = s; }
     }
@@ -186,14 +192,43 @@
   // ---------- Qué toca hacer ----------
   function def(e) { return HB.MACHINES[e.type]; }
 
-  function cheapest(R, affordableOnly) {
+  // La zona más barata. affordableOnly: solo las que se pueden pagar ya; si pide materiales,
+  // hace falta llevar en la pila alguno de los que faltan (lo entregado se guarda).
+  function cheapest(R, affordableOnly, stack) {
     let best = null, br = Infinity;
     for (const z of HB.Logic.visibleZones(R)) {
       const rem = HB.Logic.remaining(R, z);
       if (affordableOnly && rem > R.credits) continue;
+      if (affordableOnly && stack) {
+        const left = HB.Logic.matsLeft(R, z);
+        if (left && !carriesAny(stack, left)) continue;
+      }
       if (rem < br) { br = rem; best = z; }
     }
     return best ? { z: best, rem: br } : null;
+  }
+
+  function carriesAny(stack, left) {
+    for (const it of stack) if (left[it]) return true;
+    return false;
+  }
+
+  // Una obra que ya se puede pagar en dinero pero a la que le faltan materiales: de dónde
+  // sacarlos (la máquina que los fabrica y tiene más en la salida).
+  function gatherFor(R, stack) {
+    let best = null;
+    for (const z of HB.Logic.visibleZones(R)) {
+      const left = HB.Logic.matsLeft(R, z);
+      if (!left || HB.Logic.remaining(R, z) > R.credits || carriesAny(stack, left)) continue;
+      for (const it in left) {
+        for (const e of R.ents) {
+          const d = def(e);
+          if (d.kind !== 'proc' || d.output !== it || e.dead || e.out <= 0) continue;
+          if (!best || e.out > best.e.out) best = { z: z, it: it, e: e };
+        }
+      }
+    }
+    return best;
   }
 
   function exportEnt(R) {
@@ -231,8 +266,12 @@
   }
 
   // ¿Nadie podrá aceptar nada de la pila? Todas las máquinas que quieren algo están llenas y sin
-  // poder fabricar (su salida también está llena), y no hay exportación ni torreta con hueco.
+  // poder fabricar (su salida también está llena), y no hay exportación, torreta ni obra con hueco.
   function stuck(R, stack) {
+    for (const z of HB.Logic.visibleZones(R)) {
+      const left = HB.Logic.matsLeft(R, z);
+      if (left && carriesAny(stack, left)) return false;
+    }
     for (const e of R.ents) {
       const d = def(e);
       if (e.dead || !wantsAny(e, stack)) continue;
@@ -261,14 +300,28 @@
     return best;
   }
 
-  // Hueco para Ore que queda en las máquinas que lo aceptan.
-  function oreRoom(R) {
+  // Hueco que queda para un mineral (Ore, Copper) en las máquinas que lo aceptan.
+  function itemRoom(R, it) {
     let n = 0;
     for (const e of R.ents) {
       const d = def(e);
-      if (d.kind === 'proc' && !e.dead && d.inputs.ore !== undefined) n += HB.Logic.level(e).inCap - e.inBuf.ore;
+      if (d.kind === 'proc' && !e.dead && d.inputs[it] !== undefined) n += HB.Logic.level(e).inCap - e.inBuf[it];
     }
     return n;
+  }
+
+  // Qué mineral conviene minar: el que más hueco tiene (descontando lo que ya va en la pila).
+  function mineItem(R, stack) {
+    let best = null, bw = 0;
+    const seen = {};
+    for (const v of R.veins) {
+      const it = v.item || 'ore';
+      if (seen[it]) continue;
+      seen[it] = true;
+      const w = itemRoom(R, it) - count(stack, it);
+      if (w > bw) { bw = w; best = it; }
+    }
+    return best;
   }
 
   function ammoSource(R) {
@@ -375,6 +428,7 @@
     if (kind === 'trash') return 'hint_trash';
     if (kind === 'deliver') {
       if (e.type === 'smelter') return 'hint_deposit';
+      if (e.type === 'winder') return 'hint_winder';
       if (e.type === 'export') return 'hint_export';
       return 'hint_feed';
     }
@@ -388,7 +442,7 @@
   function stillValid(st, t, mem) {
     const R = st.regions[st.cur], c = st.cmd, cap = HB.CONFIG.cmd.stackCap;
     if (!t) return false;
-    if (t.kind === 'mine') return c.stack.length < cap && R.veins.length > 0;
+    if (t.kind === 'mine') return c.stack.length < cap && R.veins.length > 0 && (!t.item || itemRoom(R, t.item) > count(c.stack, t.item));
     if (t.kind === 'collect') return R.pile > 0;
     if (t.kind === 'deliver') return R._byId[t.e.id] === t.e && acceptCount(t.e, c.stack) > 0;
     if (t.kind === 'refill') return !t.e.dead && HB.Logic.boxRoom(t.e) && count(c.stack, 'ammo') > 0;
@@ -461,11 +515,23 @@
     }
 
     // 3. Si puedes pagar una zona, eso primero (la más barata).
-    const za = cheapest(R, true);
+    const za = cheapest(R, true, c.stack);
     if (za && !threat) {
       if (mem.task && mem.task.kind === 'pay' && mem.task.z === za.z) return mem.task;
       const p = HB.Logic.zonePadPos(za.z);
       return mk('pay', p.x, p.y, null, za.z);
+    }
+
+    // 3c. Una obra pagable a la que le faltan materiales: ir a por ellos (funcional v0.4, 6.2).
+    if (!threat && c.stack.length < cap) {
+      const gf = gatherFor(R, c.stack);
+      if (gf) {
+        if (same(mem.task, 'pickup', gf.e) && mem.task.gather) return mem.task;
+        const p = HB.Logic.padPos(gf.e, 'out');
+        const t = mk('pickup', p.x, p.y, gf.e);
+        t.gather = gf.it; t.hint = 'hint_bring_' + gf.it;
+        return t;
+      }
     }
 
     // 3b. El suministro aéreo: solo si se ven los vídeos (sin vídeo la caja no da nada).
@@ -546,10 +612,18 @@
     }
     if (pe && c.stack.length < cap) { const p = HB.Logic.padPos(pe, 'out'); return mk('pickup', p.x, p.y, pe); }
 
-    // 10. Minar (sin pasarse: si las Fundiciones están llenas, el mineral no tiene adónde ir).
-    if (c.stack.length < cap && oreRoom(R) > count(c.stack, 'ore')) {
-      const s = bestSpot(st);
-      if (s) return mk('mine', s.x, s.y);
+    // 10. Minar (sin pasarse: si las máquinas están llenas, el mineral no tiene adónde ir). Del
+    // mineral que más hueco tenga: Ore para las Fundiciones, Copper para la Bobinadora.
+    const mi = c.stack.length < cap ? mineItem(R, c.stack) : null;
+    if (mi) {
+      const s = bestSpot(st, mi);
+      if (s) {
+        if (mem.task && mem.task.kind === 'mine' && mem.task.item === mi && HB.dist(mem.task.x, mem.task.y, s.x, s.y) < 0.5) return mem.task;
+        const t = mk('mine', s.x, s.y);
+        t.item = mi;
+        if (mi === 'copper') t.hint = 'hint_mine_cu';
+        return t;
+      }
     }
 
     // 10b. Atascado: la pila llena y todo lo que la quiere está lleno por los dos lados (una

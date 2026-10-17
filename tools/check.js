@@ -6,7 +6,7 @@
 //    huecos {0}/{1}, y todo texto que pide el código existe.
 // 4. Tablas: zonas bien escritas, nada pisando nada en el mapa.
 // 5. Prueba de humo: el robot del simulador juega la región entera sin que nada falle.
-// 6. Guardado: guardar y cargar devuelve la misma partida.
+// 6. Guardado: guardar y cargar devuelve la misma partida, y una partida vieja carga bien.
 // 7. Mientras no juegas: el cálculo cuadra con lo que la base vende de verdad, y los topes.
 // 8. Cofres, suministro aéreo y reciclador: dan lo que dicen las tablas, se guardan, y con la
 //    pila atascada la flecha lleva al reciclador y se sale del atasco.
@@ -245,6 +245,23 @@ if (HB) {
     if (!back || back.regions.r1.credits !== 42 || !back.regions.r1._byId) bad('guardar y cargar no devuelve la misma partida');
     else if (!('perks' in back)) bad('falta el campo perks en el guardado (funcional 15.9)');
     else ok('guardar y cargar funciona (clave ' + HB.CONFIG.save.key + ')');
+    // Una partida de la 0.9.x (guardado v2): mapa 12 filas más corto, sin materiales y con la
+    // Exportación sin hueco para Bobinas. Tiene que cargar y seguir vendiendo.
+    const old = HB.State.newGame(6);
+    for (let i = 0; i < 2; i++) HB.Logic.forceUnlock(old, HB.REGIONS.r1.zones[i]);   // sin la Expansión
+    const o = JSON.parse(HB.State.serialize(old)), oR = o.regions.r1;
+    o.v = 2; delete oR.mats; oR.fogY = 15.4; o.cmd.y = 9;
+    for (const e of oR.ents) if (e.type === 'export') delete e.inBuf.coil;
+    const mig = HB.State.deserialize(JSON.stringify(o));
+    const mR = mig && mig.regions.r1, ex = mR && mR._byId.export;
+    if (!mig || mig.v !== HB.State.SAVE_VERSION) bad('una partida de la 0.9.x no carga');
+    else if (!(ex.inBuf.coil === 0) || !mR.mats || mR.fogY !== HB.REGIONS.r1.fogY || mig.cmd.y !== HB.REGIONS.r1.spawn.y) bad('una partida de la 0.9.x carga mal (hueco de Bobinas, materiales, niebla o comandante)');
+    else {
+      ex.inBuf.ammo = 3;
+      for (let t = 0; t < 40 * 10; t++) HB.Logic.econ(mig, 0.1);
+      if (!(mR.pile > 0)) bad('una partida de la 0.9.x deja de vender (la nave no compra)');
+      else ok('una partida de la 0.9.x (guardado v2) carga en el mapa nuevo y sigue vendiendo');
+    }
   }
 
   console.log('[check] 7. Mientras no juegas (offline)');

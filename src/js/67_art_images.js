@@ -96,9 +96,10 @@
   A.dissipator = function () { return building('hb_dissipator', 'dissipator', false) || orig.dissipator(); };
   A.export = function () { return building('hb_export', 'export', false) || orig.export(); };
 
-  A.vein = function () {
-    const im = img('hb_vein');
-    return im ? grounded('i:vein', im, ART_SPECS.hb_vein.w, ART_SPECS.hb_vein.base, false) : orig.vein();
+  // la imagen de IA es la veta de Ore; la de cobre, de momento, siempre dibujada con código
+  A.vein = function (item) {
+    const im = (item || 'ore') === 'ore' ? img('hb_vein') : null;
+    return im ? grounded('i:vein', im, ART_SPECS.hb_vein.w, ART_SPECS.hb_vein.base, false) : orig.vein(item);
   };
   A.nest = function (broken) {
     const im = img('hb_nest');

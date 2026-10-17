@@ -152,7 +152,7 @@ function print(r) {
       '   ' + res.padEnd(17) + ' ' + String(n.kills).padStart(5) + '  ' + ('$' + n.loot).padStart(5) + '  ' + String(n.damage).padStart(4) + '  ' + (n.hq + '%').padStart(5));
   }
   out.push('');
-  if (r.cleared !== null) out.push('REGIÓN CONQUISTADA en ' + mmss(r.cleared) + ' (el funcional pide 15-25 min para R1).');
+  if (r.cleared !== null) out.push('REGIÓN CONQUISTADA en ' + mmss(r.cleared) + ' (el funcional pide unos 25 min para R1, 6.4).');
   else out.push('Sin conquistar tras ' + mmss(r.total) + ' (' + r.zones.length + '/' + r.zonesTotal + ' zonas).');
   out.push('Suministros aéreos: ' + r.drops + ' cajas lanzadas' + (r.ads ? ', ' + r.supplies + ' abiertas con vídeo' : ' (el robot sin vídeos no las abre)'));
   out.push('Gemas al final: ' + r.gems + ' (cofres de la primera noche y del jefe, y Swarmers dorados)');

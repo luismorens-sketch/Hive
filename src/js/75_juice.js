@@ -70,16 +70,18 @@
     leaper: ['tut_leaper', P.acid, 'alarm'],
     boss: ['tut_boss', '#ff8a8a', 'alarm'],
     supplyDrop: ['tut_supply', P.orangeL, 'normal'],
+    matsSeen: ['tut_mats', P.yellow, 'normal'],
+    winder: ['tut_winder', P.orangeL, 'happy'],
   };
 
   const H = {
     mine: function (st, e) {
       const v = e.a, idx = e.b;
       Au.play('tic', { step: Au.step() });
-      Fx.sparks(v.x + (st.cmd.x - v.x) * 0.3, v.y - 0.25, 0.2, 4, P.glint);
+      Fx.sparks(v.x + (st.cmd.x - v.x) * 0.3, v.y - 0.25, 0.2, 4, v.item === 'copper' ? P.orangeL : P.glint);
       vis.stackIn++;
       Fx.fly({
-        spr: A.item('ore'), x: v.x + (Math.random() - 0.5) * 0.3, y: v.y - 0.2, z: 0.2,
+        spr: A.item(v.item || 'ore'), x: v.x + (Math.random() - 0.5) * 0.3, y: v.y - 0.2, z: 0.2,
         to: function (o) { HB.slot.stack(idx, o); }, dur: FX.mineArc, arc: FX.mineArcH,
         land: function () { vis.stackIn = Math.max(0, vis.stackIn - 1); },
       });
@@ -108,6 +110,16 @@
           if (def.kind === 'proc') squash(m.id, 0.06);
           Au.play('drop', { step: Au.step() });
         },
+      });
+    },
+
+    // material entregado a una obra (funcional v0.4, 6.2): salta de la pila a la zona
+    payMat: function (st, e) {
+      const z = e.a, it = e.b, idx = e.c, p = HB.Logic.zonePadPos(z);
+      HB.slot.stack(idx, tmp);
+      Fx.fly({
+        spr: A.item(it), x: tmp.x, y: tmp.y, z: 0, tx: p.x, ty: p.y - 0.2, tz: 0, dur: FX.depositFly, arc: 0.8,
+        land: function () { Fx.dust(p.x, p.y, 2, 0.4); Au.play('drop', { step: Au.step() }); },
       });
     },
 

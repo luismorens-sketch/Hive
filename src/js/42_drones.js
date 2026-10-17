@@ -1,7 +1,7 @@
 // Hive Breaker — drones (funcional 7). Sin DOM: lo usa también el simulador.
 //
 // Cada base de drones tiene una ruta fija:
-//   'miner': mina en sus vetas y lleva el Ore a la entrada de una máquina.
+//   'miner': mina en sus vetas y lleva el mineral (Ore o Copper) a la entrada de una máquina.
 //   'cargo': recoge de la salida de una máquina y lo deja en la entrada de otra.
 // Vuelan en línea recta. De noche se refugian en su base si hay bichos cerca.
 // Capacidad de paso = drones × carga × velocidad: si sobra producción, el montón de salida crece
@@ -78,7 +78,7 @@
       d.t += dt;
       while (d.t >= PAD().mineEvery && d.carry.length < lv.cap) {
         d.t -= PAD().mineEvery;
-        d.carry.push('ore');
+        d.carry.push(vein.item || 'ore');
         HB.Logic.ev(st, 'droneMine', d, vein);
       }
       if (d.carry.length >= lv.cap) { d.st = 'toDst'; d.t = 0; }

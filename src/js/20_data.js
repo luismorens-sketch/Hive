@@ -9,8 +9,8 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.9.2',      // sube con cada versión que se publica para probar
-    hito: 6,               // hito del funcional 21 en el que estamos
+    version: '0.10.0',      // sube con cada versión que se publica para probar
+    hito: 7,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
     viewTiles: 10,         // casillas que caben a lo ancho de la pantalla (en un móvil en vertical)
@@ -97,9 +97,11 @@
 
   // Objetos que se cargan en la pila (funcional 5.1). h = alto en la pila (casillas).
   HB.ITEMS = {
-    ore:   { h: 0.20, price: 0 },
-    plate: { h: 0.15, price: 3 },
-    ammo:  { h: 0.22, price: 10 },
+    ore:    { h: 0.20, price: 0 },
+    plate:  { h: 0.15, price: 3 },
+    ammo:   { h: 0.22, price: 10 },
+    copper: { h: 0.20, price: 0 },    // funcional v0.4: el segundo metal de la región 1
+    coil:   { h: 0.20, price: 4 },
   };
 
   // Máquinas, torretas y edificios. w × h = huella en el suelo (casillas). z = alto del dibujo.
@@ -128,9 +130,19 @@
         { time: 0.75, inCap: 40, outCap: 32, heatMul: 0.7, power: 5 },
       ],
     },
+    // Bobinadora (funcional v0.4, 5.1): Copper → Coil.
+    winder: {
+      kind: 'proc', w: 2.2, h: 1.8, z: 1.0, hp: 200, power: 2,
+      inputs: { copper: 1 }, output: 'coil', heat: 1.0,
+      levels: [
+        { time: 0.9,  inCap: 20, outCap: 20, heatMul: 1,   power: 2 },
+        { time: 0.65, inCap: 30, outCap: 30, heatMul: 1,   power: 3 },
+        { time: 0.5,  inCap: 40, outCap: 40, heatMul: 0.7, power: 4 },
+      ],
+    },
     export: {
       kind: 'export', w: 2.4, h: 2.4, z: 0.25, hp: 250,
-      accepts: ['ammo', 'plate'],     // la nave compra en este orden si no cabe todo en la caja
+      accepts: ['ammo', 'coil', 'plate'],     // la nave compra en este orden si no cabe todo en la caja
       levels: [
         { interval: 20, vault: 150,  inCap: 40 },
         { interval: 15, vault: 400,  inCap: 60 },
@@ -171,7 +183,7 @@
     leaper:  { hp: 40,  speed: 1.8,  dmg: 8,  rate: 1.0, r: 0.32, cost: 3, loot: 6,  weight: 3,  from: 4, jump: true },
     crusher: { hp: 260, speed: 0.75, dmg: 25, rate: 0.6, r: 0.48, cost: 9, loot: 20, weight: 1.5, from: 6 },
     gilded:  { hp: 30,  speed: 2.4,  dmg: 0,  rate: 0,   r: 0.28, cost: 0, loot: 60, chance: 1 / 150, flee: true, gems: 5 },
-    brood:   { hp: 1800, speed: 0.45, dmg: 40, rate: 0.6, r: 1.0, cost: 0, loot: 400, boss: true,
+    brood:   { hp: 1500, speed: 0.45, dmg: 40, rate: 0.6, r: 1.0, cost: 0, loot: 400, boss: true,
                phases: [0.75, 0.5, 0.25], brood: 6 },
   };
 
@@ -186,67 +198,82 @@
   //                 máquina) o 'cargo' (de la salida de una máquina a la entrada de otra)
   //   'nest'      → el Nido: pagarla permite lanzar la noche del jefe (funcional 3.4)
   // req: zonas que tienen que estar compradas para que esta aparezca.
+  // item: de qué es una veta ('ore' si no se dice; 'copper', el cobre).
+  // mats: materiales que pide además del dinero (funcional v0.4, 6.2), p. ej. { plate: 8 }.
+  //       Se pagan igual, quedándose encima: saltan de la pila. Lo entregado se guarda.
   // Precio: P(n) = p0 × k^n × mult, con n = posición en la lista (funcional 6.3).
   // Se ven a la vez como mucho `visible` zonas: las primeras de la lista que cumplen req.
   HB.REGIONS = {
     r1: {
       name: 'Dust Flats',
-      w: 12, h: 44,
-      fogY: 15.4,           // por encima de esta fila hay niebla al empezar
-      p0: 50, k: 1.15,
+      w: 12, h: 56,
+      fogY: 27.4,           // por encima de esta fila hay niebla al empezar
+      // k 1,08 (0.10.0): con 37 zonas, la región dura unos 25-35 min (decidido: ~25, funcional 6.4)
+      p0: 50, k: 1.08,
       // Las 5 primeras zonas cuestan menos (decidido 15/10/2026): el funcional 21 pide que la
       // primera zona se pague en menos de 45 s y el primer dron llegue antes de 3 min.
       early: [0.5, 0.55, 0.6, 0.6, 0.55],
       visible: 3,
-      spawn: { x: 6.0, y: 26.4 },
+      spawn: { x: 6.0, y: 38.4 },
       // Amenaza (funcional 8): barra de Calor B(n) = B0·(1 + 0,25·n); amenaza A(n) = A0·(1 + 0,15·n)
       B0: 140, A0: 16,
       flanks: {
-        s: { y: 43.4, x0: 1.5, x1: 10.5 },
+        s: { y: 55.4, x0: 1.5, x1: 10.5 },
         n: { fromFog: true, x0: 1.5, x1: 10.5 },   // sale de la niebla
       },
-      nestAt: { x: 6.0, y: 41.4 },
+      nestAt: { x: 6.0, y: 53.4 },
       // Reciclador (decisión provisional): quedarse encima vacía la pila. Evita el atasco de
       // tener la pila llena de mineral con la Fundición llena por los dos lados.
-      trash: { x: 6.0, y: 31.3 },
+      trash: { x: 6.0, y: 43.3 },
+      bugLand: 48.5,        // desde aquí hacia el sur, el suelo se vuelve tierra de bichos (dibujo)
+      // El norte (de la fila 3 a la 27) lo abre la Expansión. Entre la línea de defensa norte
+      // (fila 5-7) y la Fundición 2 está el distrito del cobre (funcional v0.4, 6.1): rinde, pero
+      // es lo primero que pisan los bichos del norte.
       start: [
-        { id: 'hq',        type: 'hq',      x: 6.0, y: 29.0 },
-        { id: 'smelter_1', type: 'smelter', x: 6.0, y: 22.8 },
-        { id: 'export',    type: 'export',  x: 9.6, y: 26.4 },
+        { id: 'hq',        type: 'hq',      x: 6.0, y: 41 },
+        { id: 'smelter_1', type: 'smelter', x: 6.0, y: 34.8 },
+        { id: 'export',    type: 'export',  x: 9.6, y: 38.4 },
       ],
-      veins: [ { id: 'vein_1', x: 2.4, y: 24.0 } ],
+      veins: [ { id: 'vein_1', x: 2.4, y: 36 } ],
       zones: [
-        { id: 'vein_2',        kind: 'vein',      x: 2.4,  y: 25.85 },
-        { id: 'ammo_fab',      kind: 'machine',   x: 6.0,  y: 18.8, type: 'ammo_fab', flip: true, mult: 1.3 },
-        { id: 'expansion_n',   kind: 'expansion', x: 9.8,  y: 16.4, fogY: 3, mult: 1.3 },
-        { id: 'turret_s1',     kind: 'turret',    x: 4.0,  y: 33.4, type: 'gatling', mult: 1.2 },
-        { id: 'drone_miner_1', kind: 'drone',     x: 2.2,  y: 21.4, mult: 1.3, route: { kind: 'miner', veins: ['vein_1', 'vein_2'], to: 'smelter_1' } },
-        { id: 'smelter_1_l2',  kind: 'upgrade',   x: 6.0,  y: 24.65, target: 'smelter_1' },
-        { id: 'drone_cargo_1', kind: 'drone',     x: 10.2, y: 21.4, req: ['ammo_fab'], route: { kind: 'cargo', from: 'smelter_1', to: 'ammo_fab' } },
-        { id: 'solar_1',       kind: 'machine',   x: 2.4,  y: 28.8, type: 'solar' },
-        { id: 'wall_s1',       kind: 'wall',      x: 1.7,  y: 35.2, x0: 0, x1: 3.4 },
-        { id: 'vein_3',        kind: 'vein',      x: 1.8,  y: 11.6, req: ['expansion_n'] },
-        { id: 'turret_s2',     kind: 'turret',    x: 8.0,  y: 33.4, choice: ['gatling', 'cannon'], mult: 1.2 },
-        { id: 'export_l2',     kind: 'upgrade',   x: 11.1, y: 29.2, target: 'export' },
-        { id: 'smelter_2',     kind: 'machine',   x: 6.6,  y: 10.6, type: 'smelter', req: ['expansion_n'], mult: 1.3 },
-        { id: 'drone_cargo_2', kind: 'drone',     x: 2.2,  y: 17.4, req: ['ammo_fab'], route: { kind: 'cargo', from: 'ammo_fab', to: 'export' } },
+        { id: 'vein_2',        kind: 'vein',      x: 2.4,  y: 37.85 },
+        { id: 'ammo_fab',      kind: 'machine',   x: 6.0,  y: 30.8, type: 'ammo_fab', flip: true, mult: 1.3 },
+        { id: 'expansion_n',   kind: 'expansion', x: 9.8,  y: 28.4, fogY: 3, mult: 1.3 },
+        { id: 'turret_s1',     kind: 'turret',    x: 4.0,  y: 45.4, type: 'gatling', mult: 1.2 },
+        { id: 'drone_miner_1', kind: 'drone',     x: 2.2,  y: 33.4, mult: 1.3, route: { kind: 'miner', veins: ['vein_1', 'vein_2'], to: 'smelter_1' } },
+        { id: 'smelter_1_l2',  kind: 'upgrade',   x: 6.0,  y: 36.65, target: 'smelter_1' },
+        { id: 'drone_cargo_1', kind: 'drone',     x: 10.2, y: 33.4, req: ['ammo_fab'], route: { kind: 'cargo', from: 'smelter_1', to: 'ammo_fab' } },
+        { id: 'solar_1',       kind: 'machine',   x: 2.4,  y: 40.8, type: 'solar' },
+        { id: 'wall_s1',       kind: 'wall',      x: 1.7,  y: 47.2, x0: 0, x1: 3.4 },
+        { id: 'vein_3',        kind: 'vein',      x: 1.8,  y: 23.6, req: ['expansion_n'] },
+        { id: 'turret_s2',     kind: 'turret',    x: 8.0,  y: 45.4, choice: ['gatling', 'cannon'], mult: 1.2 },
+        { id: 'export_l2',     kind: 'upgrade',   x: 11.1, y: 41.2, target: 'export' },
+        { id: 'smelter_2',     kind: 'machine',   x: 6.6,  y: 22.6, type: 'smelter', req: ['expansion_n'], mult: 1.3 },
+        { id: 'drone_cargo_2', kind: 'drone',     x: 2.2,  y: 29.4, req: ['ammo_fab'], route: { kind: 'cargo', from: 'ammo_fab', to: 'export' } },
+        // el cobre (funcional v0.4): la Bobinadora es la primera obra que pide materiales
+        { id: 'winder',        kind: 'machine',   x: 6.6,  y: 12.4, type: 'winder', mats: { plate: 8 }, req: ['expansion_n'], mult: 1.2 },
+        { id: 'vein_cu_1',     kind: 'vein',      x: 2.0,  y: 11.6, item: 'copper', req: ['winder'] },
+        { id: 'drone_miner_cu', kind: 'drone',    x: 1.2,  y: 15.4, req: ['winder', 'vein_cu_1'], mult: 1.2, route: { kind: 'miner', veins: ['vein_cu_1', 'vein_cu_2'], to: 'winder' } },
         { id: 'turret_n1',     kind: 'turret',    x: 4.0,  y: 6.6, choice: ['gatling', 'cannon'], req: ['expansion_n'], mult: 1.2 },
-        { id: 'ammo_fab_l2',   kind: 'upgrade',   x: 9.9,  y: 18.6, target: 'ammo_fab', req: ['ammo_fab'] },
-        { id: 'drone_miner_2', kind: 'drone',     x: 1.2,  y: 10.0, req: ['smelter_2', 'vein_3'], route: { kind: 'miner', veins: ['vein_3', 'vein_4'], to: 'smelter_2' } },
-        { id: 'vein_4',        kind: 'vein',      x: 1.8,  y: 13.45, req: ['expansion_n'] },
-        { id: 'drone_cargo_3', kind: 'drone',     x: 10.6, y: 13.8, req: ['smelter_2', 'ammo_fab'], route: { kind: 'cargo', from: 'smelter_2', to: 'ammo_fab' } },
-        { id: 'wall_s2',       kind: 'wall',      x: 10.3, y: 35.2, x0: 8.6, x1: 12 },
-        { id: 'turret_s1_l2',  kind: 'upgrade',   x: 2.4,  y: 31.9, target: 'turret_s1', req: ['turret_s1'] },
-        { id: 'smelter_1_l3',  kind: 'upgrade',   x: 6.0,  y: 24.65, target: 'smelter_1', req: ['smelter_1_l2'] },
+        { id: 'ammo_fab_l2',   kind: 'upgrade',   x: 9.9,  y: 30.6, target: 'ammo_fab', req: ['ammo_fab'] },
+        { id: 'drone_miner_2', kind: 'drone',     x: 1.2,  y: 22, req: ['smelter_2', 'vein_3'], route: { kind: 'miner', veins: ['vein_3', 'vein_4'], to: 'smelter_2' } },
+        { id: 'vein_4',        kind: 'vein',      x: 1.8,  y: 25.45, req: ['expansion_n'] },
+        { id: 'drone_cargo_3', kind: 'drone',     x: 10.6, y: 25.8, req: ['smelter_2', 'ammo_fab'], route: { kind: 'cargo', from: 'smelter_2', to: 'ammo_fab' } },
+        { id: 'drone_cargo_cu', kind: 'drone',    x: 10.6, y: 11.2, req: ['winder'], route: { kind: 'cargo', from: 'winder', to: 'export' } },
+        { id: 'wall_s2',       kind: 'wall',      x: 10.3, y: 47.2, x0: 8.6, x1: 12 },
+        { id: 'vein_cu_2',     kind: 'vein',      x: 2.0,  y: 13.45, item: 'copper', req: ['vein_cu_1'] },
+        { id: 'turret_s1_l2',  kind: 'upgrade',   x: 2.4,  y: 43.9, target: 'turret_s1', req: ['turret_s1'] },
+        { id: 'smelter_1_l3',  kind: 'upgrade',   x: 6.0,  y: 36.65, target: 'smelter_1', req: ['smelter_1_l2'] },
+        { id: 'winder_l2',     kind: 'upgrade',   x: 6.6,  y: 14.25, target: 'winder', mats: { coil: 6 }, req: ['winder'] },
         { id: 'wall_n1',       kind: 'wall',      x: 1.7,  y: 5.2, x0: 0, x1: 3.4, req: ['expansion_n'] },
         { id: 'turret_n2',     kind: 'turret',    x: 8.0,  y: 6.6, choice: ['gatling', 'cannon'], req: ['expansion_n'], mult: 1.2 },
-        { id: 'drone_miner_1_l2', kind: 'upgrade', x: 2.2, y: 21.4, target: 'drone_miner_1', req: ['drone_miner_1'] },
-        { id: 'export_l3',     kind: 'upgrade',   x: 11.1, y: 29.2, target: 'export', req: ['export_l2'] },
-        { id: 'turret_s2_l2',  kind: 'upgrade',   x: 9.6,  y: 31.9, target: 'turret_s2', req: ['turret_s2'] },
-        { id: 'smelter_2_l2',  kind: 'upgrade',   x: 6.6,  y: 12.45, target: 'smelter_2', req: ['smelter_2'] },
-        { id: 'dissipator_1',  kind: 'machine',   x: 11.0, y: 22.8, type: 'dissipator' },
-        { id: 'solar_2',       kind: 'machine',   x: 10.4, y: 9.2,  type: 'solar', req: ['expansion_n'] },
-        { id: 'nest',          kind: 'nest',      x: 6.0,  y: 38.8, mult: 1.5 },
+        { id: 'drone_miner_1_l2', kind: 'upgrade', x: 2.2, y: 33.4, target: 'drone_miner_1', req: ['drone_miner_1'] },
+        { id: 'export_l3',     kind: 'upgrade',   x: 11.1, y: 41.2, target: 'export', mats: { coil: 10 }, req: ['export_l2'] },
+        { id: 'turret_s2_l2',  kind: 'upgrade',   x: 9.6,  y: 43.9, target: 'turret_s2', req: ['turret_s2'] },
+        { id: 'smelter_2_l2',  kind: 'upgrade',   x: 6.6,  y: 24.45, target: 'smelter_2', mats: { plate: 10 }, req: ['smelter_2'] },
+        { id: 'dissipator_1',  kind: 'machine',   x: 11.0, y: 34.8, type: 'dissipator', mats: { plate: 10 } },
+        { id: 'solar_2',       kind: 'machine',   x: 10.4, y: 21.2,  type: 'solar', mats: { coil: 8 }, req: ['expansion_n'] },
+        { id: 'nest',          kind: 'nest',      x: 6.0,  y: 50.8, mult: 1.5 },
       ],
     },
   };
@@ -294,7 +321,8 @@
   // el segundo de juego en que pasa cada uno por primera vez; el menú de pruebas y el simulador
   // los enseñan en este orden (sirve para ver dónde se atasca quien juega por primera vez).
   HB.FTUE = ['intro', 'move', 'mine', 'feed', 'pickup', 'sell', 'collect', 'buy', 'drone', 'heat',
-    'warn', 'night', 'win', 'chest', 'refill', 'power', 'choice', 'leaper', 'orbitalReady', 'orbital', 'boss',
+    'warn', 'night', 'win', 'chest', 'refill', 'power', 'choice', 'matsSeen', 'mats', 'winder', 'copper', 'coil',
+    'leaper', 'orbitalReady', 'orbital', 'boss',
     'cleared', 'offlineTip', 'away', 'supplyDrop', 'supply', 'trash'];
 
   // Lugares de vídeo recompensado (funcional 15.3). En el prototipo son SIMULADOS: el botón da

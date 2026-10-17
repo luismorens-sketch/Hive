@@ -3,16 +3,18 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 16/10/2026 · **Versión publicada:** 0.9.2 ·
+**Última actualización:** 17/10/2026 · **Versión publicada:** 0.10.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
 
 Fase 2 del funcional (prototipo jugable), **ampliada el 16/10/2026** (funcional v0.4): más
 materiales y edificios, la región 2 y una primera investigación; sin prueba con 5 personas
-(se probará en la prueba cerrada de Play Console). **Hito 6 terminado** (0.9.0). **Toca el
-hito 7: la región 1 con dos metales.** Pendientes de tu prueba: el tutorial (0.6.0), el
-Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro aéreo (0.9.0).
+(se probará en la prueba cerrada de Play Console). **Hito 6 terminado** (0.9.0). **Hito 7 en
+marcha: la región 1 con dos metales**; la 0.10.0 trae su primera parte (el cobre, la
+Bobinadora y las obras que piden materiales). Pendientes de tu prueba: el tutorial (0.6.0), el
+Sargento Brass (0.7.0), el cofre (0.8.0), el arranque rápido con el suministro aéreo (0.9.0) y
+el cobre (0.10.0).
 
 | Hito (funcional 21) | Estado |
 |---|---|
@@ -22,14 +24,38 @@ Sargento Brass (0.7.0), el cofre (0.8.0) y el arranque rápido con el suministro
 | 4. Drones, torretas, munición, bichos, campo de flujo, noche | Hecho y probado (0.3.0) |
 | 5. Calor-reloj, energía, brownout, jefe | Hecho y probado (0.3.0) |
 | 6. Tutorial, guardado/offline, vídeos simulados | **Hecho**: guardado, mientras no juegas (0.5.0), tutorial (0.6.0) con el Sargento Brass (0.7.0), cofre (0.8.0) y los 4 vídeos simulados (0.9.0) |
-| 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **Lo siguiente** |
+| 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **En marcha**: cobre, Bobinadora, obras con materiales y región de ~27 min (0.10.0). Falta: Taller de celdas, torreta Shock, Arsenal y Radar |
 | 8. Mapa del planeta + región 2 (The Mire) | Pendiente |
 | 9. Investigación, primera versión | Pendiente |
 | 10. Balance, vídeos y prueba cerrada en Play Console → seguir o no | Pendiente. Primer pase de ritmo y dificultad hecho (0.4.0) |
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE).
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE) · 0.10.0 el cobre, la Bobinadora, las obras con materiales y la región de ~27 min.
+
+## Lo nuevo de la 0.10.0: el cobre (hito 7, primera parte)
+
+Lo que decidiste el 16/10/2026 (funcional v0.4), primera tanda:
+
+- **El mapa crece 12 casillas hacia el norte.** Entre la línea de defensa norte y la
+  Fundición 2 aparece el **distrito del cobre**, que abre la Expansión. Tu partida se recoloca
+  sola al cargar: no pierdes nada (el comandante aparece en la Torre de mando).
+- **La Bobinadora** (Copper → Coil): es la **primera obra que pide materiales**: dinero **y 8
+  Placas**. Al verla, el Sargento Brass avisa: «¡LAS OBRAS GRANDES PIDEN MATERIAL!». Te quedas
+  encima y las Placas saltan de la pila; lo entregado se guarda aunque te vayas. Debajo del
+  precio, el cartel dice qué falta (en ámbar si no lo llevas encima). Si te falta material, la
+  flecha te lleva a por él: «COGE PLACAS PARA LA OBRA».
+- **Las vetas de cobre** (dos) y su **dron minero**; un **dron de carga** lleva las Bobinas a la
+  Exportación. Las Bobinas se venden a $4 (la nave compra Munición, Bobinas y Placas).
+- **Más obras con materiales**: mejorar la Bobinadora (6 Bobinas), la Fundición 2 nivel 2 (10
+  Placas), la Exportación nivel 3 (10 Bobinas), el Disipador (10 Placas) y el segundo panel
+  solar (8 Bobinas).
+- **La región, de unos 27 minutos** (antes 55): los precios suben un 8 % por zona en lugar de
+  un 15 %, y la Madre de la Prole tiene 1.500 de vida (antes 1.800), porque llega con menos
+  noches encima. Con el robot: 26-30 min con cualquier estrategia; con vídeos, 23.
+- **Arreglado de paso**: en una partida vieja, la Exportación no tenía hueco para las Bobinas
+  y eso habría estropeado el montón de dinero (la nave dejaba de venir). Ahora se repara al
+  cargar, y `tools/check.js` prueba que una partida de la 0.9.x carga y sigue vendiendo.
 
 ## Lo nuevo de la 0.9.2: el sistema de idiomas de CORE
 
@@ -158,7 +184,20 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.9.2)
+## Qué probar ahora (versión 0.10.0)
+
+**Lo nuevo, el cobre** (en tu partida de siempre, sin borrar nada):
+
+- Que tu partida cargue bien en el mapa nuevo (deberías aparecer en la Torre de mando).
+- **La Bobinadora**: ¿se entiende que pide Placas además de dinero? ¿Se lee el cartel (×8 y el
+  icono de la Placa)? ¿La flecha te lleva a por las Placas cuando te faltan?
+- **El cobre**: mínalo, llévalo a la Bobinadora y recoge las Bobinas. ¿Se distinguen bien el
+  Cobre, las Bobinas y lo demás en la pila?
+- ¿Se nota el carrete girando cuando la Bobinadora trabaja?
+- **El ritmo**: la región debería durar unos 25-30 minutos. Para verlo de verdad, desde cero
+  (rueda dentada → «Borrar progreso»), y mira el tiempo en «Tu partida».
+
+**Lo de antes** (versión 0.9.2):
 
 **Para ver el tutorial hay que empezar de cero**: rueda dentada → «Borrar progreso» y otra vez
 para confirmar (se pierde la partida de prueba, nada más).
@@ -222,8 +261,12 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
 - **Bucle básico**: estar entre dos vetas mina de las dos; la nave espera a que haya
   mercancía y no compra más de lo que cabe en la caja fuerte; para pagar hay que quedarse
   0,4 s encima; guardado automático.
-- **Precios**: P(n) = 50 × 1,15^n (las 5 primeras, con descuento). El funcional pide subir un
-  18-25 % por zona; con más del 15 % el final de la región se hace eterno.
+- **Precios** (0.10.0): P(n) = 50 × 1,08^n (las 5 primeras, con descuento). **Choca con el
+  funcional 6.3**, que pide subir un 18-25 % por zona: con 37 zonas y la región de ~25 min que
+  decidiste (6.4), la subida tiene que ser de un 8 %. Hay que corregir la 6.3 (su tabla de
+  tiempos entre zonas es de cuando la región duraba 50 min): ¿la ajusto?
+- **El mapa** (0.10.0): 12 casillas más al norte para el distrito del cobre. Qué obras piden
+  materiales y cuántos (ver «Lo nuevo de la 0.10.0») lo elegí yo.
 - **Detalles de la v0.4 del funcional** (los concreté yo al escribirla; dime si cambias algo):
   - Nombres: Bobinadora, Taller de celdas y torreta Shock (en inglés: Copper, Coil, Cell,
     Shock).
@@ -263,7 +306,8 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
   30 s tras el amanecer. Premio por aguantar: 15 × (1 + 0,5·n).
 - **DEFENSA / EQUILIBRIO / BENEFICIO**: solo afecta a los drones que llevan cosas a la
   exportación; EQUILIBRIO deja la mitad para las torretas.
-- **El jefe**: 1.800 de vida; pare 6 crías al 75, 50 y 25 %; al morir ella mueren sus bichos.
+- **El jefe**: 1.500 de vida (1.800 hasta la 0.9.2); pare 6 crías al 75, 50 y 25 %; al morir
+  ella mueren sus bichos.
   Orbital Strike desde la noche 5, una carga por noche.
 - **Al conquistar la región**: las noches siguen, sin jefe; sale el aviso de la región 2.
 - **Mientras no juegas**: la pantalla sale tras 2 min fuera como mínimo. Los topes diarios de
@@ -281,30 +325,35 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
     Gemas, los botones de Tienda y Misiones (minuto 5-7), el mapa con la región 2 iluminada y
     el permiso de notificaciones (este necesita la app de Android).
 
-## Simulador (versión 0.9.0)
+## Simulador (versión 0.10.0)
 
-Sin vídeos: 8 partidas `balanced` conquistan la región en **53-61 min** (mediana 55:33), con
-4 noches perdidas de 103; `defense` y `profit` quedan en 54-57 min. **Con vídeos** (×2 del
-informe, segunda oportunidad y suministro aéreo): **42-46 min**, sin noches perdidas. El robot
+Sin vídeos, 3 partidas de cada estrategia conquistan la región: `balanced` **27-28 min**,
+`profit` 26-29, `defense` 28-30; 7 noches, el jefe cae a la primera. **Con vídeos** (×2 del
+informe, segunda oportunidad y suministro aéreo): **23 min**. El cobre, con el robot: la
+primera obra con Placas a los 7:17, la Bobinadora a los 7:18, el primer Cobre a los 10:08 y
+las primeras Bobinas a los 12:25. (En la 0.9.0, la región duraba 53-61 min.) El robot
 defiende sin dudar: una persona perderá más. El simulador también dice cuándo hace el robot
 cada paso del tutorial, cuántas cajas de suministro caen y las Gemas que gana (150: los dos
 cofres).
 
 ## Lo siguiente
 
-1. **Hito 7: la región 1 con dos metales** (funcional v0.4: 5.1, 5.4, 6.2, 9.1 y 12). En 2-3
-   versiones que irás probando: primero el cobre, la Bobinadora y las zonas con materiales;
-   luego el Taller de celdas y la torreta Shock; al final el Arsenal, el Radar y el ritmo de
-   unos 25 min con el simulador.
+1. **Hito 7: la región 1 con dos metales** (funcional v0.4: 5.1, 5.4, 6.2, 9.1 y 12). Hecho
+   en la 0.10.0: el cobre, la Bobinadora, las obras con materiales y el ritmo de ~27 min.
+   Falta: el Taller de celdas y la torreta Shock (siguiente versión), y luego el Arsenal y el
+   Radar.
 2. **Hito 8**: el mapa del planeta y la región 2 (The Mire).
 3. **Hito 9**: la investigación, primera versión.
 4. **Hito 10**: balance, vídeos y prueba cerrada en Play Console (antes: comprobar la marca y
    fijar el identificador de la app).
 
-Mientras tanto, tu prueba de la 0.6.0 a la 0.9.2 sigue valiendo (ver «Qué probar ahora»).
+Mientras tanto, tu prueba de la 0.6.0 a la 0.10.0 (ver «Qué probar ahora»).
 Arte con IA: aparcado (te gusta el dibujado con código).
 
 ## Pendientes técnicos (no urgentes)
+
+- **El suelo en caché** (0.10.0): con el mapa de 56 filas ocupa unos 27 MB en un móvil (antes
+  21). Si en el Android real va justo de memoria, se parte en trozos.
 
 - **Al empaquetar para Android** (lecciones 19 y 20 de CORE, fallan sin avisar):
   `domStorageEnabled = true` (si no, el guardado se borra en cada arranque), `configChanges`

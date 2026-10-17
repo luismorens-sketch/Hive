@@ -11,7 +11,7 @@
 (function (HB) {
   'use strict';
 
-  const SAVE_VERSION = 2;
+  const SAVE_VERSION = 3;
 
   // Crea un edificio. opts: { flip, w, h (muros), route (drones) }
   function machineEntity(id, type, x, y, opts) {
@@ -48,9 +48,9 @@
     if (d._layout) return d._layout;
     const L = { ents: {}, veins: {} };
     for (const s of d.start) L.ents[s.id] = { type: s.type, x: s.x, y: s.y, opts: { flip: s.flip } };
-    for (const v of d.veins) L.veins[v.id] = { x: v.x, y: v.y };
+    for (const v of d.veins) L.veins[v.id] = { x: v.x, y: v.y, item: v.item || 'ore' };
     for (const z of d.zones) {
-      if (z.kind === 'vein') L.veins[z.id] = { x: z.x, y: z.y };
+      if (z.kind === 'vein') L.veins[z.id] = { x: z.x, y: z.y, item: z.item || 'ore' };
       else if (z.kind === 'machine') L.ents[z.id] = { type: z.type, x: z.x, y: z.y, opts: { flip: z.flip } };
       else if (z.kind === 'wall') L.ents[z.id] = { type: 'wall', x: (z.x0 + z.x1) / 2, y: z.y, opts: { w: z.x1 - z.x0, h: HB.MACHINES.wall.h } };
       else if (z.kind === 'drone') L.ents[z.id] = { type: 'dronepad', x: z.x, y: z.y, opts: { route: z.route } };
@@ -67,6 +67,7 @@
       credits: 0,
       fogY: d.fogY,
       paid: {},       // pagos parciales: lo pagado se guarda aunque te vayas (funcional 6.1)
+      mats: {},       // materiales ya entregados a cada zona que los pide (funcional v0.4, 6.2)
       bought: {},     // zona → segundo de juego en que se compró
       ents: [],
       veins: [],
@@ -82,7 +83,7 @@
       lossStreak: 0,  // noches perdidas seguidas (la siguiente llega más suave)
     };
     for (const s of d.start) R.ents.push(machineEntity(s.id, s.type, s.x, s.y, { flip: s.flip }));
-    for (const v of d.veins) R.veins.push({ id: v.id, x: v.x, y: v.y });
+    for (const v of d.veins) R.veins.push({ id: v.id, x: v.x, y: v.y, item: v.item || 'ore' });
     return R;
   }
 
@@ -99,13 +100,19 @@
       if (e.hp === undefined) e.hp = def.hp;
       if (e.dead === undefined) e.dead = false;
       if (def.kind === 'proc' && !e.prio) e.prio = 'balanced';
+      // Si una máquina acepta algo nuevo (la Exportación compra Bobinas desde la 0.10.0), su
+      // hueco empieza en 0: sin esto, la cuenta saldría «NaN» y la nave dejaría de venir.
+      if (e.inBuf) {
+        const keys = def.kind === 'proc' ? Object.keys(def.inputs) : (def.accepts || []);
+        for (const k of keys) if (!(e.inBuf[k] >= 0)) e.inBuf[k] = 0;
+      }
       if (def.levels) e.level = Math.min(e.level || 1, def.levels.length);
       return true;
     });
     R.veins = R.veins.filter(function (v) {
       const p = L.veins[v.id];
       if (!p) return false;
-      v.x = p.x; v.y = p.y;
+      v.x = p.x; v.y = p.y; v.item = p.item;
       return true;
     });
   }
@@ -163,6 +170,8 @@
         R._dirty = true;
         R._bugs = []; R._shots = []; R._loot = []; R._strikes = []; R._drones = null; R._night = null;
         R.nightLoot = 0;
+        if (!(R.pile >= 0)) R.pile = 0;
+        if (!(R.credits >= 0)) R.credits = 0;
         // Una noche a medias no se guarda: al volver, es de día y la barra está casi llena.
         if (R.phase !== 'day') {
           R.phase = 'day';
@@ -211,6 +220,20 @@
         obj.report = null; obj.choice = null; obj.defeat = null;
         obj.v = 2;
       }
+      if (obj.v === 2) {
+        // v2 → v3 (versión 0.10.0): el mapa de la región 1 crece 12 filas hacia el norte para el
+        // distrito del cobre (funcional v0.4). Los edificios se recolocan solos (relayout); aquí
+        // se mueve lo demás: la niebla sin abrir, el comandante y la caja del suministro aéreo.
+        for (const rid in obj.regions) {
+          const R = obj.regions[rid];
+          if (rid === 'r1' && R.fogY > 3.01) R.fogY = HB.REGIONS.r1.fogY;
+          if (R.supply) R.supply.box = null;
+          if (!R.mats) R.mats = {};
+        }
+        const c = obj.cmd, sp = HB.REGIONS[obj.cur || 'r1'].spawn;
+        c.x = sp.x; c.y = sp.y; c.pad = null;
+        obj.v = 3;
+      }
       if (!obj.perks) obj.perks = {};
       if (!obj.settings) obj.settings = { sound: true, vib: true, lowfx: false, lang: null };
       if (!obj.ftue) obj.ftue = {};
@@ -221,6 +244,7 @@
       if (obj.gems === undefined) obj.gems = 0;      // 0.8.0: Gemas y cofres
       if (!obj.chests) obj.chests = [];
       if (obj.supply === undefined) obj.supply = null;   // 0.9.0: suministro aéreo
+      for (const rid in obj.regions) if (!obj.regions[rid].mats) obj.regions[rid].mats = {};   // 0.10.0
       return obj;
     },
   };

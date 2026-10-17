@@ -50,6 +50,19 @@
 
   function remaining(R, z) { return price(R, z) - (R.paid[z.id] || 0); }
 
+  // Materiales que todavía pide una zona (funcional v0.4, 6.2): { plate: 3 }, o null si no pide
+  // nada (o ya está todo entregado).
+  function matsLeft(R, z) {
+    if (!z.mats) return null;
+    const got = (R.mats && R.mats[z.id]) || {};
+    let out = null;
+    for (const it in z.mats) {
+      const n = z.mats[it] - (got[it] || 0);
+      if (n > 0) { out = out || {}; out[it] = n; }
+    }
+    return out;
+  }
+
   function totalIn(e) {
     let n = 0;
     for (const k in e.inBuf) n += e.inBuf[k];
@@ -253,6 +266,7 @@
     c.stack.push(it);
     ev(st, 'pickup', e, it, c.stack.length - 1);
     ftue(st, 'pickup');
+    if (it === 'coil') ftue(st, 'coil');
     if (c.stack.length >= cap) ev(st, 'full');
     return true;
   }
@@ -277,10 +291,11 @@
   function unlock(st, R, z) {
     R.bought[z.id] = st.time;
     delete R.paid[z.id];
+    if (R.mats) delete R.mats[z.id];
     st.stats.zones++;
     let res = null;
     if (z.kind === 'vein') {
-      res = { id: z.id, x: z.x, y: z.y };
+      res = { id: z.id, x: z.x, y: z.y, item: z.item || 'ore' };
       R.veins.push(res);
     } else if (z.kind === 'machine' || z.kind === 'wall' || z.kind === 'drone') {
       res = buildEntity(st, R, z);
@@ -302,6 +317,7 @@
     ev(st, 'unlock', z, res);
     ftue(st, 'buy');
     if (z.kind === 'drone') ftue(st, 'drone');
+    if (z.type === 'winder') ftue(st, 'winder');
   }
 
   // El jugador elige el tipo de torreta de una zona ya pagada (funcional 6.2).
@@ -319,23 +335,51 @@
     return e;
   }
 
+  // Entrega a la zona un material que pida, el que esté más arriba en la pila.
+  function payMatOne(st, R, c, z) {
+    const left = matsLeft(R, z);
+    if (!left) return false;
+    for (let i = c.stack.length - 1; i >= 0; i--) {
+      const it = c.stack[i];
+      if (!left[it]) continue;
+      c.stack.splice(i, 1);
+      const got = R.mats[z.id] || (R.mats[z.id] = {});
+      got[it] = (got[it] || 0) + 1;
+      ev(st, 'payMat', z, it, i);
+      ftue(st, 'mats');
+      return true;
+    }
+    return false;
+  }
+
   function pay(st, R, c, z, dt) {
-    const P = HB.CONFIG.pay;
-    if (c.padT < P.dwell || R.credits <= 0) return;
+    const P = HB.CONFIG.pay, K = HB.CONFIG.cmd;
+    if (c.padT < P.dwell) return;
+    // Los materiales saltan de la pila uno a uno, al ritmo de depositar en una máquina.
+    if (z.mats) {
+      c.actT += dt;
+      while (c.actT >= K.depositInterval) {
+        c.actT -= K.depositInterval;
+        if (!payMatOne(st, R, c, z)) { c.actT = 0; break; }
+      }
+    }
     const pr = price(R, z);
     const paid = R.paid[z.id] || 0;
-    c.payT += dt;
-    // Cada vez más rápido: de x1 a x5 en 1,5 s (funcional 13.2).
-    const mult = 1 + (P.maxMult - 1) * Math.min(1, c.payT / P.accelTime);
-    c.payAcc += pr * P.baseFrac * mult * dt;
-    let n = Math.floor(c.payAcc);
-    if (n < 1) return;
-    c.payAcc -= n;
-    n = Math.min(n, pr - paid, R.credits);
-    R.credits -= n;
-    R.paid[z.id] = paid + n;
-    ev(st, 'pay', z, n);
-    if (paid + n >= pr) unlock(st, R, z);
+    if (paid < pr && R.credits > 0) {
+      c.payT += dt;
+      // Cada vez más rápido: de x1 a x5 en 1,5 s (funcional 13.2).
+      const mult = 1 + (P.maxMult - 1) * Math.min(1, c.payT / P.accelTime);
+      c.payAcc += pr * P.baseFrac * mult * dt;
+      let n = Math.floor(c.payAcc);
+      if (n >= 1) {
+        c.payAcc -= n;
+        n = Math.min(n, pr - paid, R.credits);
+        R.credits -= n;
+        R.paid[z.id] = paid + n;
+        ev(st, 'pay', z, n);
+      }
+    }
+    if ((R.paid[z.id] || 0) >= pr && !matsLeft(R, z)) unlock(st, R, z);
   }
 
   function findPad(R, x, y) {
@@ -412,6 +456,10 @@
       actions(st, R, c, dt);
     }
 
+    if (st.ftue.matsSeen === undefined) {
+      for (const z of R._vis) if (z.mats) { ftue(st, 'matsSeen'); break; }
+    }
+
     if (HB.Drones) HB.Drones.step(st, R, dt);
     if (HB.Night) HB.Night.step(st, R, dt);
     if (HB.Supply) HB.Supply.step(st, R, dt);
@@ -428,10 +476,11 @@
       if (c.mineT[v.id] < K.mineInterval) continue;
       if (c.stack.length >= K.stackCap) { c.mineT[v.id] = K.mineInterval; continue; }
       c.mineT[v.id] -= K.mineInterval;
-      c.stack.push('ore');
+      c.stack.push(v.item || 'ore');
       st.stats.mined++;
       ev(st, 'mine', v, c.stack.length - 1);
       ftue(st, 'mine');
+      if (v.item === 'copper') ftue(st, 'copper');
       if (c.stack.length >= K.stackCap) ev(st, 'full');
     }
 
@@ -536,7 +585,7 @@
         for (const it of d.accepts) {
           const pr = HB.ITEMS[it].price;
           const room = Math.floor((L.vault - R.pile - value) / pr);
-          const n = Math.min(e.inBuf[it], Math.max(0, room));
+          const n = Math.min(e.inBuf[it] || 0, Math.max(0, room));
           if (n <= 0) continue;
           e.inBuf[it] -= n;
           value += n * pr;
@@ -620,6 +669,7 @@
     ftue: ftue,
     price: price,
     remaining: remaining,
+    matsLeft: matsLeft,
     totalIn: totalIn,
     level: level,
     dims: dims,
