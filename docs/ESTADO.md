@@ -86,8 +86,7 @@ el bucle no se frena por debajo de 30 FPS y solo se dibuja lo que se ve. **El n�
   número de versión** (abajo, en la ventana de ajustes).
 - **«Tu partida»** en la ventana de ajustes, para todos: tiempo jugado, zonas, noches ganadas y
   perdidas, vídeos, y cuándo hizo cada cosa por primera vez. En la prueba basta una captura.
-- **Guía de la prueba**: `docs/PRUEBA_5_PERSONAS.md` (qué mirar, qué capturas pedir, la tabla
-  de resultados y cómo decidir después).
+- **Guía de la prueba con 5 personas**: borrada el 17/10/2026 (ya no hay esa prueba).
 
 ## Lo nuevo de la 0.9.0: arranque rápido y suministro aéreo
 
@@ -198,6 +197,8 @@ Preguntas para ti:
 - **Duración de la región 1** (16/10/2026): **unos 25 min, por ahora**. Sustituye a lo del
   15/10 (dejarla en 55 min «hasta que entren más elementos»): ahora entran. Hasta que se
   programe el hito 7, el código sigue en 55 min.
+- **El test de mercado** (17/10/2026): al subir a producción, **lo último del proyecto**. **No
+  recordárselo hasta entonces.**
 - **Sin prueba con 5 personas** (16/10/2026): se probará en la prueba cerrada de Play Console.
   El prototipo suma la región 2 y una primera investigación antes de esa prueba.
 - **El ritmo y la dificultad de la 0.4.0** (15/10/2026): «por ahora está bien».
@@ -302,12 +303,6 @@ cofres).
 
 Mientras tanto, tu prueba de la 0.6.0 a la 0.9.2 sigue valiendo (ver «Qué probar ahora»).
 Arte con IA: aparcado (te gusta el dibujado con código).
-
-Preguntas pendientes:
-- El **test de mercado** con anuncios (funcional 21, fase 2.5: 150-300 € en Meta o TikTok)
-  sigue en el funcional, ahora tras el hito 10. ¿Se queda o lo quitamos también?
-- `docs/PRUEBA_5_PERSONAS.md` ya no hace falta. ¿Lo borro, o lo guardo para preparar la
-  prueba cerrada?
 
 ## Pendientes técnicos (no urgentes)
 

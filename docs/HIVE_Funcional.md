@@ -1,4 +1,4 @@
-# HIVE BREAKER — Funcional v0.4
+# HIVE BREAKER — Funcional v0.4.1
 
 Arcade Idle Tycoon para Android. Aterrizas como comandante en un planeta infestado:
 recoges mineral con tus propias manos, lo fundes, lo vendes a la flota y con cada
@@ -15,6 +15,10 @@ construido tiene que aguantar. Región a región, hasta matar a la Reina.
 ---
 
 ## 0. Cambios
+
+### v0.4.1 (17/10/2026)
+- **El test de mercado, lo último del proyecto**: se hace al subir el juego a producción en
+  Google Play, no al terminar el prototipo (21, 24.1).
 
 ### v0.4 (16/10/2026)
 - **Más materiales y edificios.** Regla para todas las regiones: cada región trae un material
@@ -996,10 +1000,10 @@ criterios de jugadores se miden en la **prueba cerrada de Play Console**, con la
 10. Balance con simulador, vídeos de 15-30 s y prueba cerrada en Play Console (antes:
     comprobar la marca y fijar el identificador de la app, 16) → decisión go/no-go.
 
-**Fase 2.5 (decidido: sí) — test de mercado:** 2-3 vídeos de 15-30 s del prototipo en una
-campaña pequeña (Meta o TikTok, ~150-300 €) hacia una ficha de Play en prueba abierta.
-Se mide cuánta gente toca el anuncio e instala, comparado con vídeos del género. Si el
-vídeo no engancha, falla el tema o el gancho, no el código: mejor saberlo antes de la fase 3.
+**Test de mercado (decidido: sí; es lo último del proyecto, 17/10/2026):** al subir el juego
+a producción en Google Play, 2-3 vídeos de 15-30 s en una campaña pequeña (Meta o TikTok,
+~150-300 €) hacia la ficha de Play. Se mide cuánta gente toca el anuncio e instala,
+comparado con vídeos del género.
 
 ---
 
@@ -1066,7 +1070,7 @@ invertir en captación.
 | 4 | Logros y Gemas | Los logros **no dan Gemas** (regla de Hyper Drill) | 5.2 |
 | 5 | Tope offline | **2 h** base → 6 h con investigación | 14.4 |
 | 6 | Suscripción VIP | **Aplazada** hasta después del soft launch, si la retención lo justifica | 15.9 |
-| 7 | Test de mercado | **Sí**, al terminar el prototipo (hito 10) | 21 |
+| 7 | Test de mercado | **Sí**, al subir a producción: lo último del proyecto (17/10/2026) | 21 |
 | 8 | Idiomas | Sistema de idiomas de CORE desde el inicio; **inglés + español** en el MVP; portugués (Brasil), alemán, francés, japonés y coreano para el lanzamiento | 20, 21 |
 | 9 | Repositorio | `Hive` (GitHub) | 20 |
 | 10 | Comandante | **Fijo con skins** | 4 |
