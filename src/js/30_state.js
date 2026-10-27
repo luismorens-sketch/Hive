@@ -36,6 +36,10 @@
       e.ammo = def.shots * def.startBoxes;   // disparos que le quedan
       e.cd = 0;
       e.aim = -Math.PI / 2;
+    } else if (def.kind === 'arsenal') {
+      e.inBuf = {};
+      for (const k of def.accepts) e.inBuf[k] = 0;
+      e.t = 0;            // segundos hacia la siguiente caja que manda a una torreta
     } else if (def.kind === 'dronepad') {
       e.route = opts.route;
     }

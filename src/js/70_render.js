@@ -282,7 +282,7 @@
       if (p.kind === 'box') { V.blit(A.pad('box', 0, HB.Logic.ammoOf(e)), p.x, p.y); continue; }
       const toMachine = e.x > p.x ? 1 : -1;
       if (p.kind === 'in') {
-        const item = def.kind === 'proc' ? Object.keys(def.inputs)[0] : null;
+        const item = def.kind === 'proc' ? Object.keys(def.inputs)[0] : (def.kind === 'arsenal' ? 'ammo' : null);
         V.blit(A.pad('in', toMachine, item), p.x, p.y);
       } else {
         V.blit(A.pad('out', -toMachine, def.output), p.x, p.y);
@@ -315,6 +315,25 @@
       g.setLineDash([]); g.lineDashOffset = 0;
       g.globalAlpha = 1;
     }
+  }
+
+  // Hasta dónde llega un Arsenal: un círculo discontinuo en el suelo cuando el comandante se acerca
+  // (y en el plano de su zona antes de construirlo), para que se vea qué torretas rellena.
+  function drawArsenalRange(st, R) {
+    const g = V.ctx, c = st.cmd;
+    const ring = function (x, y, r, a) {
+      if (!V.onScreen(x, y, r + 1)) return;
+      g.globalAlpha = a; g.setLineDash([0.3, 0.22]); g.lineDashOffset = -vis.clock * 0.4;
+      g.lineWidth = 0.07; g.strokeStyle = P.tealL;
+      D.ellipse(g, x, y, r, r); g.stroke();
+      g.setLineDash([]); g.lineDashOffset = 0; g.globalAlpha = 1;
+    };
+    for (const e of R.ents) {
+      if (HB.MACHINES[e.type].kind !== 'arsenal' || e.dead) continue;
+      const r = HB.Logic.level(e).radius, d = HB.dist(c.x, c.y, e.x, e.y);
+      if (d < r + 0.5) ring(e.x, e.y, r, HB.clamp((r + 0.5 - d) / 1.5, 0.2, 0.6));
+    }
+    for (const z of HB.Logic.visibleZones(R)) if (z.kind === 'machine' && z.type === 'arsenal') ring(z.x, z.y, HB.MACHINES.arsenal.levels[0].radius, 0.4);
   }
 
   function drawZones(st, R, t) {
@@ -431,6 +450,8 @@
     if (t === 'export') return A.export();
     if (t === 'solar') return A.solar();
     if (t === 'dissipator') return A.dissipator();
+    if (t === 'arsenal') return A.arsenal();
+    if (t === 'radar') return A.radar();
     if (t === 'wall') return A.wall(HB.Logic.dims(e).w);
     if (d.kind === 'turret') return A.turretBase();
     return A.hq();
@@ -454,7 +475,7 @@
     return HB.lerp(1.15, 1.0, (k - 0.5) / 0.5);
   }
 
-  const RECIPE_Y = { smelter: -2.2, ammo_fab: -2.25, winder: -2.25, cell_works: -2.3, export: -1.75, solar: -1.65, dissipator: -2.15 };
+  const RECIPE_Y = { smelter: -2.2, ammo_fab: -2.25, winder: -2.25, cell_works: -2.3, export: -1.75, solar: -1.65, dissipator: -2.15, arsenal: -2.25 };
 
   function drawMachine(st, R, e) {
     const g = V.ctx, m = HB.MACHINES[e.type], dm = HB.Logic.dims(e), ve = HB.entVis(e.id);
@@ -530,6 +551,44 @@
         g.fillStyle = blink ? '#fff6a8' : P.yellow; g.fill();
         g.lineWidth = 0.03; g.strokeStyle = P.ink; g.stroke();
       }
+    } else if (m.kind === 'arsenal') {
+      // lo que guarda, en el tejado: cajas de Ammo desde la izquierda y Celdas desde la derecha
+      // (cada icono, unas 3 cajas); primero la fila de atrás
+      const B = HB.Art.ARSENAL;
+      const na = Math.min(4, Math.ceil((e.inBuf.ammo || 0) / 3)), nc = Math.min(6 - na, Math.ceil((e.inBuf.cell || 0) / 3));
+      const sa = A.item('ammo'), sc = A.item('cell');
+      for (let row = 1; row >= 0; row--) {
+        for (let col = 0; col < 3; col++) {
+          const i = row * 3 + col, px = e.x + B.cols[col], py = e.y + B.rows[row];
+          if (i < na) V.blit(sa, px, py, 0.75);
+          else if (5 - i < nc) V.blit(sc, px, py, 0.75);
+        }
+      }
+      // la luz de la antena: verde al mandar una caja, roja y lenta si no queda nada
+      const busy = ve.muzzle > 0, empty = HB.Logic.totalIn(e) <= 0;
+      if (busy || !empty || Math.floor(vis.clock * 2) % 2) {
+        g.globalCompositeOperation = 'lighter'; g.globalAlpha = busy ? 0.9 : 0.5;
+        V.blit(glowSprite(busy || !empty ? P.cashL : '#ff5a5a'), e.x + B.ax, e.y + B.ly, busy ? 0.7 : 0.45);
+        g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+      }
+    } else if (m.kind === 'radar') {
+      // la antena gira (si falta energía, a trompicones); con aviso en curso, ondas que salen
+      const cx = e.x, cy = e.y + HB.Art.RADAR.my - 0.06;
+      if (!flick) ve.spin = (ve.spin || 0) + (R.power && R.power.f < 1 ? 0.35 : 1) * 0.022;
+      const a = (ve.spin || 0) + e.x, c = Math.cos(a), rx = 0.1 + 0.4 * Math.abs(c), fx = cx + Math.sin(a) * 0.2;
+      const dish = function () {
+        D.ellipse(g, cx, cy, rx, 0.3); D.fillStroke(g, c > 0 ? '#e8eef1' : '#a9b6bc', 0.05);
+        if (c > 0 && rx > 0.16) { D.ellipse(g, cx + Math.sin(a) * 0.03, cy + 0.02, rx * 0.72, 0.21); g.fillStyle = '#b9c6cc'; g.fill(); }
+        else { D.ellipse(g, cx, cy, Math.min(rx, 0.08), 0.08); D.fillStroke(g, P.steelD, 0.03); }
+      };
+      const horn = function () { g.strokeStyle = P.ink; g.lineWidth = 0.04; g.beginPath(); g.moveTo(cx, cy); g.lineTo(fx, cy - 0.04); g.stroke(); D.ellipse(g, fx, cy - 0.04, 0.05, 0.05); D.fillStroke(g, P.tealL, 0.025); };
+      if (c > 0) { dish(); horn(); } else { horn(); dish(); }
+      if (R._plan && R._plan.radar && (R.phase === 'day' || R.phase === 'warn')) {
+        const k = (vis.clock * 0.8) % 1;
+        g.globalAlpha = 0.7 * (1 - k); g.lineWidth = 0.05; g.strokeStyle = P.tealL;
+        D.ellipse(g, cx, cy, 0.3 + k * 1.6, (0.3 + k * 1.6) * 0.75); g.stroke();
+        g.globalAlpha = 1;
+      }
     } else if (m.kind === 'cool') {
       // aspas del ventilador
       const cx = e.x, cy = e.y + dm.h / 2 - 0.05 - m.z - 0.48;
@@ -562,7 +621,7 @@
     hpLabel(e, e.y - dm.h / 2 - m.z - 0.35);
     const stt = HB.Logic.status(R, e);
     if (stt && stt !== 'dead') {
-      const key = { full: 'output_full', starve: 'no_input', vault: 'vault_full', power: 'low_power', noammo: 'no_ammo' }[stt];
+      const key = { full: 'output_full', starve: 'no_input', vault: 'vault_full', power: 'low_power', noammo: 'no_ammo', empty: 'arsenal_empty' }[stt];
       vis.labels.push({ k: 'warn', x: e.x, y: e.y - dm.h / 2 - m.z - 0.75, s: HB.T(key) });
     }
     // interruptor DEFENSA / EQUILIBRIO / BENEFICIO en la salida, si un dron la lleva a exportar
@@ -1083,6 +1142,7 @@
       drawGround(R);
       drawPads(st, R);
       drawDronePads(st, R);
+      drawArsenalRange(st, R);
       drawZones(st, R, vis.clock);
       drawLootGround(R);
       drawDrones(R, true);

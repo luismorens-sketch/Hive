@@ -74,6 +74,8 @@
     winder: ['tut_winder', P.orangeL, 'happy'],
     cellWorks: ['tut_cells', '#8ff0ff', 'happy'],
     shock: ['tut_shock', P.tealL, 'normal'],
+    arsenal: ['tut_arsenal', P.oliveL, 'happy'],
+    radar: ['tut_radar', P.tealL, 'alarm'],
   };
 
   const H = {
@@ -280,6 +282,26 @@
       HB.slot.box(R, t, tmp);
       Fx.fly({ spr: A.item(e.b || 'ammo'), x: sx, y: sy, z: 0, tx: tmp.x, ty: tmp.y - 0.5, tz: 0, dur: FX.depositFly, arc: 0.7,
         land: function () { Au.play('drop', { step: Au.step() }); HB.entVis(t.id).flash = 0.4; } });
+    },
+
+    // el Arsenal manda una caja a una torreta de su radio (funcional 9.1)
+    arsenalFeed: function (st, e) {
+      const a = e.a, t = e.b, R = st.regions[st.cur];
+      HB.entVis(a.id).muzzle = 0.35;
+      if (!V.onScreen(a.x, a.y, 6) && !V.onScreen(t.x, t.y, 2)) return;
+      HB.slot.box(R, t, tmp);
+      Fx.fly({ spr: A.item(e.c), x: a.x, y: a.y - 0.4, z: 0, tx: tmp.x, ty: tmp.y - 0.5, tz: 0, dur: 0.55, arc: 1.6,
+        land: function () { Au.play('drop', { vol: volAt(st, t.x, t.y) }); HB.entVis(t.id).flash = 0.4; } });
+    },
+
+    // el Radar ha visto venir la noche: ondas desde la antena y su pitido
+    radar: function (st, e) {
+      const R = st.regions[st.cur];
+      for (const r of R.ents) {
+        if (HB.MACHINES[r.type].kind !== 'radar' || r.dead) continue;
+        Fx.ring(r.x, r.y + HB.Art.RADAR.my, 2.2, P.tealL);
+      }
+      Au.play('ping');
     },
 
     repair: function (st, e) {

@@ -91,6 +91,8 @@
     bite: function (t, o) { noise(t, 0.05, 0.1 * o.vol, 'highpass', 1800); },
     click: function (t, o) { tone('square', 1400, 0, t, 0.02, 0.06 * o.vol); tone('square', 900, 0, t + 0.06, 0.02, 0.05 * o.vol); },
     shock: function (t, o) { noise(t, 0.12, 0.08 * o.vol, 'bandpass', 3500 * jit(), 1200, 3); tone('square', 880 * jit(), 220, t, 0.1, 0.04 * o.vol); },
+    // el Radar ve algo: dos pitidos limpios, como un sonar
+    ping: function (t, o) { tone('sine', 1320, 1250, t, 0.18, 0.12 * o.vol); tone('sine', 1320, 1250, t + 0.32, 0.22, 0.07 * o.vol); },
     zap: function (t, o) { tone('sawtooth', 220, 140, t, 0.35, 0.07 * o.vol); noise(t, 0.3, 0.05 * o.vol, 'bandpass', 3000, 0, 4); },
     siren: function (t, o) {
       const os = ac.createOscillator(); os.type = 'sawtooth';

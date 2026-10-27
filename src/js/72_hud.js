@@ -139,6 +139,39 @@
     return y + 40;
   }
 
+  // ---------- Radar (funcional 9.1): por dónde vendrá la noche y con qué bichos ----------
+  const RADAR_ORDER = ['crusher', 'leaper', 'swarmer'];
+  function drawRadar(st, R, y) {
+    const p = R._plan;
+    if (!p || !p.radar || (R.phase !== 'day' && R.phase !== 'warn')) return y;
+    const g = V.ctx, x0 = V.gx + 14, w = V.gw - 28, h = 30, cy = y + h / 2;
+    const key = p.flanks.length > 1 ? 'radar_ns' : (p.flanks[0] === 'n' ? 'radar_n' : 'radar_s');
+    // cuántos de cada uno (el dorado cuenta como Swarmer: que sea una sorpresa)
+    const n = vis.radarN || (vis.radarN = {});
+    for (const k in n) n[k] = 0;
+    for (const gr of p.groups) for (const t of gr.list) { const k = t === 'gilded' ? 'swarmer' : t; n[k] = (n[k] || 0) + 1; }
+    D.rr(g, x0, y, w, h, 11); g.fillStyle = 'rgba(14,38,42,0.88)'; g.fill();
+    g.lineWidth = 2; g.strokeStyle = P.tealL; g.stroke();
+    // el barrido: un punto que late a la izquierda
+    const k = (vis.clock * 1.2) % 1;
+    g.globalAlpha = 1 - k; D.ellipse(g, x0 + 16, cy, 4 + k * 9, 4 + k * 9); g.lineWidth = 2; g.strokeStyle = P.tealL; g.stroke();
+    g.globalAlpha = 1; D.ellipse(g, x0 + 16, cy, 4, 4); g.fillStyle = P.tealL; g.fill();
+    // los bichos, de derecha a izquierda
+    let x = x0 + w - 10;
+    g.font = V.font(20);
+    for (const t of RADAR_ORDER) {
+      if (!n[t]) continue;
+      const s = '×' + n[t];
+      V.text(s, x, cy + 1, 20, '#ffffff', P.ink, 'right');
+      x -= g.measureText(s).width + 2;
+      const spr = A.bug(t, 0), sz = t === 'crusher' ? 30 : 26;
+      g.drawImage(spr.c, x - sz, cy - sz / 2, sz, sz);
+      x -= sz + 8;
+    }
+    fitText(T(key), x0 + 30, cy + 1, 20, P.tealL, x - x0 - 34, 600, null, 'left');
+    return y + h + 8;
+  }
+
   // Energía junto al dinero (funcional 18): usada / disponible. Ámbar cerca del límite; roja y
   // latiendo si falta (brownout: todo va más lento).
   function drawPowerPill(R, x, y, h, maxW) {
@@ -638,6 +671,7 @@
     H.buttons.push({ x: gx - 28, y: gy - 28, w: 56, h: 56, fn: function () { HB.Menu.open(); } });
 
     let yy = drawHeat(st, R, 70);
+    yy = drawRadar(st, R, yy);
     yy = drawPower(R, yy);
 
     // pista del tutorial (cortita) mientras se aprende el bucle; de noche, la que toque

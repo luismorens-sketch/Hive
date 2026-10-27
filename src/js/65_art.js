@@ -390,6 +390,53 @@
       });
     },
 
+    // ---------- Arsenal: un búnker oliva con cajas en el tejado (funcional v0.4, 9.1) ----------
+    // Lo que guarda se ve en el tejado (lo dibuja 70_render.js según sus existencias).
+    arsenal: function () {
+      const m = HB.MACHINES.arsenal, w = m.w, h = m.h, z = m.z;
+      return V.sprite('arsenal', w + 1.0, z + h * 0.75 + 1.9, (w + 1.0) / 2, z + h * 0.75 + 1.4 - h / 2, function (g) {
+        const fy = h / 2, front = fy - 0.1;
+        shadow(g, 0.1, fy, w / 2 + 0.25, 0.26, 0.26);
+        D.rr(g, -w / 2 - 0.1, fy - 0.26, w + 0.2, 0.32, 0.06); D.fillStroke(g, P.conc, LW);
+        D.box(g, 0, front, w - 0.1, h, z, P.oliveL, P.olive, LW);
+        const top = front - z, td = h * 0.75;
+        // portón blindado con su viga amarilla y negra
+        D.rr(g, -0.42, front - z + 0.24, 0.84, z - 0.3, 0.05); D.fillStroke(g, P.oliveD, 0.05);
+        g.strokeStyle = 'rgba(28,33,38,0.5)'; g.lineWidth = 0.03;
+        for (let k = 1; k < 3; k++) { const yy = front - z + 0.24 + k * (z - 0.3) / 3; g.beginPath(); g.moveTo(-0.38, yy); g.lineTo(0.38, yy); g.stroke(); }
+        hazard(g, -w / 2 + 0.1, front - z + 0.06, w - 0.3, 0.13);
+        // tejado: un pretil alrededor del patio de cajas
+        D.rr(g, -w / 2 + 0.14, top - td + 0.1, w - 0.38, td - 0.2, 0.06); D.fillStroke(g, '#5a7a33', 0.04);
+        // antena con su luz (parpadea: 70_render.js)
+        g.strokeStyle = P.ink; g.lineWidth = 0.05;
+        g.beginPath(); g.moveTo(ARSENAL.ax, top - td + 0.16); g.lineTo(ARSENAL.ax, ARSENAL.ly + 0.06); g.stroke();
+        D.ellipse(g, ARSENAL.ax, ARSENAL.ly, 0.07, 0.07); D.fillStroke(g, '#5a1f1f', 0.03);
+      });
+    },
+
+    // ---------- Radar: caseta de acero con su mástil (la antena gira: 70_render.js) ----------
+    radar: function () {
+      const m = HB.MACHINES.radar, w = m.w, h = m.h, z = 0.55;
+      return V.sprite('radar', w + 1.0, h / 2 - RADAR.my + 0.5, (w + 1.0) / 2, -RADAR.my + 0.2, function (g) {
+        const fy = h / 2, front = fy - 0.05, d = h - 0.1;
+        shadow(g, 0.1, fy, w / 2 + 0.2, 0.24, 0.25);
+        D.box(g, 0, front, w - 0.1, d, z, '#cfd8dc', '#8796a0', LW);
+        // ventana turquesa de la sala de control
+        D.rr(g, -0.32, front - z + 0.1, 0.64, 0.2, 0.04); D.fillStroke(g, P.tealL, 0.04);
+        g.fillStyle = 'rgba(255,255,255,0.5)'; g.fillRect(-0.26, front - z + 0.13, 0.1, 0.13);
+        // mástil de celosía
+        const base = front - z - d * 0.75 / 2;
+        g.strokeStyle = '#3d4a50'; g.lineWidth = 0.05;
+        g.beginPath(); g.moveTo(-0.14, base); g.lineTo(-0.03, RADAR.my); g.moveTo(0.14, base); g.lineTo(0.03, RADAR.my); g.stroke();
+        g.lineWidth = 0.03;
+        for (let k = 1; k < 4; k++) {
+          const y0 = HB.lerp(base, RADAR.my, (k - 1) / 4), y1 = HB.lerp(base, RADAR.my, k / 4);
+          g.beginPath(); g.moveTo(HB.lerp(-0.14, -0.03, (k - 1) / 4), y0); g.lineTo(HB.lerp(0.14, 0.03, k / 4), y1); g.stroke();
+        }
+        D.ellipse(g, 0, RADAR.my, 0.08, 0.06); D.fillStroke(g, P.steelD, 0.03);
+      });
+    },
+
     // ---------- Plataforma de exportación ----------
     export: function () {
       const m = HB.MACHINES.export, w = m.w, h = m.h;
@@ -834,6 +881,18 @@
     cell_works: function (g) {
       g.save(); g.translate(0, 0.22); g.scale(1.5, 1.5); ITEM_ART.cell(g); g.restore();
     },
+    arsenal: function (g) {
+      g.save(); g.translate(0, 0.2); g.scale(1.5, 1.5); ITEM_ART.ammo(g); g.restore();
+      g.save(); g.translate(0.2, 0.02); g.scale(0.9, 0.9); ITEM_ART.ammo(g); g.restore();
+      g.save(); g.translate(-0.2, 0.02); g.scale(0.9, 0.9); ITEM_ART.ammo(g); g.restore();
+    },
+    radar: function (g) {
+      icoStyle(g);
+      g.beginPath(); g.moveTo(-0.3, -0.18); g.quadraticCurveTo(-0.05, 0.25, 0.3, 0.1); g.closePath(); g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(0, -0.04); g.lineTo(0.18, -0.24); g.stroke();
+      D.ellipse(g, 0.2, -0.26, 0.05, 0.05); g.fillStyle = P.tealL; g.fill(); g.stroke();
+      D.rr(g, -0.06, 0.08, 0.12, 0.2, 0.02); g.fillStyle = '#ffffff'; g.fill(); g.stroke();
+    },
     dissipator: function (g) {
       icoStyle(g);
       D.rr(g, -0.26, -0.2, 0.52, 0.42, 0.05); g.fill(); g.stroke();
@@ -854,6 +913,7 @@
     export_cell: [['cell', 'ammo', 'coil', 'plate'], ['$']],   // y con el Taller, las Celdas
     solar: [['bolt'], ['+5']],
     dissipator: [['heat'], ['-2']],
+    arsenal: [['ammo', 'cell'], ['turret']],
   };
   HB.Art.recipe = function (type) {
     const r = RECIPES[type];
@@ -872,6 +932,8 @@
           g.beginPath(); g.moveTo(x, -0.2); g.quadraticCurveTo(x + 0.17, -0.02, x + 0.1, 0.12); g.quadraticCurveTo(x, 0.2, x - 0.1, 0.12);
           g.quadraticCurveTo(x - 0.15, 0.0, x, -0.2); g.closePath(); D.fillStroke(g, P.orange, 0.03);
           g.beginPath(); g.moveTo(x, -0.05); g.quadraticCurveTo(x + 0.07, 0.05, x + 0.03, 0.12); g.lineTo(x - 0.04, 0.12); g.quadraticCurveTo(x - 0.06, 0.04, x, -0.05); g.fillStyle = P.yellow; g.fill();
+        } else if (it === 'turret') {
+          g.save(); g.translate(x, 0.02); g.scale(0.62, 0.62); ZONE_ICONS.turret(g); g.restore();
         } else if (it === 'bolt') {
           g.beginPath(); g.moveTo(x + 0.05, -0.2); g.lineTo(x - 0.1, 0.03); g.lineTo(x, 0.03); g.lineTo(x - 0.05, 0.2); g.lineTo(x + 0.11, -0.04); g.lineTo(x + 0.01, -0.04); g.closePath();
           D.fillStroke(g, P.yellow, 0.03);
@@ -894,6 +956,12 @@
   // El banco de carga del Taller de celdas (respecto al tejado): lo usa también 70_render.js.
   const CELLW = { cx: 0.3, cy: -0.35, post: 0.42 };
   HB.Art.CELLW = CELLW;
+  // El Arsenal: dónde van su antena (x, y de la luz) y las cajas del tejado (filas y columnas), y
+  // la punta del mástil del Radar (respecto al centro del edificio): las usa también 70_render.js.
+  const ARSENAL = { ax: 0.5, ly: -1.75, rows: [-0.42, -0.8], cols: [-0.42, 0, 0.42] };
+  HB.Art.ARSENAL = ARSENAL;
+  const RADAR = { my: -1.75 };
+  HB.Art.RADAR = RADAR;
 
   function levelPips(g, flip, lvl, x, y) {
     // Puntitos de nivel en la fachada (1, 2 o 3). Se dibujan sin voltear.

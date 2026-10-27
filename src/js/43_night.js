@@ -24,6 +24,7 @@
   function threat(R, n) { return rdef(R).A0 * (1 + 0.15 * n); }
 
   function hq(R) { for (const e of R.ents) if (def(e).kind === 'hq') return e; return null; }
+  function radarOn(R) { for (const e of R.ents) if (def(e).kind === 'radar' && !e.dead) return true; return false; }
 
   // ---------- Campo de flujo hacia la Torre de mando ----------
   // jump = true: el de los Leapers, que saltan los muros.
@@ -117,6 +118,7 @@
     const open = openFlanks(R);
     let flanks;
     if (first) flanks = ['s'];
+    else if (opts.flanks) flanks = opts.flanks.slice();   // los que ya anunció el Radar
     else {
       const count = 1 + Math.floor(HB.rand(st) * open.length);
       flanks = open.slice();
@@ -189,7 +191,10 @@
   function warn(st, R, opts) {
     R.phase = 'warn';
     R._warnT = C().night.warn;
-    R._plan = plan(st, R, opts);
+    // Si el Radar ya la vio venir, se cumple lo que dijo. Con el tope del día llegan menos
+    // bichos (se rehace la lista), pero por los mismos flancos.
+    const seen = R._plan;
+    if (!seen || opts.capped) R._plan = plan(st, R, Object.assign({}, opts, seen ? { flanks: seen.flanks } : {}));
     ev(st, 'warn', R._plan);
     HB.Logic.ftue(st, 'warn');
   }
@@ -571,6 +576,13 @@
       }
       R.heat = Math.max(0, R.heat + h * dt);
       const size = barSize(R);
+      // Radar (funcional 9.1): cuando la noche se acerca, ya sabe por dónde vendrá y con qué.
+      if (!R._plan && radarOn(R) && Math.max(R.heat / size, R.dayT / C().night.dayCap) >= HB.MACHINES.radar.at) {
+        R._plan = plan(st, R, {});
+        R._plan.radar = true;
+        ev(st, 'radar', R._plan);
+        HB.Logic.ftue(st, 'radar');
+      }
       if (R.heat >= size || R.dayT >= C().night.dayCap) warn(st, R, { capped: R.heat < size });
     } else if (R.phase === 'warn') {
       R._warnT -= dt;
@@ -626,11 +638,14 @@
     bossRating: bossRating,
     provokeInfo: provokeInfo,
     openFlanks: openFlanks,
+    radarOn: radarOn,
 
     provoke: function (st) {
       const R = st.regions[st.cur], p = provokeInfo(st, R);
       if (!p.can) return false;
-      startNight(st, R, plan(st, R, { provoke: p.bonus }));
+      const pl = R._plan || plan(st, R, {});   // si el Radar ya la anunció, la misma noche
+      pl.provoke = p.bonus;
+      startNight(st, R, pl);
       return true;
     },
 

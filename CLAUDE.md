@@ -121,6 +121,10 @@ Dónde se toca cada cosa:
   y la ventana que tiembla y estalla en `72_hud.js`.
 - **Suministro aéreo** → `CONFIG.supply` (`20_data.js`), las reglas en `src/js/47_supply.js`;
   la caja y su flecha en `70_render.js` y su ventana en `72_hud.js`.
+- **Arsenal y Radar** → sus filas en `MACHINES` (`20_data.js`); el Arsenal rellena torretas en
+  `40_logic.js` (`arsenalStep`) y el aviso del Radar está en `43_night.js` (la noche anunciada
+  se guarda en `R._plan`); su dibujo, en `65_art.js` y `70_render.js`, y el aviso de debajo de
+  la barra de Calor, en `72_hud.js` (`drawRadar`).
 - **Tutorial** (funcional 12): la lista de pasos es `HB.FTUE` (`20_data.js`); la lógica apunta
   cuándo pasa cada uno con `HB.Logic.ftue(st, 'paso')`; los avisos de una sola vez están en
   `75_juice.js` (manejador `ftue`), las pistas y la tarjeta final en `72_hud.js` y la entrada

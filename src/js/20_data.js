@@ -9,7 +9,7 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.11.0',      // sube con cada versión que se publica para probar
+    version: '0.12.0',      // sube con cada versión que se publica para probar
     hito: 7,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
@@ -108,7 +108,8 @@
   // Máquinas, torretas y edificios. w × h = huella en el suelo (casillas). z = alto del dibujo.
   // kind: 'proc' transforma objetos · 'export' vende a la flota · 'hq' Torre de mando ·
   //       'power' da energía · 'cool' Disipador · 'turret' defiende · 'wall' muro ·
-  //       'dronepad' base de drones (no ocupa sitio: se pisa).
+  //       'dronepad' base de drones (no ocupa sitio: se pisa) · 'arsenal' rellena torretas ·
+  //       'radar' ve venir la noche.
   // power: MW que consume; supply: MW que da. heat: Calor por segundo mientras trabaja.
   // levels: nivel 1, 2 y 3 (funcional 6.2). Si un nivel trae `power`, ese nivel consume eso
   // (mejorar una máquina la hace más rápida, pero pide más energía).
@@ -165,6 +166,18 @@
     solar:      { kind: 'power', w: 1.6, h: 1.2, z: 0.6, hp: 120, supply: 5 },
     dissipator: { kind: 'cool', w: 1.4, h: 1.4, z: 1.3, hp: 150, power: 3, heat: -2 },
     wall:       { kind: 'wall', w: 1, h: 0.5, z: 0.7, hp: 300 },
+    // Arsenal (funcional v0.4, 9.1): edificio avanzado que rellena solo las torretas de su radio
+    // (radius) con la munición que se le lleve, Ammo o Celdas: cada `every` s manda una caja a la
+    // más vacía. inCap = cajas de cada cosa que guarda. No gasta energía: es un almacén.
+    arsenal: {
+      kind: 'arsenal', w: 1.6, h: 1.4, z: 0.75, hp: 250,
+      accepts: ['ammo', 'cell'],
+      levels: [{ inCap: 12, radius: 5.5, every: 0.8 }],
+    },
+    // Radar (funcional v0.4, 9.1 y 8.3): ve venir la noche. Cuando la barra de Calor pasa de `at`
+    // (o el día lleva ese tanto de su tope), dice por qué flanco vendrá la oleada y con qué bichos.
+    // Sin él, solo se sabe al sonar «THE HIVE STIRS», 10 s antes.
+    radar:      { kind: 'radar', w: 1.2, h: 1.2, z: 1.6, hp: 150, power: 1, at: 0.6 },
 
     // Torretas (funcional 9.1). dmg por disparo, rate disparos/s, range casillas,
     // shots = disparos por caja de munición, box = cajas que caben, splash = radio de área.
@@ -294,10 +307,17 @@
         { id: 'turret_s1_l2',  kind: 'upgrade',   x: 2.4,  y: 43.9, target: 'turret_s1', req: ['turret_s1'] },
         { id: 'smelter_1_l3',  kind: 'upgrade',   x: 6.0,  y: 36.65, target: 'smelter_1', req: ['smelter_1_l2'] },
         { id: 'winder_l2',     kind: 'upgrade',   x: 6.6,  y: 14.25, target: 'winder', mats: { coil: 6 }, req: ['winder'] },
-        { id: 'cell_works_l2', kind: 'upgrade',   x: 6.6,  y: 19.05, target: 'cell_works', mats: { cell: 4 }, req: ['cell_works'] },
         { id: 'solar_3',       kind: 'machine',   x: 1.6,  y: 18.0,  type: 'solar', mats: { coil: 6 }, req: ['cell_works'] },
         { id: 'wall_n1',       kind: 'wall',      x: 1.7,  y: 5.2, x0: 0, x1: 3.4, req: ['expansion_n'] },
         { id: 'turret_n2',     kind: 'turret',    x: 8.0,  y: 6.6, choice: ['gatling', 'cannon', 'shock'], req: ['expansion_n', 'cell_works'], mult: 1.2 },
+        // el Arsenal y el Radar (funcional v0.4, 9.1): edificios avanzados, con Bobinas. Los dos en
+        // el norte: es el flanco más lejos de la Fábrica de munición
+        { id: 'arsenal',       kind: 'machine',   x: 6.0,  y: 9.4,  type: 'arsenal', mats: { coil: 8 }, req: ['turret_n2'] },
+        { id: 'radar',         kind: 'machine',   x: 10.6, y: 8.2,  type: 'radar', mats: { coil: 6 }, req: ['cell_works', 'turret_n1'] },
+        // con el Radar, la región gastaba más de lo que daban tres paneles hasta el final (22/20 MW)
+        { id: 'solar_4',       kind: 'machine',   x: 0.9,  y: 31.0, type: 'solar', mats: { coil: 6 }, req: ['radar'] },
+        { id: 'drone_cargo_ar', kind: 'drone',    x: 2.0,  y: 8.6,  req: ['arsenal'], route: { kind: 'cargo', from: 'ammo_fab', to: 'arsenal' } },
+        { id: 'cell_works_l2', kind: 'upgrade',   x: 6.6,  y: 19.05, target: 'cell_works', mats: { cell: 4 }, req: ['cell_works'] },
         { id: 'drone_miner_1_l2', kind: 'upgrade', x: 2.2, y: 33.4, target: 'drone_miner_1', req: ['drone_miner_1'] },
         { id: 'export_l3',     kind: 'upgrade',   x: 11.1, y: 41.2, target: 'export', mats: { coil: 10 }, req: ['export_l2'] },
         { id: 'turret_s2_l2',  kind: 'upgrade',   x: 9.6,  y: 43.9, target: 'turret_s2', req: ['turret_s2'] },
@@ -353,7 +373,7 @@
   HB.FTUE = ['intro', 'move', 'mine', 'feed', 'pickup', 'sell', 'collect', 'buy', 'drone', 'heat',
     'warn', 'night', 'win', 'chest', 'refill', 'power', 'choice', 'matsSeen', 'mats', 'winder', 'copper', 'coil',
     'cellWorks', 'cell', 'shock',
-    'leaper', 'orbitalReady', 'orbital', 'boss',
+    'leaper', 'orbitalReady', 'orbital', 'arsenal', 'arsenalFeed', 'radar', 'boss',
     'cleared', 'offlineTip', 'away', 'supplyDrop', 'supply', 'trash'];
 
   // Lugares de vídeo recompensado (funcional 15.3). En el prototipo son SIMULADOS: el botón da

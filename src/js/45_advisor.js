@@ -241,11 +241,13 @@
   // Cuántos objetos de la pila aceptaría ahora la máquina e (limitado por su hueco).
   function acceptCount(e, stack) {
     const d = def(e);
-    if (e.dead || (d.kind !== 'proc' && d.kind !== 'export')) return 0;
+    if (e.dead || (d.kind !== 'proc' && d.kind !== 'export' && d.kind !== 'arsenal')) return 0;
     const L = HB.Logic.level(e);
     let n = 0;
     if (d.kind === 'proc') {
       for (const k in d.inputs) n += Math.min(count(stack, k), L.inCap - e.inBuf[k]);
+    } else if (d.kind === 'arsenal') {
+      for (const k of d.accepts) n += Math.min(count(stack, k), L.inCap - (e.inBuf[k] || 0));
     } else {
       let have = 0;
       for (const it of stack) if (d.accepts.indexOf(it) >= 0) have++;
@@ -259,7 +261,7 @@
     if (e.dead) return false;
     for (const it of stack) {
       if (d.kind === 'proc' && d.inputs[it] !== undefined) return true;
-      if (d.kind === 'export' && d.accepts.indexOf(it) >= 0) return true;
+      if ((d.kind === 'export' || d.kind === 'arsenal') && d.accepts.indexOf(it) >= 0) return true;
       if (d.kind === 'turret' && it === HB.Logic.ammoOf(e)) return true;
     }
     return false;
@@ -288,11 +290,13 @@
 
   // Torretas que necesitan munición, la más vacía primero. limit = por debajo de qué fracción.
   // stack: solo las que se pueden recargar con lo que lleva la pila (Ammo, o Celdas la de choque).
+  // Las que tiene a su cargo un Arsenal con existencias no cuentan: ya las rellena él.
   function hungryTurret(R, limit, from, stack) {
     let best = null, bs = Infinity;
     for (const e of R.ents) {
       if (def(e).kind !== 'turret' || e.dead || !HB.Logic.boxRoom(e)) continue;
       if (stack && stack.indexOf(HB.Logic.ammoOf(e)) < 0) continue;
+      if (HB.Logic.arsenalFor(R, e)) continue;
       const f = ammoFrac(e);
       if (f >= limit) continue;
       // la más vacía; a igualdad, la más cercana (la distancia no cambia quién entra en la lista)
@@ -433,12 +437,26 @@
       if (e.type === 'smelter') return 'hint_deposit';
       if (e.type === 'winder') return 'hint_winder';
       if (e.type === 'export') return 'hint_export';
+      if (e.type === 'arsenal') return 'hint_arsenal';
       return 'hint_feed';
     }
     return null;
   }
 
   function mk(kind, x, y, e, z) { return { kind: kind, x: x, y: y, e: e || null, z: z || null, hint: hintFor(kind, e) }; }
+
+  // Un sitio para plantarse o recoger botín que no caiga en el reciclador: quedarse quieto
+  // encima vaciaría la pila sin querer. Se corre a un lado.
+  function offTrash(R, p) {
+    const tr = HB.REGIONS[R.id].trash;
+    if (!tr || HB.dist(p.x, p.y, tr.x, tr.y) > HB.CONFIG.padRadius + 0.2) return p;
+    const N = nav(R), side = p.x < tr.x ? -1 : 1;
+    for (const dx of [side * 1.3, -side * 1.3]) {
+      const q = { x: tr.x + dx, y: p.y };
+      if (!N.blocked[cellOf(N, q.x, q.y)]) return q;
+    }
+    return { x: p.x, y: tr.y + (p.y < tr.y ? -1.1 : 1.1) };
+  }
 
   function same(t, kind, e) { return t && t.kind === kind && t.e === e; }
 
@@ -497,7 +515,7 @@
     // 2. De noche: botín cercano, y si no, plantarse a defender.
     if (night) {
       const l = nearestLoot(R, c, threat ? 3 : 6);
-      if (l) return mk('loot', l.x, l.y);
+      if (l) { const q = offTrash(R, l); return mk('loot', q.x, q.y); }
       if (threat) {
         let p = defendSpot(R, c);
         if (boss && H) {
@@ -509,6 +527,7 @@
         }
         if (c.hp < HB.CONFIG.cmd.hp * 0.35 && H) p = { x: H.x, y: H.y + HB.Logic.sideOf(R.id, (p || H).y) * -1.8 };
         if (p) {
+          p = offTrash(R, p);
           if (mem.task && mem.task.kind === 'defend' && HB.dist(mem.task.x, mem.task.y, p.x, p.y) < 1) return mem.task;
           return mk('defend', p.x, p.y);
         }
@@ -518,7 +537,7 @@
     // 2b. De día, el botín que quedó en el suelo antes de que desaparezca.
     if (!night) {
       const l = nearestLoot(R, c, 9);
-      if (l) return mk('loot', l.x, l.y);
+      if (l) { const q = offTrash(R, l); return mk('loot', q.x, q.y); }
     }
 
     // 3. Si puedes pagar una zona, eso primero (la más barata).
@@ -599,7 +618,9 @@
         const n = acceptCount(e, c.stack);
         if (n <= 0) continue;
         const p = HB.Logic.padPos(e, 'in');
-        const s = n * (def(e).kind === 'proc' ? 2 : 1) - HB.dist(c.x, c.y, p.x, p.y) * 0.05;
+        // fabricar antes que vender; el Arsenal, antes que vender salvo si se va a por beneficio
+        const k = def(e).kind, w = k === 'proc' ? 2 : (k === 'arsenal' ? (strat === 'profit' ? 0.5 : 1.5) : 1);
+        const s = n * w - HB.dist(c.x, c.y, p.x, p.y) * 0.05;
         if (s > bs) { bs = s; best = e; }
       }
       // la munición, si alguna torreta tiene hueco y no vamos a por beneficio, a la torreta

@@ -148,6 +148,9 @@
       } else if (k === 'turret') {
         const a = padPos(e, 'box', R.id);
         pads.push({ key: e.id + ':box', kind: 'box', x: a.x, y: a.y, e: e });
+      } else if (k === 'arsenal') {
+        const a = padPos(e, 'in');
+        pads.push({ key: e.id + ':in', kind: 'in', x: a.x, y: a.y, e: e });
       }
     }
     for (const z of vis) {
@@ -222,6 +225,7 @@
     const d = def(e);
     if (d.kind === 'proc') return d.inputs[it] !== undefined && e.inBuf[it] < level(e).inCap;
     if (d.kind === 'export') return d.accepts.indexOf(it) >= 0 && totalIn(e) < level(e).inCap;
+    if (d.kind === 'arsenal') return d.accepts.indexOf(it) >= 0 && (e.inBuf[it] || 0) < level(e).inCap;
     return false;
   }
 
@@ -325,6 +329,7 @@
     if (z.type === 'winder') ftue(st, 'winder');
     if (z.type === 'cell_works') ftue(st, 'cellWorks');
     if (z.kind === 'turret' && z.type === 'shock') ftue(st, 'shock');
+    if (z.type === 'arsenal') ftue(st, 'arsenal');
   }
 
   // El jugador elige el tipo de torreta de una zona ya pagada (funcional 6.2).
@@ -612,6 +617,38 @@
     }
   }
 
+  // Arsenal (funcional 9.1): manda una caja a la torreta más vacía de su radio que use lo que
+  // guarda (Ammo o Celdas). Trabaja de día y de noche; dañado, más despacio.
+  function covers(a, t) { return HB.dist(a.x, a.y, t.x, t.y) <= level(a).radius; }
+
+  function arsenalStep(st, R, e, dt) {
+    if (e.dead) return;
+    const L = level(e);
+    e.t = Math.min(L.every, (e.t || 0) + dt * eff(e));
+    if (e.t < L.every) return;
+    let best = null, bf = 1;
+    for (const t of R.ents) {
+      if (def(t).kind !== 'turret' || !boxRoom(t) || !(e.inBuf[ammoOf(t)] > 0) || !covers(e, t)) continue;
+      const f = t.ammo / (def(t).box * def(t).shots);
+      if (f < bf) { bf = f; best = t; }
+    }
+    if (!best) return;
+    e.t = 0;
+    const it = ammoOf(best);
+    e.inBuf[it]--;
+    best.ammo += def(best).shots;
+    st.stats.arsenal = (st.stats.arsenal || 0) + 1;
+    ev(st, 'arsenalFeed', e, best, it);
+    ftue(st, 'arsenalFeed');
+  }
+
+  // El Arsenal que rellenará la torreta t (está en su radio y tiene lo que usa), o null.
+  function arsenalFor(R, t) {
+    const it = ammoOf(t);
+    for (const e of R.ents) if (def(e).kind === 'arsenal' && !e.dead && e.inBuf[it] > 0 && covers(e, t)) return e;
+    return null;
+  }
+
   // MW que consume un edificio: el de su nivel si la tabla lo dice; si no, el de la máquina.
   function powerUse(e) {
     const d = def(e), L = d.levels && d.levels[e.level - 1];
@@ -643,6 +680,7 @@
       const d = def(e);
       if (d.kind === 'proc') procStep(st, R, e, d, dt);
       else if (d.kind === 'export') exportStep(st, R, e, d, dt);
+      else if (d.kind === 'arsenal') arsenalStep(st, R, e, dt);
     }
     if (HB.Night) HB.Night.econ(st, R, dt);
   }
@@ -660,6 +698,8 @@
       if (R.pile >= level(e).vault) return 'vault';
     } else if (d.kind === 'turret') {
       if (e.ammo <= 0) return 'noammo';
+    } else if (d.kind === 'arsenal') {
+      if (totalIn(e) <= 0) return 'empty';
     } else if (d.kind === 'cool' && R.power && R.power.f < 1) return 'power';
     return null;
   }
@@ -691,6 +731,8 @@
     accepts: accepts,
     boxRoom: boxRoom,
     ammoOf: ammoOf,
+    arsenalFor: arsenalFor,
+    covers: covers,
     choose: choose,
     collide: collide,
     edgeDist: edgeDist,

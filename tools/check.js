@@ -226,7 +226,7 @@ if (HB) {
   {
     try {
       const { run } = require('./sim_balance');
-      // La región 1 está pensada para unos 25 min del robot (0.11.0); 90 deja margen.
+      // La región 1 dura unos 30 min del robot (0.12.0); 90 deja margen.
       const LIMIT = 90;
       const r = run({ minutos: LIMIT, seed: 777 });
       if (r.zones.length === 0) bad('el robot no ha comprado ninguna zona');
@@ -234,7 +234,9 @@ if (HB) {
       else if (r.cleared === null) bad('el robot no conquista la región en ' + LIMIT + ' minutos (' + r.zones.length + '/' + r.zonesTotal + ' zonas, ' + r.nights.length + ' noches)');
       else if (!(r.gems >= 150)) bad('el robot conquista la región pero no recibe los dos cofres (Gemas: ' + r.gems + ')');
       else if (!(r.shocks > 0 && r.slowed > 0)) bad('la torreta de choque no ha frenado a ningún bicho (sin Celdas o sin disparar)');
-      else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos · ' + r.gems + ' Gemas · ' + r.slowed + ' frenados');
+      else if (!(r.arsenal > 0)) bad('el Arsenal no ha rellenado ninguna torreta');
+      else if (!(r.radar > 0) || r.radarOk !== r.radar) bad('el Radar no avisa, o la noche no viene por donde dijo (' + r.radarOk + ' de ' + r.radar + ')');
+      else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos · ' + r.gems + ' Gemas · ' + r.slowed + ' frenados · ' + r.arsenal + ' cajas del Arsenal · ' + r.radar + ' avisos del Radar');
     } catch (e) { bad('el simulador ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
   }
 

@@ -65,6 +65,7 @@ function run(opts) {
   const nights = [];
   const taskTime = {};
   let firstSale = null, nightStart = 0, cmdDowns = 0, ads = 0, destroyed = 0, supplies = 0, drops = 0, shocks = 0, slowed = 0;
+  let arsenal = 0, radar = 0, radarOk = 0, forecast = null;
   let clearedAt = null;
 
   while (st.time < maxT && clearedAt === null) {
@@ -83,6 +84,15 @@ function run(opts) {
       if (e.k === 'destroyed') destroyed++;
       if (e.k === 'supplyDrop') drops++;
       if (e.k === 'shock') { shocks++; slowed += e.b.length; }
+      if (e.k === 'arsenalFeed') arsenal++;
+      if (e.k === 'radar') { radar++; forecast = e.a.flanks.slice().sort().join(); }
+      // ¿la noche vino por donde dijo el Radar?
+      // (la del jefe no cuenta: la lanza el jugador y sustituye a la anunciada)
+      if (e.k === 'nightStart' && forecast !== null) {
+        if (R._night && R._night.boss) radar--;
+        else if (e.b.slice().sort().join() === forecast) radarOk++;
+        forecast = null;
+      }
       if (e.k === 'nightEnd') {
         const r = e.a, H = R._byId.hq;
         nights.push({ n: r.n, at: nightStart, len: st.time - nightStart, won: r.won, kills: r.kills, loot: r.loot + r.bonus, lost: r.lostLoot, damage: r.damage, boss: r.boss, bossHp: r.bossHp, tip: r.tip, hq: Math.round(H.hp / HB.MACHINES.hq.hp * 100) });
@@ -127,6 +137,7 @@ function run(opts) {
     gems: st.gems,
     drops: drops, supplies: supplies,
     shocks: shocks, slowed: slowed,
+    arsenal: arsenal, radar: radar, radarOk: radarOk,
   };
 }
 
@@ -157,6 +168,7 @@ function print(r) {
   if (r.cleared !== null) out.push('REGIÓN CONQUISTADA en ' + mmss(r.cleared) + ' (el funcional pide unos 25 min para R1, 6.4).');
   else out.push('Sin conquistar tras ' + mmss(r.total) + ' (' + r.zones.length + '/' + r.zonesTotal + ' zonas).');
   out.push('Torretas de choque: ' + r.shocks + ' descargas, ' + r.slowed + ' bichos frenados');
+  out.push('Arsenal: ' + r.arsenal + ' cajas a las torretas · Radar: ' + r.radar + ' avisos (' + r.radarOk + ' acertaron el flanco)');
   out.push('Suministros aéreos: ' + r.drops + ' cajas lanzadas' + (r.ads ? ', ' + r.supplies + ' abiertas con vídeo' : ' (el robot sin vídeos no las abre)'));
   out.push('Gemas al final: ' + r.gems + ' (cofres de la primera noche y del jefe, y Swarmers dorados)');
   out.push('Ganado vendiendo: $' + r.earned + ' · bichos muertos: ' + r.kills + ' · comandante caído: ' + r.cmdDowns +

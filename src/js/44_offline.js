@@ -87,6 +87,8 @@
         const src = R._byId[p.route.from], dst = R._byId[p.route.to];
         // En DEFENSA, la salida se guarda entera para las torretas: no va nada a la exportación.
         if (!src || !dst || def(src).kind !== 'proc' || HB.Drones.reserve(src, dst) === Infinity) continue;
+        // El Arsenal se llena y ya no pide más: sin noches, fuera no gasta nada.
+        if (def(dst).kind === 'arsenal') continue;
         const n = Math.min(caps[p.id], left[src.id] || 0);
         left[src.id] = (left[src.id] || 0) - n;
         add(p.route.to, def(src).output, n);

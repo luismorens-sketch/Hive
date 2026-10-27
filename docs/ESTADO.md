@@ -3,19 +3,19 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 27/10/2026 · **Versión publicada:** 0.11.0 ·
+**Última actualización:** 27/10/2026 · **Versión publicada:** 0.12.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
 
 Fase 2 del funcional (prototipo jugable), **ampliada el 16/10/2026** (funcional v0.4): más
 materiales y edificios, la región 2 y una primera investigación; sin prueba con 5 personas
-(se probará en la prueba cerrada de Play Console). **Hito 6 terminado** (0.9.0). **Hito 7 en
-marcha: la región 1 con dos metales**; la 0.10.0 trajo el cobre, la Bobinadora y las obras
-que piden materiales, y la 0.11.0 el Taller de celdas y la torreta de choque. Pendientes de tu
-prueba: el tutorial (0.6.0), el Sargento Brass (0.7.0), el cofre (0.8.0), el arranque rápido
-con el suministro aéreo (0.9.0), el cobre (0.10.0) y las celdas con la torreta de choque
-(0.11.0).
+(se probará en la prueba cerrada de Play Console). **Hito 6 terminado** (0.9.0). **Hito 7
+terminado: la región 1 con dos metales**: la 0.10.0 trajo el cobre, la Bobinadora y las obras
+que piden materiales; la 0.11.0, el Taller de celdas y la torreta de choque; la 0.12.0, el
+Arsenal y el Radar. Pendientes de tu prueba: el tutorial (0.6.0), el Sargento Brass (0.7.0),
+el cofre (0.8.0), el arranque rápido con el suministro aéreo (0.9.0), el cobre (0.10.0), las
+celdas con la torreta de choque (0.11.0) y el Arsenal y el Radar (0.12.0).
 
 | Hito (funcional 21) | Estado |
 |---|---|
@@ -25,14 +25,38 @@ con el suministro aéreo (0.9.0), el cobre (0.10.0) y las celdas con la torreta 
 | 4. Drones, torretas, munición, bichos, campo de flujo, noche | Hecho y probado (0.3.0) |
 | 5. Calor-reloj, energía, brownout, jefe | Hecho y probado (0.3.0) |
 | 6. Tutorial, guardado/offline, vídeos simulados | **Hecho**: guardado, mientras no juegas (0.5.0), tutorial (0.6.0) con el Sargento Brass (0.7.0), cofre (0.8.0) y los 4 vídeos simulados (0.9.0) |
-| 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **En marcha**: cobre, Bobinadora, obras con materiales (0.10.0); Taller de celdas, torreta de choque y región de ~25 min (0.11.0). Falta: Arsenal y Radar |
+| 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **Hecho**: cobre, Bobinadora, obras con materiales (0.10.0); Taller de celdas y torreta de choque (0.11.0); Arsenal y Radar (0.12.0). La región dura ahora unos 30 min: el ajuste, cuando se equilibre todo junto |
 | 8. Mapa del planeta + región 2 (The Mire) | Pendiente |
 | 9. Investigación, primera versión | Pendiente |
 | 10. Balance, vídeos y prueba cerrada en Play Console → seguir o no | Pendiente. Primer pase de ritmo y dificultad hecho (0.4.0) |
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE) · 0.10.0 el cobre, la Bobinadora, las obras con materiales y la región de ~27 min · 0.11.0 el Taller de celdas, la torreta de choque y la región de ~25 min.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE) · 0.10.0 el cobre, la Bobinadora, las obras con materiales y la región de ~27 min · 0.11.0 el Taller de celdas, la torreta de choque y la región de ~25 min · 0.12.0 el Arsenal y el Radar.
+
+## Lo nuevo de la 0.12.0: el Arsenal y el Radar (hito 7, última parte)
+
+- **El Arsenal**, en el norte, entre las dos torretas de esa línea. Pide dinero **y 8 Bobinas**.
+  Se le lleva munición (Ammo o Celdas) y **rellena él solo las torretas de su alrededor**: cada
+  menos de un segundo manda una caja, por el aire, a la más vacía. Lo que guarda se ve en su
+  tejado (cajas de Ammo y Celdas); si se vacía, el cartel dice «VACÍO» y la luz de su antena se
+  pone roja. Al acercarte, un círculo discontinuo en el suelo enseña hasta dónde llega (también
+  antes de construirlo, en el plano de la obra). Un **dron de carga** le lleva Ammo desde la
+  Fábrica de munición. El Sargento Brass lo presenta: «¡ARSENAL LISTO!».
+- **El Radar**, en el norte, a la derecha. Pide dinero **y 6 Bobinas** y gasta 1 MW. Cuando
+  la barra de Calor pasa del 60 %, **dice por dónde vendrá la noche y con qué bichos**: debajo
+  de la barra sale «RADAR · NORTE», «SUR» o «NORTE + SUR» con cuántos Swarmers, Leapers y
+  Crushers vienen. Sin Radar, eso solo se sabe 10 segundos antes («THE HIVE STIRS»). La antena
+  gira y, con un aviso en marcha, echa ondas. El sargento: «¡CONTACTO EN EL RADAR!».
+  La noche llega siempre por donde dijo (comprobado con el robot y en `tools/check.js`).
+- **Un cuarto panel solar** (6 Bobinas), a la izquierda de la Fábrica de munición: al final de
+  la región faltaba energía para siempre (22 de 20 MW) y no había nada más que construir para
+  arreglarlo. Ahora sobra un poco (22 de 25).
+- **Arreglado de paso**: el robot (y la flecha, de noche) a veces te plantaba encima del
+  reciclador para defender o recoger botín, y quedarse quieto ahí vacía la pila. Ya no.
+- **La región dura ahora unos 30 minutos con el robot** (antes 25): son 4 obras más y todo lo
+  que viene detrás sube de precio. Como decidiste, el ajuste se deja para cuando equilibremos
+  más cosas a la vez.
 
 ## Lo nuevo de la 0.11.0: las celdas y la torreta de choque (hito 7, segunda parte)
 
@@ -207,9 +231,18 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.11.0)
+## Qué probar ahora (versión 0.12.0)
 
-**Lo nuevo, las celdas y la torreta de choque** (en tu partida de siempre, sin borrar nada):
+**Lo nuevo, el Arsenal y el Radar** (en tu partida de siempre, sin borrar nada; salen hacia el
+minuto 20, después de la segunda torreta del norte):
+
+- **El Arsenal**: ¿se entiende que rellena solo las torretas de su alrededor? ¿Se ve el círculo
+  de hasta dónde llega? ¿Se ven las cajas volando a las torretas?
+- **El Radar**: cuando la barra de Calor pasa de la mitad, ¿se lee el aviso de debajo (por dónde
+  vienen y cuántos bichos)? ¿Te sirve para prepararte?
+- **La energía**: con todo construido, ¿ya no sale «FALTA ENERGÍA» para siempre?
+
+**Lo de la 0.11.0, las celdas y la torreta de choque**:
 
 - **El Taller de celdas**: ¿se entiende que necesita Bobinas **y** Placas? ¿Se distinguen las
   Celdas en la pila?
@@ -217,8 +250,6 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   lentos (el anillo azul claro)? ¿Sirve de algo o es mejor otra torreta?
 - **Elegir entre tres** en la segunda torreta del norte: ¿se lee bien la ventana?
 - **La flecha**: cuando te falta un material para una obra, ¿te lleva a por él?
-- **El ritmo**: la región debería durar unos 25 minutos. Para verlo de verdad, desde cero
-  (rueda dentada → «Borrar progreso»), y mira el tiempo en «Tu partida».
 
 **Lo de la 0.10.0, el cobre**:
 
@@ -267,6 +298,10 @@ Preguntas para ti:
 - **Duración de la región 1** (16/10/2026): **unos 25 min, por ahora**. Sustituye a lo del
   15/10 (dejarla en 55 min «hasta que entren más elementos»): ahora entran. Hasta que se
   programe el hito 7, el código sigue en 55 min.
+- **Los ajustes de balance, más adelante** (27/10/2026): se posponen para equilibrar más facetas
+  del juego a la vez. Eso incluye corregir el funcional 6.3 (pide subir un 18-25 % por zona y
+  el código sube un 6 %) y la duración de la región, que con el Arsenal y el Radar ha pasado
+  de 25 a unos 30 minutos.
 - **El test de mercado** (17/10/2026): al subir a producción, **lo último del proyecto**. **No
   recordárselo hasta entonces.**
 - **Sin prueba con 5 personas** (16/10/2026): se probará en la prueba cerrada de Play Console.
@@ -299,6 +334,16 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
   cuando la región duraba 50 min): ¿la ajusto?
 - **El mapa** (0.10.0): 12 casillas más al norte para el distrito del cobre. Qué obras piden
   materiales y cuántos (ver «Lo nuevo de la 0.10.0» y «de la 0.11.0») lo elegí yo.
+- **El Arsenal y el Radar** (0.12.0):
+  - Los dos en el **norte** (el esquema del funcional 6.1 pone el Arsenal al sur): en el sur no
+    cabía sin mover medio mapa, y el norte es el flanco más lejos de la Fábrica de munición,
+    donde más viajes ahorra.
+  - Arsenal: guarda 12 cajas de Ammo y 12 de Celdas, llega a 5,5 casillas (cubre las dos
+    torretas del norte), manda una caja cada 0,8 s, no gasta energía. Pide 8 Bobinas.
+  - Radar: avisa al 60 % de la barra de Calor (o al 60 % del tope del día), gasta 1 MW, pide 6
+    Bobinas. Si se provoca la noche, viene la que anunció. El dorado no se anuncia (cuenta como
+    un Swarmer más: que siga siendo una sorpresa).
+  - El cuarto panel solar (6 Bobinas), tras el Radar.
 - **La torreta de choque** (0.11.0): daño 4, una descarga cada 1,7 s, alcance 3,2 casillas,
   frena al 50 % durante 2 s, 8 descargas por Celda; **no frena al jefe** (si no, sería
   demasiado fácil). La primera, en el hueco del muro sur; la segunda del norte se puede elegir
@@ -361,12 +406,16 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
     Gemas, los botones de Tienda y Misiones (minuto 5-7), el mapa con la región 2 iluminada y
     el permiso de notificaciones (este necesita la app de Android).
 
-## Simulador (versión 0.11.0)
+## Simulador (versión 0.12.0)
 
 Sin vídeos, 3 partidas de cada estrategia conquistan la región sin perder ninguna noche:
-`balanced` **25-27 min**, `profit` 25-29, `defense` 25-30; 8 noches, el jefe cae a la primera.
-El robot: Taller de celdas a los 9:06, torreta de choque a los 12:38 y la primera Celda en la
-mano a los 12:46; en una partida, las torretas de choque frenan a unos 50 bichos.
+`balanced` **30-32 min** (mediana 31:09), `profit` 29-31, `defense` 31-33; 9 noches, el jefe cae
+a la primera. Con vídeos, 27 min. El robot: Arsenal a los 20:18 (su primera caja a una torreta,
+a los 21:08) y el primer aviso del Radar a los 22:43; en una partida, el Arsenal manda unas 10
+cajas y el Radar acierta siempre el flanco. El robot pasa un 9 % del tiempo rellenando
+torretas (11 % en la 0.11.0).
+
+Versión 0.11.0: `balanced` 25-27 min, `profit` 25-29, `defense` 25-30.
 
 Versión 0.10.0: sin vídeos, 3 partidas de cada estrategia conquistan la región: `balanced` **27-28 min**,
 `profit` 26-29, `defense` 28-30; 7 noches, el jefe cae a la primera. **Con vídeos** (×2 del
@@ -379,16 +428,14 @@ cofres).
 
 ## Lo siguiente
 
-1. **Hito 7: la región 1 con dos metales** (funcional v0.4: 5.1, 5.4, 6.2, 9.1 y 12). Hecho:
-   el cobre, la Bobinadora y las obras con materiales (0.10.0); el Taller de celdas, la
-   torreta de choque y el ritmo de ~25 min (0.11.0). Falta: el **Arsenal** y el **Radar**
-   (se construyen con Bobinas) y el último ajuste de los 25 min.
-2. **Hito 8**: el mapa del planeta y la región 2 (The Mire).
-3. **Hito 9**: la investigación, primera versión.
-4. **Hito 10**: balance, vídeos y prueba cerrada en Play Console (antes: comprobar la marca y
-   fijar el identificador de la app).
+1. **Hito 8**: el mapa del planeta y la región 2 (The Mire), con su material nuevo (funcional
+   v0.4: cada región trae uno que se combina con los anteriores).
+2. **Hito 9**: la investigación, primera versión (entre otras cosas, Arsenal II y Radar II).
+3. **Hito 10**: balance (incluida la duración de la región 1 y el funcional 6.3), vídeos y
+   prueba cerrada en Play Console (antes: comprobar la marca y fijar el identificador de la
+   app).
 
-Mientras tanto, tu prueba de la 0.6.0 a la 0.11.0 (ver «Qué probar ahora»).
+Mientras tanto, tu prueba de la 0.6.0 a la 0.12.0 (ver «Qué probar ahora»).
 Arte con IA: aparcado (te gusta el dibujado con código).
 
 ## Pendientes técnicos (no urgentes)
