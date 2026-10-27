@@ -72,6 +72,8 @@
     supplyDrop: ['tut_supply', P.orangeL, 'normal'],
     matsSeen: ['tut_mats', P.yellow, 'normal'],
     winder: ['tut_winder', P.orangeL, 'happy'],
+    cellWorks: ['tut_cells', '#8ff0ff', 'happy'],
+    shock: ['tut_shock', P.tealL, 'normal'],
   };
 
   const H = {
@@ -276,7 +278,7 @@
       HB.slot.stack(idx, tmp);
       const sx = tmp.x, sy = tmp.y;
       HB.slot.box(R, t, tmp);
-      Fx.fly({ spr: A.item('ammo'), x: sx, y: sy, z: 0, tx: tmp.x, ty: tmp.y - 0.5, tz: 0, dur: FX.depositFly, arc: 0.7,
+      Fx.fly({ spr: A.item(e.b || 'ammo'), x: sx, y: sy, z: 0, tx: tmp.x, ty: tmp.y - 0.5, tz: 0, dur: FX.depositFly, arc: 0.7,
         land: function () { Au.play('drop', { step: Au.step() }); HB.entVis(t.id).flash = 0.4; } });
     },
 
@@ -313,6 +315,21 @@
       HB.tracer(tip.x, tip.y, b.x + (Math.random() - 0.5) * 0.2, b.y - 0.1);
       HB.entVis(t.id).muzzle = 0.05;
       Au.play('gun', { vol: volAt(st, t.x, t.y) * 0.7 });
+    },
+
+    // torreta de choque: un anillo cian hasta donde llega y un rayo en zigzag a cada bicho
+    shock: function (st, e) {
+      const t = e.a, list = e.b;
+      HB.entVis(t.id).muzzle = 0.12;
+      if (!V.onScreen(t.x, t.y, 3)) return;
+      const S = HB.Night.turretStats(t);
+      Fx.ring(t.x, t.y - 0.2, S.range / 1.3, P.tealL);
+      const x0 = t.x, y0 = t.y - 0.6;
+      for (const b of list) {
+        const mx = (x0 + b.x) / 2 + (Math.random() - 0.5) * 0.6, my = (y0 + b.y) / 2 + (Math.random() - 0.5) * 0.6;
+        HB.tracer(x0, y0, mx, my, '#bdf3ff'); HB.tracer(mx, my, b.x, b.y - 0.1, '#bdf3ff');
+      }
+      Au.play('shock', { vol: volAt(st, t.x, t.y) });
     },
 
     shell: function (st, e) {

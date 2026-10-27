@@ -225,19 +225,20 @@
     g.save(); g.translate(cx, cy); g.scale(s, s); g.translate(-cx, -cy);
     panel(cx, cy, pw, 330);
     V.text(T('choose_turret'), cx, cy - 135, 34, P.yellow, null);
-    const cw = (pw - 48) / 2;
+    const n = ch.options.length, gap = n > 2 ? 10 : 16, cw = (pw - gap * (n + 1)) / n;
     ch.options.forEach(function (type, i) {
-      const x = cx - pw / 2 + 16 + cw / 2 + i * (cw + 16), y = cy + 15;
+      const x = cx - pw / 2 + gap + cw / 2 + i * (cw + gap), y = cy + 15;
       D.rr(g, x - cw / 2, y - 105, cw, 210, 16); g.fillStyle = '#262c33'; g.fill(); g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,0.2)'; g.stroke();
-      // dibujo de la torreta, en grande
-      const tile = V.tile, sc = 1.6;
+      // dibujo de la torreta, en grande (con tres, un poco menos)
+      const tile = V.tile, sc = Math.min(1.6, (cw - 8) / (1.8 * tile));
       const base = A.turretBase(), head = A.turretHead(type);
       g.drawImage(base.c, x - base.ax * tile * sc, y - 25 - base.ay * tile * sc, base.w * tile * sc, base.h * tile * sc);
       g.save(); g.translate(x, y - 25 - 0.42 * tile * sc); g.rotate(-0.5);
       g.drawImage(head.c, -head.ax * tile * sc, -head.ay * tile * sc, head.w * tile * sc, head.h * tile * sc);
       g.restore();
-      V.text(T('t_' + type), x, y + 45, 30, '#ffffff', null);
-      V.text(T('t_' + type + '_d'), x, y + 75, 17, '#c9d1d6', null, 'center', 500);
+      fitText(T('t_' + type), x, y + 45, 30, '#ffffff', cw - 10);
+      const desc = wrap(T('t_' + type + '_d'), n > 2 ? 15 : 17, cw - 12, 500);
+      desc.slice(0, 2).forEach(function (l, k) { V.text(l, x, y + 72 + k * 19, n > 2 ? 15 : 17, '#c9d1d6', null, 'center', 500); });
       H.buttons.push({ x: x - cw / 2, y: y - 105, w: cw, h: 210, fn: function () { HB.Logic.choose(st, type); game.save(); } });
     });
     g.restore();
@@ -645,7 +646,7 @@
     let hint = null;
     if (game.intro) hint = null;   // la nave está aterrizando
     else if (st.ftue.move === undefined) hint = 'hint_drag';
-    else if (tgt && tgt.hint && (learning || tgt.kind === 'refill' || (tgt.kind === 'pickup' && tgt.hint === 'hint_ammo') || tgt.kind === 'repair' || tgt.kind === 'trash')) hint = tgt.hint;
+    else if (tgt && tgt.hint && (learning || tgt.kind === 'refill' || (tgt.kind === 'pickup' && (tgt.hint === 'hint_ammo' || tgt.hint === 'hint_cell')) || tgt.gather || tgt.kind === 'repair' || tgt.kind === 'trash')) hint = tgt.hint;
     // de noche, lo que enseña el tutorial (funcional 12): quieto se dispara más; el Orbital
     if (!hint && !game.intro && R.phase === 'night' && R._night) {
       if (R._orbital > 0 && st.ftue.orbital === undefined && !H.aiming) hint = 'tut_orbital';
@@ -653,7 +654,7 @@
     }
     if (hint && !H.modal(st)) {
       const hy = yy + 22 + Math.sin(vis.clock * 3) * 3;
-      fitText(T(hint), V.gx + V.gw / 2, hy, 28, hint === 'hint_refill' || hint === 'hint_ammo' ? P.orangeL : P.yellow, V.gw - 24, 600, P.ink);
+      fitText(T(hint), V.gx + V.gw / 2, hy, 28, hint === 'hint_refill' || hint === 'hint_ammo' || hint === 'hint_cell' ? P.orangeL : P.yellow, V.gw - 24, 600, P.ink);
     }
     if (st.ftue.move === undefined && !game.intro) drawHand();
 

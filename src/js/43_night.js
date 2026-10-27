@@ -292,6 +292,7 @@
       if (b.dead) continue;
       const E = HB.ENEMIES[b.type];
       if (b.hitT > 0) b.hitT -= dt;
+      if (b.slowT > 0) b.slowT -= dt;   // frenado por una torreta de choque
       if (b.st === 'jump') {
         b.jt += dt;
         b.x += b.jx * dt; b.y += b.jy * dt;
@@ -322,6 +323,7 @@
       }
       b.st = 'move';
       let speed = E.speed;
+      if (b.slowT > 0) speed *= b.slowK || 1;
       if (E.flee) {
         // el dorado huye hacia el borde más cercano (funcional 9.5)
         const ex = b.x < d.w / 2 ? -1 : 1;
@@ -419,7 +421,17 @@
       if (!t || e.cd > 0) continue;
       e.cd = 1 / (S.rate * pf(R) * HB.Logic.eff(e));
       e.ammo--;
-      if (S.splash > 0) {
+      if (T.slow) {
+        // torreta de choque: descarga en área que frena a todos los que alcanza (al jefe, no)
+        const hit = [];
+        for (const b of R._bugs) {
+          if (b.dead || b.z > 0.3 || HB.dist(e.x, e.y - 0.3, b.x, b.y) > S.range + b.r) continue;
+          if (!HB.ENEMIES[b.type].boss) { b.slowT = T.slowT; b.slowK = T.slow; }
+          if (hit.length < 6) hit.push(b);
+          damageBug(st, R, b, S.dmg);
+        }
+        ev(st, 'shock', e, hit);
+      } else if (S.splash > 0) {
         const dd = HB.dist(e.x, e.y, t.x, t.y);
         R._shots.push({ x: e.x, y: e.y - 0.6, tx: t.x, ty: t.y, t: 0, dur: dd / T.shellSpeed, dmg: S.dmg, splash: S.splash });
         ev(st, 'shell', e, t);

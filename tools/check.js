@@ -226,14 +226,15 @@ if (HB) {
   {
     try {
       const { run } = require('./sim_balance');
-      // La región 1 está pensada para unos 55-60 min del robot (0.4.0); 90 deja margen.
+      // La región 1 está pensada para unos 25 min del robot (0.11.0); 90 deja margen.
       const LIMIT = 90;
       const r = run({ minutos: LIMIT, seed: 777 });
       if (r.zones.length === 0) bad('el robot no ha comprado ninguna zona');
       else if (!r.nights.length) bad('no ha llegado ninguna noche');
       else if (r.cleared === null) bad('el robot no conquista la región en ' + LIMIT + ' minutos (' + r.zones.length + '/' + r.zonesTotal + ' zonas, ' + r.nights.length + ' noches)');
       else if (!(r.gems >= 150)) bad('el robot conquista la región pero no recibe los dos cofres (Gemas: ' + r.gems + ')');
-      else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos · ' + r.gems + ' Gemas');
+      else if (!(r.shocks > 0 && r.slowed > 0)) bad('la torreta de choque no ha frenado a ningún bicho (sin Celdas o sin disparar)');
+      else ok('región conquistada en ' + Math.round(r.cleared / 60) + ' min de juego · ' + r.nights.length + ' noches · ' + r.kills + ' bichos · ' + r.gems + ' Gemas · ' + r.slowed + ' frenados');
     } catch (e) { bad('el simulador ha fallado: ' + (e.stack || e.message).split('\n').slice(0, 4).join(' | ')); }
   }
 

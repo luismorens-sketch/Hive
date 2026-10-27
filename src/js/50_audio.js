@@ -9,7 +9,7 @@
   let streak = 0, streakT = -10;
 
   // Separación mínima entre dos sonidos iguales, para que no se amontonen.
-  const GAP = { tic: 0.028, drop: 0.03, cling: 0.024, chunk: 0.09, payTick: 0.055, clunk: 0.25, gun: 0.05, blaster: 0.06, splat: 0.04, thwip: 0.03, bite: 0.08, hurt: 0.2, click: 0.4, cannon: 0.1 };
+  const GAP = { tic: 0.028, drop: 0.03, cling: 0.024, chunk: 0.09, payTick: 0.055, clunk: 0.25, gun: 0.05, blaster: 0.06, splat: 0.04, thwip: 0.03, bite: 0.08, hurt: 0.2, click: 0.4, cannon: 0.1, shock: 0.15 };
 
   function now() { return ac ? ac.currentTime : 0; }
 
@@ -90,6 +90,7 @@
     thwip: function (t, o) { tone('triangle', 900 * jit(), 400, t, 0.04, 0.05 * o.vol); },
     bite: function (t, o) { noise(t, 0.05, 0.1 * o.vol, 'highpass', 1800); },
     click: function (t, o) { tone('square', 1400, 0, t, 0.02, 0.06 * o.vol); tone('square', 900, 0, t + 0.06, 0.02, 0.05 * o.vol); },
+    shock: function (t, o) { noise(t, 0.12, 0.08 * o.vol, 'bandpass', 3500 * jit(), 1200, 3); tone('square', 880 * jit(), 220, t, 0.1, 0.04 * o.vol); },
     zap: function (t, o) { tone('sawtooth', 220, 140, t, 0.35, 0.07 * o.vol); noise(t, 0.3, 0.05 * o.vol, 'bandpass', 3000, 0, 4); },
     siren: function (t, o) {
       const os = ac.createOscillator(); os.type = 'sawtooth';

@@ -101,6 +101,15 @@
       D.ellipse(g, 0, -0.25, 0.17, 0.06); D.fillStroke(g, P.steel, 0.03);
       D.ellipse(g, 0, -0.25, 0.04, 0.018); g.fillStyle = P.ink; g.fill();
     },
+    // Celda de energía: una pila cian de pie, con su borne y un rayo amarillo
+    cell: function (g) {
+      D.rr(g, -0.12, -0.26, 0.24, 0.26, 0.05); D.fillStroke(g, '#38c9e6', 0.035);
+      g.fillStyle = '#1f8fb0'; g.fillRect(-0.11, -0.07, 0.22, 0.045);
+      D.rr(g, -0.05, -0.31, 0.1, 0.06, 0.02); D.fillStroke(g, P.steelD, 0.03);
+      g.beginPath(); g.moveTo(0.03, -0.23); g.lineTo(-0.05, -0.13); g.lineTo(0.0, -0.13); g.lineTo(-0.03, -0.04);
+      g.lineTo(0.06, -0.16); g.lineTo(0.01, -0.16); g.closePath(); D.fillStroke(g, P.yellow, 0.015);
+      g.fillStyle = 'rgba(255,255,255,0.55)'; g.fillRect(-0.09, -0.23, 0.03, 0.15);
+    },
     bill: function (g) {
       D.rr(g, -0.24, -0.14, 0.48, 0.14, 0.025); D.fillStroke(g, P.cashD, 0.03);
       D.rr(g, -0.24, -0.2, 0.48, 0.08, 0.025); D.fillStroke(g, P.cash, 0.03);
@@ -293,6 +302,43 @@
         g.beginPath(); g.moveTo(w / 2 - 0.12, fy - 0.75); g.lineTo(w / 2 + 0.42, fy - 0.45); g.lineTo(w / 2 + 0.42, fy - 0.25); g.lineTo(w / 2 - 0.12, fy - 0.5); g.closePath();
         D.fillStroke(g, P.steelD, LW);
         levelPips(g, flip, lvl, w / 2 - 0.6, top + 0.3);
+      });
+    },
+
+    // ---------- Taller de celdas: un banco de carga con una celda grande entre dos bobinas ----------
+    // Cuando trabaja, la celda se ilumina y salta un arco entre las bobinas (70_render.js).
+    cell_works: function (flip, lvl) {
+      const m = HB.MACHINES.cell_works, w = m.w, h = m.h, z = m.z;
+      return V.sprite('cellw:' + (flip ? 1 : 0) + ':' + lvl, w + 1.2, z + h * 0.75 + 2.2, (w + 1.2) / 2, z + h * 0.75 + 1.6 - h / 2, function (g) {
+        if (flip) g.scale(-1, 1);
+        const fy = h / 2;
+        shadow(g, 0.15, fy + 0.02, w / 2 + 0.3, 0.28, 0.28);
+        D.rr(g, -w / 2 - 0.1, fy - 0.3, w + 0.2, 0.36, 0.06); D.fillStroke(g, P.conc, LW);
+        D.box(g, 0, fy - 0.12, w - 0.1, h, z, '#a7b6bd', '#66767f', LW);
+        const top = fy - 0.12 - z;
+        hazard(g, -w / 2 + 0.1, fy - 0.36, w - 0.3, 0.16);
+        g.fillStyle = P.teal; g.fillRect(-w / 2 + 0.08, top + 0.02, w - 0.26, 0.08);
+        // emblema: una celda en un círculo
+        D.ellipse(g, 0.3, top + 0.48, 0.3, 0.26); D.fillStroke(g, '#bdf3ff', LW);
+        g.save(); g.translate(0.3, top + 0.66); g.scale(1.15, 1.15); ITEM_ART.cell(g); g.restore();
+        // tolva de entrada (lado de la entrada, como las demás máquinas)
+        g.beginPath();
+        g.moveTo(-w / 2 + 0.02, top - 1.0); g.lineTo(-w / 2 + 0.8, top - 1.0); g.lineTo(-w / 2 + 0.7, top - 0.45); g.lineTo(-w / 2 + 0.12, top - 0.45);
+        g.closePath(); D.fillStroke(g, P.steelD, LW);
+        g.fillStyle = '#3f474c'; g.fillRect(-w / 2 + 0.1, top - 0.95, 0.62, 0.14);
+        // el banco de carga: dos postes con bobinas de cobre y la celda grande en medio
+        const cx = CELLW.cx, cy = top + CELLW.cy;
+        for (const px of [cx - CELLW.post, cx + CELLW.post]) {
+          D.rr(g, px - 0.07, cy - 0.55, 0.14, 0.7, 0.04); D.fillStroke(g, P.copperD, 0.04);
+          g.fillStyle = P.copperL;
+          for (let k = 0; k < 4; k++) g.fillRect(px - 0.07, cy - 0.5 + k * 0.14, 0.14, 0.05);
+          D.ellipse(g, px, cy - 0.6, 0.11, 0.08); D.fillStroke(g, P.steel, 0.04);
+        }
+        g.save(); g.translate(cx, cy + 0.15); g.scale(2.1, 2.1); ITEM_ART.cell(g); g.restore();
+        // conducto de salida
+        g.beginPath(); g.moveTo(w / 2 - 0.12, fy - 0.75); g.lineTo(w / 2 + 0.42, fy - 0.45); g.lineTo(w / 2 + 0.42, fy - 0.25); g.lineTo(w / 2 - 0.12, fy - 0.5); g.closePath();
+        D.fillStroke(g, P.steelD, LW);
+        levelPips(g, flip, lvl, -w / 2 + 0.25, top + 0.12);
       });
     },
 
@@ -785,6 +831,9 @@
     winder: function (g) {
       g.save(); g.translate(0, 0.2); g.scale(1.55, 1.55); ITEM_ART.coil(g); g.restore();
     },
+    cell_works: function (g) {
+      g.save(); g.translate(0, 0.22); g.scale(1.5, 1.5); ITEM_ART.cell(g); g.restore();
+    },
     dissipator: function (g) {
       icoStyle(g);
       D.rr(g, -0.26, -0.2, 0.52, 0.42, 0.05); g.fill(); g.stroke();
@@ -799,8 +848,10 @@
     smelter: [['ore'], ['plate']],
     ammo_fab: [['plate', 'plate'], ['ammo']],
     winder: [['copper'], ['coil']],
+    cell_works: [['coil', 'plate'], ['cell']],
     export: [['ammo', 'plate'], ['$']],
     export_cu: [['ammo', 'coil', 'plate'], ['$']],   // con la Bobinadora, las Bobinas también se venden
+    export_cell: [['cell', 'ammo', 'coil', 'plate'], ['$']],   // y con el Taller, las Celdas
     solar: [['bolt'], ['+5']],
     dissipator: [['heat'], ['-2']],
   };
@@ -840,6 +891,9 @@
   // Dónde está el tambor de la Bobinadora (respecto al tejado): lo usa también 70_render.js.
   const WINDER = { cx: 0.25, cy: -0.5, len: 0.95, r: 0.34 };
   HB.Art.WINDER = WINDER;
+  // El banco de carga del Taller de celdas (respecto al tejado): lo usa también 70_render.js.
+  const CELLW = { cx: 0.3, cy: -0.35, post: 0.42 };
+  HB.Art.CELLW = CELLW;
 
   function levelPips(g, flip, lvl, x, y) {
     // Puntitos de nivel en la fachada (1, 2 o 3). Se dibujan sin voltear.

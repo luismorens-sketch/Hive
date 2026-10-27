@@ -175,7 +175,7 @@
     const st = G.st;
     G.target = HB.Advisor.target(st, G.mem);
     const idle = performance.now() - HB.Input.lastInput > 6000 && !st.cmd.moving;
-    G.showGuide = G.target && (G.target.kind === 'pay' || st.stats.zones < 2 || idle || G.autopilot);
+    G.showGuide = G.target && (G.target.kind === 'pay' || G.target.gather || st.stats.zones < 2 || idle || G.autopilot);
 
     HB.Audio.music(st.regions[st.cur].phase);
     HB.Render.frame(G, G.acc / dt, vdt || (HB.HUD.modal(st) ? real : real * 0.0001));

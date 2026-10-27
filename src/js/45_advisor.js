@@ -260,7 +260,7 @@
     for (const it of stack) {
       if (d.kind === 'proc' && d.inputs[it] !== undefined) return true;
       if (d.kind === 'export' && d.accepts.indexOf(it) >= 0) return true;
-      if (d.kind === 'turret' && it === 'ammo') return true;
+      if (d.kind === 'turret' && it === HB.Logic.ammoOf(e)) return true;
     }
     return false;
   }
@@ -287,10 +287,12 @@
   function ammoFrac(e) { const d = def(e); return e.ammo / (d.box * d.shots); }
 
   // Torretas que necesitan munición, la más vacía primero. limit = por debajo de qué fracción.
-  function hungryTurret(R, limit, from) {
+  // stack: solo las que se pueden recargar con lo que lleva la pila (Ammo, o Celdas la de choque).
+  function hungryTurret(R, limit, from, stack) {
     let best = null, bs = Infinity;
     for (const e of R.ents) {
       if (def(e).kind !== 'turret' || e.dead || !HB.Logic.boxRoom(e)) continue;
+      if (stack && stack.indexOf(HB.Logic.ammoOf(e)) < 0) continue;
       const f = ammoFrac(e);
       if (f >= limit) continue;
       // la más vacía; a igualdad, la más cercana (la distancia no cambia quién entra en la lista)
@@ -324,9 +326,10 @@
     return best;
   }
 
-  function ammoSource(R) {
+  function ammoSource(R, item) {
     let best = null;
-    for (const e of R.ents) if (def(e).kind === 'proc' && def(e).output === 'ammo' && !e.dead && e.out > 0 && (!best || e.out > best.out)) best = e;
+    item = item || 'ammo';
+    for (const e of R.ents) if (def(e).kind === 'proc' && def(e).output === item && !e.dead && e.out > 0 && (!best || e.out > best.out)) best = e;
     return best;
   }
 
@@ -419,7 +422,7 @@
 
   function hintFor(kind, e) {
     if (kind === 'mine') return 'hint_mine';
-    if (kind === 'pickup') return e && def(e).output === 'ammo' ? 'hint_ammo' : 'hint_pickup';
+    if (kind === 'pickup') return e && def(e).output === 'ammo' ? 'hint_ammo' : (e && def(e).output === 'cell' ? 'hint_cell' : 'hint_pickup');
     if (kind === 'collect') return 'hint_collect';
     if (kind === 'pay') return 'hint_pay';
     if (kind === 'refill') return 'hint_refill';
@@ -445,7 +448,7 @@
     if (t.kind === 'mine') return c.stack.length < cap && R.veins.length > 0 && (!t.item || itemRoom(R, t.item) > count(c.stack, t.item));
     if (t.kind === 'collect') return R.pile > 0;
     if (t.kind === 'deliver') return R._byId[t.e.id] === t.e && acceptCount(t.e, c.stack) > 0;
-    if (t.kind === 'refill') return !t.e.dead && HB.Logic.boxRoom(t.e) && count(c.stack, 'ammo') > 0;
+    if (t.kind === 'refill') return !t.e.dead && HB.Logic.boxRoom(t.e) && count(c.stack, HB.Logic.ammoOf(t.e)) > 0;
     if (t.kind === 'pickup') {
       const e = t.e, d = def(e);
       if (c.stack.length >= cap || e.dead) return false;
@@ -468,19 +471,23 @@
     const boss = night && R._night && R._night.bossRef && !R._night.bossRef.dead ? R._night.bossRef : null;
     // De noche manda la defensa en cuanto hay bichos cerca del comandante o de la base.
     const threat = night && (boss || bugsNear(R, c.x, c.y, 7) > 0 || (H && bugsNear(R, H.x, H.y, 10) > 0));
-    const ammoIn = count(c.stack, 'ammo');
+    const ammoIn = count(c.stack, 'ammo') + count(c.stack, 'cell');
 
-    // 1. Munición para las torretas: de noche, cuando se acerca y si van muy vacías.
+    // 1. Munición para las torretas: de noche, cuando se acerca y si van muy vacías. Ammo para
+    // las Gatling y los Cañones; Celdas para las de choque.
     const limit = night ? 0.6 : (soon ? 0.85 : (strat === 'defense' ? 0.7 : 0.35));
     const hungry = hungryTurret(R, limit, c);
-    if (hungry && ammoIn > 0) {
-      if (same(mem.task, 'refill', hungry)) return mem.task;
-      const p = HB.Logic.padPos(hungry, 'box', R.id);
-      return mk('refill', p.x, p.y, hungry);
+    const canFill = hungryTurret(R, limit, c, c.stack);
+    if (canFill) {
+      if (same(mem.task, 'refill', canFill)) return mem.task;
+      const p = HB.Logic.padPos(canFill, 'box', R.id);
+      return mk('refill', p.x, p.y, canFill);
     }
     if (hungry && (night || soon) && c.stack.length < cap) {
-      const src = ammoSource(R);
-      if (src && !(threat && bugsNear(R, src.x, src.y, 3) > 0)) {
+      // a por la munición que falte y haya: primero Ammo, luego Celdas
+      for (const it of ['ammo', 'cell']) {
+        const h = hungryTurret(R, limit, c, [it]), src = h && ammoSource(R, it);
+        if (!src || (threat && bugsNear(R, src.x, src.y, 3) > 0)) continue;
         if (same(mem.task, 'pickup', src)) return mem.task;
         const p = HB.Logic.padPos(src, 'out');
         return mk('pickup', p.x, p.y, src);
@@ -597,7 +604,7 @@
       }
       // la munición, si alguna torreta tiene hueco y no vamos a por beneficio, a la torreta
       if (ammoIn > 0 && strat !== 'profit') {
-        const t = hungryTurret(R, strat === 'defense' ? 1 : 0.8, c);
+        const t = hungryTurret(R, strat === 'defense' ? 1 : 0.8, c, c.stack);
         if (t) { const p = HB.Logic.padPos(t, 'box', R.id); return mk('refill', p.x, p.y, t); }
       }
       if (best) { const p = HB.Logic.padPos(best, 'in'); return mk('deliver', p.x, p.y, best); }

@@ -59,6 +59,17 @@
         D.ellipse(g, 0, 0, 0.4, 0.36); D.fillStroke(g, P.oliveD, LW);
         D.ellipse(g, -0.06, -0.06, 0.26, 0.22); g.fillStyle = P.olive; g.fill();
         g.fillStyle = P.orange; g.fillRect(-0.32, -0.04, 0.12, 0.08);
+      } else if (type === 'shock') {
+        // sin cañón: un disco con bobinas de cobre, una esfera cian y dos púas que echan chispas
+        for (const s of [-1, 1]) {
+          g.beginPath(); g.moveTo(0.18, s * 0.07); g.lineTo(0.44, s * 0.2); g.lineWidth = 0.06; g.strokeStyle = '#2b3135'; g.stroke();
+          D.ellipse(g, 0.44, s * 0.2, 0.055, 0.055); g.fillStyle = P.tealL; g.fill(); g.lineWidth = 0.025; g.strokeStyle = P.ink; g.stroke();
+        }
+        D.ellipse(g, 0, 0, 0.34, 0.3); D.fillStroke(g, P.oliveD, LW);
+        g.strokeStyle = P.copper; g.lineWidth = 0.05;
+        for (let i = 0; i < 3; i++) { D.ellipse(g, 0, 0, 0.26 - i * 0.06, 0.22 - i * 0.05); g.stroke(); }
+        D.ellipse(g, 0, 0, 0.12, 0.12); D.fillStroke(g, '#8ff0ff', 0.04);
+        D.ellipse(g, -0.04, -0.04, 0.04, 0.04); g.fillStyle = '#ffffff'; g.fill();
       } else {
         for (const oy of [-0.09, 0, 0.09]) { D.rr(g, 0.15, oy - 0.035, 0.52, 0.07, 0.02); D.fillStroke(g, '#2b3135', 0.035); }
         D.rr(g, 0.55, -0.14, 0.08, 0.28, 0.02); D.fillStroke(g, '#4a545b', 0.035);

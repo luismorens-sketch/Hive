@@ -225,6 +225,9 @@
     return false;
   }
 
+  // Con qué se recarga una torreta: Ammo, o Celdas la de choque (funcional v0.4, 9.1).
+  function ammoOf(e) { return def(e).ammo || 'ammo'; }
+
   // ¿Cabe otra caja de munición en la torreta?
   function boxRoom(e) {
     const d = def(e);
@@ -247,11 +250,12 @@
 
   function refillOne(st, c, e) {
     if (!boxRoom(e)) return false;
+    const want = ammoOf(e);
     for (let i = c.stack.length - 1; i >= 0; i--) {
-      if (c.stack[i] !== 'ammo') continue;
+      if (c.stack[i] !== want) continue;
       c.stack.splice(i, 1);
       e.ammo += def(e).shots;
-      ev(st, 'refill', e, 'ammo', i);
+      ev(st, 'refill', e, want, i);
       ftue(st, 'refill');
       return true;
     }
@@ -267,6 +271,7 @@
     ev(st, 'pickup', e, it, c.stack.length - 1);
     ftue(st, 'pickup');
     if (it === 'coil') ftue(st, 'coil');
+    if (it === 'cell') ftue(st, 'cell');
     if (c.stack.length >= cap) ev(st, 'full');
     return true;
   }
@@ -318,6 +323,8 @@
     ftue(st, 'buy');
     if (z.kind === 'drone') ftue(st, 'drone');
     if (z.type === 'winder') ftue(st, 'winder');
+    if (z.type === 'cell_works') ftue(st, 'cellWorks');
+    if (z.kind === 'turret' && z.type === 'shock') ftue(st, 'shock');
   }
 
   // El jugador elige el tipo de torreta de una zona ya pagada (funcional 6.2).
@@ -332,6 +339,7 @@
     st.needSave = true;
     ev(st, 'unlock', z, e);
     ftue(st, 'choice');
+    if (type === 'shock') ftue(st, 'shock');
     return e;
   }
 
@@ -682,6 +690,7 @@
     allBought: allBought,
     accepts: accepts,
     boxRoom: boxRoom,
+    ammoOf: ammoOf,
     choose: choose,
     collide: collide,
     edgeDist: edgeDist,

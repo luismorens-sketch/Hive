@@ -3,7 +3,7 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 17/10/2026 · **Versión publicada:** 0.10.0 ·
+**Última actualización:** 27/10/2026 · **Versión publicada:** 0.11.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
@@ -11,10 +11,11 @@
 Fase 2 del funcional (prototipo jugable), **ampliada el 16/10/2026** (funcional v0.4): más
 materiales y edificios, la región 2 y una primera investigación; sin prueba con 5 personas
 (se probará en la prueba cerrada de Play Console). **Hito 6 terminado** (0.9.0). **Hito 7 en
-marcha: la región 1 con dos metales**; la 0.10.0 trae su primera parte (el cobre, la
-Bobinadora y las obras que piden materiales). Pendientes de tu prueba: el tutorial (0.6.0), el
-Sargento Brass (0.7.0), el cofre (0.8.0), el arranque rápido con el suministro aéreo (0.9.0) y
-el cobre (0.10.0).
+marcha: la región 1 con dos metales**; la 0.10.0 trajo el cobre, la Bobinadora y las obras
+que piden materiales, y la 0.11.0 el Taller de celdas y la torreta de choque. Pendientes de tu
+prueba: el tutorial (0.6.0), el Sargento Brass (0.7.0), el cofre (0.8.0), el arranque rápido
+con el suministro aéreo (0.9.0), el cobre (0.10.0) y las celdas con la torreta de choque
+(0.11.0).
 
 | Hito (funcional 21) | Estado |
 |---|---|
@@ -24,14 +25,36 @@ el cobre (0.10.0).
 | 4. Drones, torretas, munición, bichos, campo de flujo, noche | Hecho y probado (0.3.0) |
 | 5. Calor-reloj, energía, brownout, jefe | Hecho y probado (0.3.0) |
 | 6. Tutorial, guardado/offline, vídeos simulados | **Hecho**: guardado, mientras no juegas (0.5.0), tutorial (0.6.0) con el Sargento Brass (0.7.0), cofre (0.8.0) y los 4 vídeos simulados (0.9.0) |
-| 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **En marcha**: cobre, Bobinadora, obras con materiales y región de ~27 min (0.10.0). Falta: Taller de celdas, torreta Shock, Arsenal y Radar |
+| 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **En marcha**: cobre, Bobinadora, obras con materiales (0.10.0); Taller de celdas, torreta de choque y región de ~25 min (0.11.0). Falta: Arsenal y Radar |
 | 8. Mapa del planeta + región 2 (The Mire) | Pendiente |
 | 9. Investigación, primera versión | Pendiente |
 | 10. Balance, vídeos y prueba cerrada en Play Console → seguir o no | Pendiente. Primer pase de ritmo y dificultad hecho (0.4.0) |
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE) · 0.10.0 el cobre, la Bobinadora, las obras con materiales y la región de ~27 min.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE) · 0.10.0 el cobre, la Bobinadora, las obras con materiales y la región de ~27 min · 0.11.0 el Taller de celdas, la torreta de choque y la región de ~25 min.
+
+## Lo nuevo de la 0.11.0: las celdas y la torreta de choque (hito 7, segunda parte)
+
+- **El Taller de celdas** (Bobina + Placa → Celda), en el distrito del cobre, justo encima de
+  la Bobinadora. Pide dinero **y 6 Bobinas**. Un dron de carga le lleva las Bobinas, otro las
+  Placas de la Fundición 2 y un tercero saca las Celdas a la Exportación. La Celda se vende a
+  $12 (la nave compra ahora Celdas, Munición, Bobinas y Placas). Su mejora pide 4 Celdas.
+- **La torreta de choque**: lanza una descarga eléctrica alrededor que **frena a los bichos a
+  la mitad durante 2 segundos** y apenas hace daño; los sujeta delante de las otras torretas.
+  Gasta Celdas (una cada 8 descargas) y se rellena como las demás: con Celdas en la pila, te
+  acercas. Los bichos frenados llevan un anillo azul claro debajo. **Al jefe no lo frena.**
+  - La primera está en el hueco del muro sur (pide 4 Bobinas).
+  - La segunda torreta del norte deja ahora **elegir entre tres**: Gatling, Cañón o Choque.
+- **Más energía**: con las máquinas del cobre, dos paneles se quedaban cortos toda la región.
+  El segundo panel llega antes y hay un **tercero** al lado del Taller de celdas (6 Bobinas).
+- **La flecha y los materiales**: si una obra te pide un material que no llevas, la flecha te
+  lleva a la máquina que lo hace y la pista dice qué coger («COGE BOBINAS PARA LA OBRA»).
+- **La región, de unos 25 minutos**, como decidiste: los precios suben ahora un 6 % por zona
+  (antes un 8 %), porque hay más zonas (44). Con el robot: 25-30 min con cualquier
+  estrategia, sin perder ninguna noche.
+- **El Sargento Brass** avisa con el Taller de celdas («¡CELDAS DE ENERGÍA!») y con la torreta
+  de choque («¡TORRETA DE CHOQUE LISTA!»).
 
 ## Lo nuevo de la 0.10.0: el cobre (hito 7, primera parte)
 
@@ -184,9 +207,20 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.10.0)
+## Qué probar ahora (versión 0.11.0)
 
-**Lo nuevo, el cobre** (en tu partida de siempre, sin borrar nada):
+**Lo nuevo, las celdas y la torreta de choque** (en tu partida de siempre, sin borrar nada):
+
+- **El Taller de celdas**: ¿se entiende que necesita Bobinas **y** Placas? ¿Se distinguen las
+  Celdas en la pila?
+- **La torreta de choque**: de noche, ¿se ve la descarga? ¿Se nota que los bichos van más
+  lentos (el anillo azul claro)? ¿Sirve de algo o es mejor otra torreta?
+- **Elegir entre tres** en la segunda torreta del norte: ¿se lee bien la ventana?
+- **La flecha**: cuando te falta un material para una obra, ¿te lleva a por él?
+- **El ritmo**: la región debería durar unos 25 minutos. Para verlo de verdad, desde cero
+  (rueda dentada → «Borrar progreso»), y mira el tiempo en «Tu partida».
+
+**Lo de la 0.10.0, el cobre**:
 
 - Que tu partida cargue bien en el mapa nuevo (deberías aparecer en la Torre de mando).
 - **La Bobinadora**: ¿se entiende que pide Placas además de dinero? ¿Se lee el cartel (×8 y el
@@ -194,9 +228,6 @@ cortos abajo, **uno cada vez y solo la primera vez**:
 - **El cobre**: mínalo, llévalo a la Bobinadora y recoge las Bobinas. ¿Se distinguen bien el
   Cobre, las Bobinas y lo demás en la pila?
 - ¿Se nota el carrete girando cuando la Bobinadora trabaja?
-- **El ritmo**: la región debería durar unos 25-30 minutos. Para verlo de verdad, desde cero
-  (rueda dentada → «Borrar progreso»), y mira el tiempo en «Tu partida».
-
 **Lo de antes** (versión 0.9.2):
 
 **Para ver el tutorial hay que empezar de cero**: rueda dentada → «Borrar progreso» y otra vez
@@ -261,12 +292,17 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
 - **Bucle básico**: estar entre dos vetas mina de las dos; la nave espera a que haya
   mercancía y no compra más de lo que cabe en la caja fuerte; para pagar hay que quedarse
   0,4 s encima; guardado automático.
-- **Precios** (0.10.0): P(n) = 50 × 1,08^n (las 5 primeras, con descuento). **Choca con el
+- **Precios** (0.11.0): P(n) = 50 × 1,06^n (en la 0.10.0, 1,08^n) (las 5 primeras, con descuento). **Choca con el
   funcional 6.3**, que pide subir un 18-25 % por zona: con 37 zonas y la región de ~25 min que
-  decidiste (6.4), la subida tiene que ser de un 8 %. Hay que corregir la 6.3 (su tabla de
-  tiempos entre zonas es de cuando la región duraba 50 min): ¿la ajusto?
+  decidiste (6.4), la subida tenía que ser de un 8 %; con las 44 zonas de la 0.11.0, de un
+  **6 %** (P(n) = 50 × 1,06^n). Hay que corregir la 6.3 (su tabla de tiempos entre zonas es de
+  cuando la región duraba 50 min): ¿la ajusto?
 - **El mapa** (0.10.0): 12 casillas más al norte para el distrito del cobre. Qué obras piden
-  materiales y cuántos (ver «Lo nuevo de la 0.10.0») lo elegí yo.
+  materiales y cuántos (ver «Lo nuevo de la 0.10.0» y «de la 0.11.0») lo elegí yo.
+- **La torreta de choque** (0.11.0): daño 4, una descarga cada 1,7 s, alcance 3,2 casillas,
+  frena al 50 % durante 2 s, 8 descargas por Celda; **no frena al jefe** (si no, sería
+  demasiado fácil). La primera, en el hueco del muro sur; la segunda del norte se puede elegir
+  de choque. El tercer panel solar y el adelanto del segundo, para que no falte energía.
 - **Detalles de la v0.4 del funcional** (los concreté yo al escribirla; dime si cambias algo):
   - Nombres: Bobinadora, Taller de celdas y torreta Shock (en inglés: Copper, Coil, Cell,
     Shock).
@@ -325,9 +361,14 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
     Gemas, los botones de Tienda y Misiones (minuto 5-7), el mapa con la región 2 iluminada y
     el permiso de notificaciones (este necesita la app de Android).
 
-## Simulador (versión 0.10.0)
+## Simulador (versión 0.11.0)
 
-Sin vídeos, 3 partidas de cada estrategia conquistan la región: `balanced` **27-28 min**,
+Sin vídeos, 3 partidas de cada estrategia conquistan la región sin perder ninguna noche:
+`balanced` **25-27 min**, `profit` 25-29, `defense` 25-30; 8 noches, el jefe cae a la primera.
+El robot: Taller de celdas a los 9:06, torreta de choque a los 12:38 y la primera Celda en la
+mano a los 12:46; en una partida, las torretas de choque frenan a unos 50 bichos.
+
+Versión 0.10.0: sin vídeos, 3 partidas de cada estrategia conquistan la región: `balanced` **27-28 min**,
 `profit` 26-29, `defense` 28-30; 7 noches, el jefe cae a la primera. **Con vídeos** (×2 del
 informe, segunda oportunidad y suministro aéreo): **23 min**. El cobre, con el robot: la
 primera obra con Placas a los 7:17, la Bobinadora a los 7:18, el primer Cobre a los 10:08 y
@@ -338,16 +379,16 @@ cofres).
 
 ## Lo siguiente
 
-1. **Hito 7: la región 1 con dos metales** (funcional v0.4: 5.1, 5.4, 6.2, 9.1 y 12). Hecho
-   en la 0.10.0: el cobre, la Bobinadora, las obras con materiales y el ritmo de ~27 min.
-   Falta: el Taller de celdas y la torreta Shock (siguiente versión), y luego el Arsenal y el
-   Radar.
+1. **Hito 7: la región 1 con dos metales** (funcional v0.4: 5.1, 5.4, 6.2, 9.1 y 12). Hecho:
+   el cobre, la Bobinadora y las obras con materiales (0.10.0); el Taller de celdas, la
+   torreta de choque y el ritmo de ~25 min (0.11.0). Falta: el **Arsenal** y el **Radar**
+   (se construyen con Bobinas) y el último ajuste de los 25 min.
 2. **Hito 8**: el mapa del planeta y la región 2 (The Mire).
 3. **Hito 9**: la investigación, primera versión.
 4. **Hito 10**: balance, vídeos y prueba cerrada en Play Console (antes: comprobar la marca y
    fijar el identificador de la app).
 
-Mientras tanto, tu prueba de la 0.6.0 a la 0.10.0 (ver «Qué probar ahora»).
+Mientras tanto, tu prueba de la 0.6.0 a la 0.11.0 (ver «Qué probar ahora»).
 Arte con IA: aparcado (te gusta el dibujado con código).
 
 ## Pendientes técnicos (no urgentes)

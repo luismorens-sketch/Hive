@@ -111,6 +111,7 @@
   A.dronePad = function () { const im = img('hb_dronepad'); return im ? centered('i:dpad', im, ART_SPECS.hb_dronepad.w) : orig.dronePad(); };
   A.turretBase = function () { const im = img('hb_turret_base'); return im ? centered('i:tbase', im, ART_SPECS.hb_turret_base.w) : orig.turretBase(); };
   A.turretHead = function (type) {
+    if (type === 'shock') return orig.turretHead(type);   // todavía sin imagen de IA
     const name = type === 'cannon' ? 'hb_cannon_head' : 'hb_gatling_head', im = img(name);
     return im ? centered('i:' + name, im, ART_SPECS[name].w) : orig.turretHead(type);
   };

@@ -279,7 +279,7 @@
       if (p.kind === 'trash') { V.blit(A.pad('in', 0, null), p.x, p.y + 0.12); continue; }   // donde se pisa; el contenedor va detrás
       const e = p.e, def = HB.MACHINES[e.type];
       if (p.kind === 'pile') { V.blit(A.pad('pile', 0, null), p.x, p.y); continue; }
-      if (p.kind === 'box') { V.blit(A.pad('box', 0, 'ammo'), p.x, p.y); continue; }
+      if (p.kind === 'box') { V.blit(A.pad('box', 0, HB.Logic.ammoOf(e)), p.x, p.y); continue; }
       const toMachine = e.x > p.x ? 1 : -1;
       if (p.kind === 'in') {
         const item = def.kind === 'proc' ? Object.keys(def.inputs)[0] : null;
@@ -427,6 +427,7 @@
     if (t === 'smelter') return A.smelter(e.flip, e.level);
     if (t === 'ammo_fab') return A.ammo_fab(e.flip, e.level);
     if (t === 'winder') return A.winder(e.flip, e.level);
+    if (t === 'cell_works') return A.cell_works(e.flip, e.level);
     if (t === 'export') return A.export();
     if (t === 'solar') return A.solar();
     if (t === 'dissipator') return A.dissipator();
@@ -453,7 +454,7 @@
     return HB.lerp(1.15, 1.0, (k - 0.5) / 0.5);
   }
 
-  const RECIPE_Y = { smelter: -2.2, ammo_fab: -2.25, winder: -2.25, export: -1.75, solar: -1.65, dissipator: -2.15 };
+  const RECIPE_Y = { smelter: -2.2, ammo_fab: -2.25, winder: -2.25, cell_works: -2.3, export: -1.75, solar: -1.65, dissipator: -2.15 };
 
   function drawMachine(st, R, e) {
     const g = V.ctx, m = HB.MACHINES[e.type], dm = HB.Logic.dims(e), ve = HB.entVis(e.id);
@@ -499,6 +500,19 @@
         g.fillStyle = '#fff3dc';
         g.fillRect(cx - W.len / 2 + 0.05, cy - W.r + 0.04 + k * (W.r * 2 - 0.14), W.len - 0.1, 0.06);
         g.globalAlpha = 1;
+      } else if (e.type === 'cell_works' && e.busy && !flick) {
+        // la celda grande se carga: brilla, y salta un arco entre las dos bobinas
+        const C = HB.Art.CELLW, cx = e.x + side * C.cx, cy = top + C.cy;
+        g.globalCompositeOperation = 'lighter';
+        g.globalAlpha = 0.4 + Math.sin(vis.clock * 10 + e.x) * 0.15;
+        V.blit(glowSprite(P.tealL), cx, cy - 0.15, 1.3);
+        g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+        if (Math.random() < 0.5) {
+          g.strokeStyle = '#e8fdff'; g.lineWidth = 0.035;
+          g.beginPath(); g.moveTo(cx - C.post, cy - 0.6);
+          for (let i = 1; i < 5; i++) g.lineTo(cx - C.post + i * C.post / 2.5, cy - 0.72 + (Math.random() - 0.5) * 0.18);
+          g.lineTo(cx + C.post, cy - 0.6); g.stroke();
+        }
       }
     } else if (m.kind === 'export') {
       let i = 0;
@@ -538,7 +552,7 @@
       g.globalAlpha = 1;
     }
     // cartel de receta: qué entra y qué sale
-    const rec = A.recipe(e.type === 'export' && R._byId.winder ? 'export_cu' : e.type);
+    const rec = A.recipe(e.type !== 'export' ? e.type : (R._byId.cell_works ? 'export_cell' : (R._byId.winder ? 'export_cu' : 'export')));
     if (rec) {
       const near = HB.dist(st.cmd.x, st.cmd.y, e.x, e.y) < 4.5;
       g.globalAlpha = near ? 1 : 0.6;
@@ -587,7 +601,8 @@
     g.restore();
     if (ve.muzzle > 0) {
       g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.min(1, ve.muzzle * 12);
-      V.blit(glowSprite(P.yellow), hx + Math.cos(e.aim) * 0.7, hy + Math.sin(e.aim) * 0.7, e.type === 'cannon' ? 1.0 : 0.6);
+      if (T.slow) V.blit(glowSprite(P.tealL), hx, hy, 1.6);   // la de choque brilla entera al descargar
+      else V.blit(glowSprite(P.yellow), hx + Math.cos(e.aim) * 0.7, hy + Math.sin(e.aim) * 0.7, e.type === 'cannon' ? 1.0 : 0.6);
       g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
     }
     // niveles
@@ -603,11 +618,11 @@
       const f = HB.clamp(crates - i, 0, 1);
       D.rr(g, x - 0.09, y - 0.09, 0.18, 0.18, 0.03);
       g.fillStyle = 'rgba(28,33,38,0.7)'; g.fill();
-      if (f > 0) { D.rr(g, x - 0.09, y + 0.09 - 0.18 * f, 0.18, 0.18 * f, 0.03); g.fillStyle = f >= 1 ? P.oliveL : P.yellow; g.fill(); }
+      if (f > 0) { D.rr(g, x - 0.09, y + 0.09 - 0.18 * f, 0.18, 0.18 * f, 0.03); g.fillStyle = T.slow ? (f >= 1 ? '#38c9e6' : '#bdf3ff') : (f >= 1 ? P.oliveL : P.yellow); g.fill(); }
       D.rr(g, x - 0.09, y - 0.09, 0.18, 0.18, 0.03); g.lineWidth = 0.03; g.strokeStyle = P.ink; g.stroke();
     }
     hpLabel(e, e.y - 1.15);
-    if (e.ammo <= 0) vis.labels.push({ k: 'warn', x: e.x, y: e.y - 1.45, s: HB.T('no_ammo') });
+    if (e.ammo <= 0) vis.labels.push({ k: 'warn', x: e.x, y: e.y - 1.45, s: HB.T(T.ammo === 'cell' ? 'no_cells' : 'no_ammo') });
   }
 
   function drawWall(st, R, e) {
@@ -691,6 +706,12 @@
     const fr = (Math.floor(vis.clock * (b.st === 'move' ? 10 : 4) + b.id) % 2);
     const sh = A.bugShadow();
     V.blit(sh, b.x, b.y + 0.05, b.r * 2.3);
+    if (b.slowT > 0) {
+      // frenado por una torreta de choque: un anillo cian que chisporrotea
+      g.globalAlpha = 0.5 + Math.random() * 0.4;
+      D.ellipse(g, b.x, b.y + 0.05, b.r * 1.3, b.r * 0.65); g.lineWidth = 0.05; g.strokeStyle = '#8ff0ff'; g.stroke();
+      g.globalAlpha = 1;
+    }
     const spr = A.bug(b.type, fr);
     g.save(); g.translate(b.x, b.y - b.z - (E.boss ? 0.2 : 0.05)); g.rotate(b.dir);
     if (b.st === 'atk') g.translate(Math.sin(vis.clock * 18 + b.id) * 0.04, 0);
