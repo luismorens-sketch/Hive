@@ -462,6 +462,8 @@
         c.stillT = 0;
         ftue(st, 'move');
       } else c.stillT += dt;
+      // de día, el comandante se cura solo (funcional v0.5, 4.3)
+      if (R.phase === 'day' && c.hp < K.hp) c.hp = Math.min(K.hp, c.hp + K.heal * dt);
       c.x += c.vx * dt; c.y += c.vy * dt;
       collide(c, R._solids, K.radius);
       c.x = HB.clamp(c.x, K.radius, d.w - K.radius);

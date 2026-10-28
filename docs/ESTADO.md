@@ -3,7 +3,7 @@
 > Se actualiza al final de cada sesión. Dice dónde estamos y qué toca; el diseño está en
 > `HIVE_Funcional.md`, que es quien manda.
 
-**Última actualización:** 27/10/2026 · **Versión publicada:** 0.12.0 ·
+**Última actualización:** 28/10/2026 · **Versión publicada:** 0.13.0 ·
 **Enlace de pruebas:** https://claude.ai/artifact/6qNBWM2zfcDEKoC8AWSEL9
 
 ## Dónde estamos
@@ -15,7 +15,8 @@ terminado: la región 1 con dos metales**: la 0.10.0 trajo el cobre, la Bobinado
 que piden materiales; la 0.11.0, el Taller de celdas y la torreta de choque; la 0.12.0, el
 Arsenal y el Radar. Pendientes de tu prueba: el tutorial (0.6.0), el Sargento Brass (0.7.0),
 el cofre (0.8.0), el arranque rápido con el suministro aéreo (0.9.0), el cobre (0.10.0), las
-celdas con la torreta de choque (0.11.0) y el Arsenal y el Radar (0.12.0).
+celdas con la torreta de choque (0.11.0), el Arsenal y el Radar (0.12.0) y las mejoras de
+nivel 3 con la vida del comandante (0.13.0). **Hito 8 en marcha: las mejoras** (funcional v0.5).
 
 | Hito (funcional 21) | Estado |
 |---|---|
@@ -26,13 +27,33 @@ celdas con la torreta de choque (0.11.0) y el Arsenal y el Radar (0.12.0).
 | 5. Calor-reloj, energía, brownout, jefe | Hecho y probado (0.3.0) |
 | 6. Tutorial, guardado/offline, vídeos simulados | **Hecho**: guardado, mientras no juegas (0.5.0), tutorial (0.6.0) con el Sargento Brass (0.7.0), cofre (0.8.0) y los 4 vídeos simulados (0.9.0) |
 | 7. Región 1 con dos metales (Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar, zonas con materiales), unos 25 min | **Hecho**: cobre, Bobinadora, obras con materiales (0.10.0); Taller de celdas y torreta de choque (0.11.0); Arsenal y Radar (0.12.0). La región dura ahora unos 30 min: el ajuste, cuando se equilibre todo junto |
-| 8. Mapa del planeta + región 2 (The Mire) | Pendiente |
-| 9. Investigación, primera versión | Pendiente |
+| 8. Mejoras: nivel 3 de las máquinas, vida del comandante, dron artillero y Laboratorio con Muestras (funcional v0.5) | **En marcha**: nivel 3 de todas las máquinas, lo que da cada mejora, las bandejas «12/30» y la vida del comandante (0.13.0). Falta: dron artillero y Laboratorio |
+| 9. Mapa del planeta + región 2 (The Mire) | Pendiente |
 | 10. Balance, vídeos y prueba cerrada en Play Console → seguir o no | Pendiente. Primer pase de ritmo y dificultad hecho (0.4.0) |
 
 Historial corto: 0.2.0 el bucle básico · 0.3.0 noche, torretas, drones, jefe · 0.3.1 arreglos
 del dinero fantasma y del recorte en pantallas anchas · 0.4.0 ritmo más lento, noches más
-duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE) · 0.10.0 el cobre, la Bobinadora, las obras con materiales y la región de ~27 min · 0.11.0 el Taller de celdas, la torreta de choque y la región de ~25 min · 0.12.0 el Arsenal y el Radar.
+duras, energía visible · 0.5.0 mientras no juegas · 0.6.0 tutorial · 0.7.0 el Sargento Brass · 0.7.1 los galones del sargento, dentro del brazo · 0.8.0 el cofre y las Gemas · 0.9.0 arranque rápido y suministro aéreo · 0.9.1 listo para la prueba con 5 personas · 0.9.2 rendimiento e idiomas (lecciones y sistema de CORE) · 0.10.0 el cobre, la Bobinadora, las obras con materiales y la región de ~27 min · 0.11.0 el Taller de celdas, la torreta de choque y la región de ~25 min · 0.12.0 el Arsenal y el Radar · 0.13.0 nivel 3 en todas las máquinas y la vida del comandante.
+
+## Lo nuevo de la 0.13.0: nivel 3 en todas las máquinas y la vida del comandante
+
+Lo que decidiste el 28/10/2026 (funcional v0.5), primera tanda:
+
+- **Todas las máquinas llegan al nivel 3**: la Fábrica de munición, la Fundición 2, la
+  Bobinadora y el Taller de celdas tienen ahora su segunda mejora (la Fundición 1 y la
+  Exportación ya la tenían). Son obras del final de la región y piden materiales.
+- **El cartel de cada mejora dice lo que da**, una línea por cosa, en verde: «+50 % ALMACÉN»,
+  «+33 % VELOCIDAD», y en el nivel 3 también «−30 % CALOR». En la Exportación, «CAJA FUERTE» y
+  «NAVES»; en las torretas, «DAÑO» y «CADENCIA»; en las bases de drones, «+1 DRON».
+- **Las bandejas dicen cuánto llevan y cuánto cabe** al acercarte: debajo de la entrada o de
+  la salida sale, por ejemplo, «4/20» con el icono de lo que lleva (el Taller de celdas, sus
+  dos cosas). En ámbar si está llena; la salida llena sigue diciendo «MAX».
+- **La vida del comandante, a la vista**: de noche su barra está siempre encima de la cabeza
+  (de día, solo si está herido), y **de día se cura solo**.
+- **Un quinto panel solar** (6 Bobinas): las máquinas de nivel 3 gastan más energía y, si no,
+  al final faltaba otra vez.
+- **La región dura ahora unos 38 minutos con el robot** (antes 31): son 5 obras más, de las
+  caras. Lo dejamos para el ajuste de balance, como decidiste.
 
 ## Lo nuevo de la 0.12.0: el Arsenal y el Radar (hito 7, última parte)
 
@@ -231,9 +252,17 @@ cortos abajo, **uno cada vez y solo la primera vez**:
   enseña **cuándo hizo cada cosa por primera vez** (en tiempo de juego). Si alguien se atasca,
   ahí se ve en qué paso. Basta con una captura de esa pantalla.
 
-## Qué probar ahora (versión 0.12.0)
+## Qué probar ahora (versión 0.13.0)
 
-**Lo nuevo, el Arsenal y el Radar** (en tu partida de siempre, sin borrar nada; salen hacia el
+**Lo nuevo, las mejoras y la vida** (en tu partida de siempre, sin borrar nada):
+
+- **Los carteles de las mejoras**: ¿se entiende lo que da cada una? ¿Se leen bien las líneas
+  verdes?
+- **Las bandejas**: acércate a la entrada y a la salida de una máquina. ¿Se lee «4/20»? ¿Estorba?
+- **La vida**: de noche, ¿ves la barra encima del comandante? De día, ¿se cura?
+- Las mejoras nuevas de nivel 3 salen al final de la región.
+
+**Lo de la 0.12.0, el Arsenal y el Radar** (en tu partida de siempre, sin borrar nada; salen hacia el
 minuto 20, después de la segunda torreta del norte):
 
 - **El Arsenal**: ¿se entiende que rellena solo las torretas de su alrededor? ¿Se ve el círculo
@@ -298,6 +327,13 @@ Preguntas para ti:
 - **Duración de la región 1** (16/10/2026): **unos 25 min, por ahora**. Sustituye a lo del
   15/10 (dejarla en 55 min «hasta que entren más elementos»): ahora entran. Hasta que se
   programe el hito 7, el código sigue en 55 min.
+- **Mejoras, antes que la región 2** (28/10/2026, funcional v0.5), en este orden:
+  1. **Nivel 3 en todas las máquinas**, con el cartel diciendo lo que da cada mejora, y las
+     bandejas enseñando «12/30» al acercarse.
+  2. **Dron artillero** en cada torreta (una obra junto a ella), que de noche se refugia.
+  3. **Laboratorio**: un edificio que se construye y se abre al pisarlo; se paga con
+     **Muestras** (las sueltan los bichos) + una espera.
+  Y la **vida del comandante**: barra visible de noche y curarse sola de día.
 - **Los ajustes de balance, más adelante** (27/10/2026): se posponen para equilibrar más facetas
   del juego a la vez. Eso incluye corregir el funcional 6.3 (pide subir un 18-25 % por zona y
   el código sube un 6 %) y la duración de la región, que con el Arsenal y el Radar ha pasado
@@ -334,6 +370,14 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
   cuando la región duraba 50 min): ¿la ajusto?
 - **El mapa** (0.10.0): 12 casillas más al norte para el distrito del cobre. Qué obras piden
   materiales y cuántos (ver «Lo nuevo de la 0.10.0» y «de la 0.11.0») lo elegí yo.
+- **Las mejoras y la vida** (0.13.0):
+  - Lo que piden las mejoras nuevas: Fábrica de munición nivel 3, 10 Placas; Bobinadora 3, 10
+    Bobinas; Fundición 2 nivel 3, 8 Bobinas; Taller de celdas 3, 6 Celdas. Van al final de la
+    lista de obras (probé ponerlas antes y la región no se acortaba).
+  - El comandante se cura 5 de vida por segundo de día (de 0 a lleno, 20 s); en el aviso de la
+    noche ya no.
+  - Las bandejas se ven a menos de 2,3 casillas.
+  - El quinto panel solar, entre la Fundición 2 y la Fábrica de munición.
 - **El Arsenal y el Radar** (0.12.0):
   - Los dos en el **norte** (el esquema del funcional 6.1 pone el Arsenal al sur): en el sur no
     cabía sin mover medio mapa, y el norte es el flanco más lejos de la Fábrica de munición,
@@ -406,6 +450,12 @@ Todas están en las tablas (`src/js/20_data.js`) y se cambian en un minuto.
     Gemas, los botones de Tienda y Misiones (minuto 5-7), el mapa con la región 2 iluminada y
     el permiso de notificaciones (este necesita la app de Android).
 
+## Simulador (versión 0.13.0)
+
+Sin vídeos, 3 partidas de cada estrategia conquistan la región sin perder ninguna noche:
+`balanced` **37-39 min** (mediana 37:59), `profit` 36-39, `defense` 38-39; 10 noches. Son 53
+zonas (antes 48).
+
 ## Simulador (versión 0.12.0)
 
 Sin vídeos, 3 partidas de cada estrategia conquistan la región sin perder ninguna noche:
@@ -426,33 +476,17 @@ defiende sin dudar: una persona perderá más. El simulador también dice cuánd
 cada paso del tutorial, cuántas cajas de suministro caen y las Gemas que gana (150: los dos
 cofres).
 
-## Propuestas del autor (28/10/2026), pendientes de decidir los detalles
-
-1. **Más capacidad en las bandejas de entrada y salida.** Ya existe a medias: mejorar una
-   máquina sube su almacén (20 → 30 → 40) y su velocidad, pero el cartel solo dice «LV 2», y
-   en la región 1 casi todas las máquinas tienen un solo nivel de mejora (solo la Fundición 1
-   y la Exportación llegan al 3). Propuesta: que el cartel diga lo que da, ver «12/30» al
-   acercarse a una bandeja, y nivel 3 para todas (alarga la región).
-2. **Un laboratorio** para mejorar al comandante (pila, vida, daño…): es la Investigación del
-   funcional (10.3, hito 9). El comandante ya tiene vida (100), pero la barra solo sale cuando
-   está herido y no se cura hasta que cae. Por decidir: edificio en la base o pantalla de la
-   Torre de mando; Muestras + tiempo o dinero; barra de vida visible y curarse de día.
-3. **Minidrones que rellenan cada torreta**: es el «dron artillero» del funcional 7, que estaba
-   para la fase 3. Propuesta: una obra junto a cada torreta; el dron va y viene entre la
-   fábrica y su torreta, y de noche se refugia como los demás.
-
-Orden propuesto: 1 → 3 → 2, antes de la región 2. Preguntado al autor.
-
 ## Lo siguiente
 
-1. **Hito 8**: el mapa del planeta y la región 2 (The Mire), con su material nuevo (funcional
-   v0.4: cada región trae uno que se combina con los anteriores).
-2. **Hito 9**: la investigación, primera versión (entre otras cosas, Arsenal II y Radar II).
+1. **Hito 8 (funcional v0.5): las mejoras.** Hecho: el nivel 3 de las máquinas y la vida del
+   comandante (0.13.0). Lo siguiente, el **dron artillero**; luego el **Laboratorio** con las
+   Muestras (entre otras cosas, Arsenal II y Radar II).
+2. **Hito 9**: el mapa del planeta y la región 2 (The Mire), con su material nuevo.
 3. **Hito 10**: balance (incluida la duración de la región 1 y el funcional 6.3), vídeos y
    prueba cerrada en Play Console (antes: comprobar la marca y fijar el identificador de la
    app).
 
-Mientras tanto, tu prueba de la 0.6.0 a la 0.12.0 (ver «Qué probar ahora»).
+Mientras tanto, tu prueba de la 0.6.0 a la 0.13.0 (ver «Qué probar ahora»).
 Arte con IA: aparcado (te gusta el dibujado con código).
 
 ## Pendientes técnicos (no urgentes)

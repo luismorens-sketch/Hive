@@ -375,16 +375,19 @@
         g.lineWidth = 0.16; g.strokeStyle = P.yellow; g.stroke();
       }
       V.blit(A.zoneIcon(z), p.x, p.y - 0.24, 0.6);
-      let sub = null;
+      let sub = null, gains = null;
       if (z.kind === 'upgrade') {
         const e = R._byId[z.target];
-        if (e) sub = HB.T('lvl', e.level + 1);
+        if (e) { sub = HB.T('lvl', e.level + 1); gains = upgradeGains(e); }
       } else if (z.kind === 'nest') sub = HB.T('b_nest');
       // materiales que faltan (funcional v0.4, 6.2): debajo, en ámbar los que no llevas encima
       const left = need;
       if (left) drawMatsRow(st, left, p.x, p.y + 1.02);
       const showPrice = pr - paid > 0 || !left;
-      vis.labels.push({ k: 'price', x: p.x, y: p.y + 0.2, s: showPrice ? HB.money(pr - paid) : '', can: can, sub: sub, subY: p.y + (left ? 1.62 : 0.98) });
+      const subY = p.y + (left ? 1.62 : 0.98);
+      vis.labels.push({ k: 'price', x: p.x, y: p.y + 0.2, s: showPrice ? HB.money(pr - paid) : '', can: can, sub: sub, subY: subY });
+      // lo que da la mejora, una línea por cosa (funcional v0.5, 6.2)
+      if (gains) vis.labels.push({ k: 'gains', x: p.x, y: subY + 0.42, lines: gains });
     }
     // el Nido ya pagado: zona para lanzar el asalto, con el poder recomendado
     if (R.nestReady && !R.cleared && R.phase === 'day') {
@@ -405,6 +408,38 @@
         vis.labels.push({ k: 'nest', x: z.x, y: z.y - 1.15, s: HB.T('assault'), col: col, sub: HB.T('power_rec') });
       }
     }
+  }
+
+  // Lo que da subir un nivel, en textos cortos: «+50% STORAGE», «+33% SPEED», «−30% HEAT»...
+  function pctUp(a, b) { return Math.round((a / b - 1) * 100); }
+  function upgradeGains(e) {
+    const m = HB.MACHINES[e.type], L = m.levels, a = L[e.level - 1], b = L[e.level];
+    if (!a || !b) return null;
+    const out = [];
+    if (m.kind === 'proc') {
+      out.push(HB.T('up_store', pctUp(b.inCap, a.inCap)));
+      out.push(HB.T('up_speed', pctUp(a.time, b.time)));
+      if (b.heatMul < a.heatMul) out.push(HB.T('up_heat', Math.round((1 - b.heatMul / a.heatMul) * 100)));
+    } else if (m.kind === 'export') {
+      out.push(HB.T('up_vault', pctUp(b.vault, a.vault)));
+      out.push(HB.T('up_ships', pctUp(a.interval, b.interval)));
+    } else if (m.kind === 'turret') {
+      out.push(HB.T('up_dmg', pctUp(b.dmg, a.dmg)));
+      out.push(HB.T('up_rate', pctUp(b.rate, a.rate)));
+    } else if (m.kind === 'dronepad') {
+      if (b.n > a.n) out.push(HB.T('up_drone', b.n - a.n));
+      if (b.cap > a.cap) out.push(HB.T('up_load', b.cap - a.cap));
+    }
+    return out.length ? out : null;
+  }
+
+  // Cuánto lleva y cuánto cabe en una bandeja, al acercarse (funcional v0.5, 18): «12/30».
+  // items: [{ it, n, cap }]; it puede ser null (la Exportación: todo junto).
+  // Va debajo de la bandeja: encima quedan el comandante y su «4/10».
+  function trayLabel(st, p, items) {
+    if (HB.dist(st.cmd.x, st.cmd.y, p.x, p.y) > 2.3) return false;
+    vis.labels.push({ k: 'tray', x: p.x, y: p.y + 0.72, items: items });
+    return true;
   }
 
   // Fila de materiales que pide una obra: icono del objeto y cuántos faltan.
@@ -619,13 +654,26 @@
       g.globalAlpha = 1;
     }
     hpLabel(e, e.y - dm.h / 2 - m.z - 0.35);
+    // las bandejas: cuánto llevan y cuánto cabe, al acercarse (llena, la salida ya dice «MAX»)
+    let outTray = false;
+    if (m.kind === 'proc') {
+      const L = HB.Logic.level(e), items = [];
+      for (const k in m.inputs) items.push({ it: k, n: e.inBuf[k], cap: L.inCap });
+      trayLabel(st, HB.Logic.padPos(e, 'in'), items);
+      if (e.out < L.outCap) outTray = trayLabel(st, HB.Logic.padPos(e, 'out'), [{ it: m.output, n: e.out, cap: L.outCap }]);
+    } else if (m.kind === 'export') {
+      trayLabel(st, HB.Logic.padPos(e, 'in'), [{ it: null, n: HB.Logic.totalIn(e), cap: HB.Logic.level(e).inCap }]);
+    } else if (m.kind === 'arsenal') {
+      const cap = HB.Logic.level(e).inCap;
+      trayLabel(st, HB.Logic.padPos(e, 'in'), m.accepts.map(function (k) { return { it: k, n: e.inBuf[k] || 0, cap: cap }; }));
+    }
     const stt = HB.Logic.status(R, e);
     if (stt && stt !== 'dead') {
       const key = { full: 'output_full', starve: 'no_input', vault: 'vault_full', power: 'low_power', noammo: 'no_ammo', empty: 'arsenal_empty' }[stt];
       vis.labels.push({ k: 'warn', x: e.x, y: e.y - dm.h / 2 - m.z - 0.75, s: HB.T(key) });
     }
     // interruptor DEFENSA / EQUILIBRIO / BENEFICIO en la salida, si un dron la lleva a exportar
-    if (m.kind === 'proc' && exportsByDrone(R, e)) prioSwitch(e);
+    if (m.kind === 'proc' && exportsByDrone(R, e)) prioSwitch(e, outTray ? 1.32 : 0.95);
   }
 
   function hpLabel(e, y) {
@@ -642,10 +690,10 @@
     return false;
   }
 
-  function prioSwitch(e) {
+  function prioSwitch(e, dy) {
     const p = HB.Logic.padPos(e, 'out');
     const s = e.flip ? -1 : 1;
-    vis.labels.push({ k: 'prio', x: p.x + s * 0.2, y: p.y + 0.95, e: e });
+    vis.labels.push({ k: 'prio', x: p.x + s * 0.2, y: p.y + dy, e: e });
   }
 
   function drawTurret(st, R, e) {
@@ -756,7 +804,9 @@
       V.blit(glowSprite(P.yellow), x + Math.cos(c.aim) * 0.45, y - 0.45 + Math.sin(c.aim) * 0.3, 0.5);
       g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
     }
-    if (c.hp < HB.CONFIG.cmd.hp) vis.labels.push({ k: 'hp', x: x, y: y - 1.45, f: c.hp / HB.CONFIG.cmd.hp, cmd: true });
+    // la vida: siempre de noche; de día, solo mientras está herido (funcional v0.5, 4.3)
+    const ph = st.regions[st.cur].phase;
+    if (c.hp < HB.CONFIG.cmd.hp || ph === 'night' || ph === 'warn') vis.labels.push({ k: 'hp', x: x, y: y - 1.45, f: c.hp / HB.CONFIG.cmd.hp, cmd: true });
   }
 
   // ---------- Bichos ----------
@@ -1003,6 +1053,20 @@
         const fs = T * (L.s.length > 4 ? 0.48 : 0.56);
         V.text(L.s, pt.x, pt.y + 2, fs, L.can ? '#ffffff' : '#d9dde0', P.ink);
         if (L.sub) { const q = V.w2s(L.x, L.subY, {}); V.text(L.sub, q.x, q.y, T * 0.4, P.yellow, P.ink); }
+      } else if (L.k === 'gains') {
+        for (let i = 0; i < L.lines.length; i++) V.text(L.lines[i], pt.x, pt.y + i * T * 0.38, T * 0.34, P.cashL, P.ink);
+      } else if (L.k === 'tray') {
+        const fs = T * 0.36, ic = T * 0.42;
+        g.font = V.font(fs);
+        let w = T * 0.3;
+        for (const it of L.items) { it.s = it.n + '/' + it.cap; it.w = g.measureText(it.s).width; w += (it.it ? ic + 2 : 0) + it.w + T * 0.22; }
+        pill(pt.x, pt.y, w, T * 0.5, 'rgba(20,24,28,0.85)');
+        let x = pt.x - w / 2 + T * 0.18;
+        for (const it of L.items) {
+          if (it.it) { const s = A.item(it.it); g.drawImage(s.c, x, pt.y - ic / 2 - 2, ic, ic * s.h / s.w); x += ic + 2; }
+          V.text(it.s, x, pt.y + 1, fs, it.n >= it.cap ? P.amber : '#ffffff', null, 'left');
+          x += it.w + T * 0.22;
+        }
       } else if (L.k === 'mat') {
         V.text(L.s, pt.x, pt.y + 1, T * 0.48, L.col, P.ink, 'left');
       } else if (L.k === 'warn') {
@@ -1017,7 +1081,7 @@
       } else if (L.k === 'cash') {
         V.text(L.s, pt.x, pt.y, T * 0.5, P.cashL, P.ink);
       } else if (L.k === 'hp') {
-        const w = L.big ? T * 2.4 : T * 0.9, h = L.big ? 9 : 6;
+        const w = L.big ? T * 2.4 : (L.cmd ? T * 1.1 : T * 0.9), h = L.big ? 9 : (L.cmd ? 7 : 6);
         D.rr(g, pt.x - w / 2 - 1, pt.y - h / 2 - 1, w + 2, h + 2, 3); g.fillStyle = P.ink; g.fill();
         g.fillStyle = L.bug ? P.acid : (L.f > 0.5 ? P.cashL : (L.f > 0.25 ? P.amber : '#ff5a5a'));
         g.fillRect(pt.x - w / 2, pt.y - h / 2, w * HB.clamp(L.f, 0, 1), h);

@@ -1,4 +1,4 @@
-# HIVE BREAKER — Funcional v0.4.1
+# HIVE BREAKER — Funcional v0.5
 
 Arcade Idle Tycoon para Android. Aterrizas como comandante en un planeta infestado:
 recoges mineral con tus propias manos, lo fundes, lo vendes a la flota y con cada
@@ -15,6 +15,20 @@ construido tiene que aguantar. Región a región, hasta matar a la Reina.
 ---
 
 ## 0. Cambios
+
+### v0.5 (28/10/2026)
+- **Mejoras de las máquinas**: todas las máquinas de la región llegan al **nivel 3**, y el
+  cartel de cada mejora dice lo que da («+50 % almacén · +33 % velocidad»). Al acercarse a la
+  bandeja de entrada o de salida de una máquina se ve cuánto lleva y cuánto cabe («12/30»)
+  (6.2, 18).
+- **Laboratorio**: la investigación (10.3) se hace en un **edificio que se construye** en la
+  región y se abre **al pisarlo**, como todo lo demás (4.1). Se paga con **Muestras** + tiempo.
+- **Dron artillero** en la región 1 (antes, fase 3): se compra **en cada torreta** y lleva la
+  munición de la fábrica a su torreta; de noche se refugia como los demás drones (7).
+- **Vida del comandante**: la barra se ve siempre de noche y **se cura sola de día** (4.3).
+- **Orden del prototipo**: las mejoras y el laboratorio van **antes** que la región 2 (21).
+- **Los ajustes de balance se posponen** (27/10/2026) para equilibrar varias facetas a la
+  vez: la curva de precios (6.3) y la duración de la región 1 (6.4) (24.1).
 
 ### v0.4.1 (17/10/2026)
 - **El test de mercado, lo último del proyecto**: se hace al subir el juego a producción en
@@ -200,6 +214,8 @@ Velocidad inicial: 4 casillas/s.
 
 ### 4.3 Combate y vida
 - Auto-apuntado al bicho más cercano en rango (4 casillas). Daño base 10, cadencia 3/s.
+- **Vida 100** (la investigación la sube, 4.5). Barra sobre la cabeza: **siempre visible de
+  noche**, y de día mientras esté herido. **De día se cura sola** (decidido 28/10/2026).
 - Si cae, reaparece en la Torre de mando a los 5 s (con vídeo, al instante).
   **Nunca hay «game over» por el comandante.**
 
@@ -334,7 +350,7 @@ del flanco que se abre con la Expansión: rinde más, pero está más expuesto.
 | Pad de torreta | — | El jugador **elige** el tipo (2-3 opciones) |
 | Muro | Segmento | Se levanta; canaliza a los bichos |
 | Contratación | Dron minero, Dron de carga | Aparece un dron con su ruta fija |
-| Mejora | Junto a cada máquina, pad o torreta | Sube un nivel (máx. 3): velocidad · capacidad · menos Calor |
+| Mejora | Junto a cada máquina, pad o torreta | Sube un nivel (máx. 3; **todas las máquinas llegan al 3**, decidido 28/10/2026): velocidad · capacidad de las bandejas de entrada y salida · menos Calor. El cartel dice lo que da («+50 % almacén · +33 % velocidad») |
 | Nido | Última zona | Abre la noche del jefe |
 
 **Zonas con materiales** (decidido 16/10/2026): las zonas grandes (máquinas avanzadas,
@@ -379,7 +395,12 @@ cambie algo visible en la base.
   Copper → Bobinadora).
 - **Dron de carga:** ruta fija entre dos puntos marcados en su pad
   (p. ej. Fundición → Fáb. munición, o Fáb. munición → Exportación).
-- **Dron artillero** (fase 3): rellena torretas desde el Arsenal.
+- **Dron artillero** (región 1, decidido 28/10/2026; antes, fase 3): se compra **en cada
+  torreta**, en una zona de pago junto a ella. Su dron va y viene entre la fábrica y su
+  torreta: Ammo desde la Fábrica de munición; Cells desde el Taller de celdas para la Shock.
+  De noche se refugia si hay bichos cerca, como los demás: el comandante sigue contando cuando
+  aprieta. Aparece después de la noche 2 (cuando ya se ha aprendido a rellenar a mano). El
+  Arsenal cubre a la vez las torretas de su radio; el dron, una sola, esté donde esté.
 - Valores iniciales: capacidad 4, velocidad 2,5 casillas/s.
 - Mejoras en cada pad: capacidad · velocidad · +1 dron (máx. 3 por ruta).
 - **Capacidad de paso = drones × capacidad × velocidad.** Si sobra producción, la pila
@@ -502,7 +523,9 @@ Se puede volver a cualquier región conquistada (su base y su cartera se conserv
   pausa hasta que lo limpies. **Nunca se pierde.**
 
 ### 10.3 Investigación (Laboratorio, permanente)
-- Pantalla del Cuartel General. Cuesta Muestras + **tiempo** (de 5 min a 8 h).
+- **Laboratorio** (decidido 28/10/2026): un edificio que se construye en la región (una zona
+  de pago, como las demás) y se abre **al pisarlo** (4.1). Lo investigado vale para siempre y
+  en todas las regiones. Cuesta **Muestras** + **tiempo** (de 5 min a 8 h).
 - 1 investigación a la vez; 2.ª ranura en R5.
 - Acelerar: vídeo (−30 min, 5 al día) o Gemas.
 - 4 ramas: **Producción · Energía · Armamento · Comandante.**
@@ -875,6 +898,8 @@ revivir sin vídeo · niveles del pase · cosméticos · cofres de **contenido f
 ```
 
 - Portrait. El juego ocupa toda la pantalla; el joystick aparece donde toques.
+- **Bandejas**: al acercarse a la entrada o la salida de una máquina, cuánto lleva y cuánto
+  cabe («12/30»); si se llena, «MAX» (decidido 28/10/2026).
 - **Cuellos de botella a un toque:** icono ámbar sobre la máquina parada («NO INPUT»,
   «NO POWER», «OUTPUT FULL»). El botón de alertas del HUD centra la cámara en cada uno.
 - Botón atrás de Android: estilo `HDBack()`, cierra ventanas de dentro afuera; de
@@ -946,14 +971,16 @@ provoca **«una más»**. Contenido, el justo.
 crecer a los 7 minutos):
 - R1 completa: ~30 zonas, 2 flancos, 1 Expansión, Nido. Unos 25 minutos (6.4).
 - **Mapa del planeta** y **R2 (The Mire)** completa, con su jefe.
-- **Investigación**, primera versión: pocos nodos de las 4 ramas, con Muestras (10.3).
+- **Investigación**, primera versión: el **Laboratorio** de la región 1, pocos nodos de las 4
+  ramas, con Muestras (10.3); esperas cortas (1-5 min) para poder probarlo.
 - Comandante: joystick, pila, minado, auto-disparo, reaparición.
 - Objetos: Ore, Plate, Ammo, Copper, Coil, Cell (R1) y Biomass, Fuel (R2). Monedas:
   Créditos y Muestras (Gemas sólo para probar el cofre).
 - Máquinas: Fundición, Fáb. munición, Bobinadora, Taller de celdas, Exportación, Solar,
   Disipador, Arsenal, Radar + Torre de mando (R1); Refinería y Generador (R2).
 - Zonas con materiales (6.2).
-- Drones: minero y de carga.
+- Drones: minero, de carga y **artillero** (7).
+- Mejoras: nivel 3 en todas las máquinas, con lo que da cada una a la vista (6.2).
 - Defensa: Gatling, Cannon, Shock, muros (R1); Flak y Flamer (R2).
 - Bichos: Swarmer, Leaper, Crusher + Brood Mother (R1); Spitter (R2).
 - Calor-reloj con «provocar», energía con brownout, prioridad DEFENSE / BALANCED /
@@ -994,9 +1021,11 @@ criterios de jugadores se miden en la **prueba cerrada de Play Console**, con la
 6. Tutorial + guardado/offline + vídeos simulados.
 7. R1 con dos metales: Copper, Bobinadora, Taller de celdas, Shock, Arsenal, Radar y
    zonas con materiales; R1 de unos 25 min en el simulador.
-8. Mapa del planeta + R2 (The Mire): Biomass → Refinería → Fuel → Generador, Spitter,
+8. Mejoras (decidido 28/10/2026: antes que la región 2): nivel 3 en todas las máquinas con
+   lo que da cada una a la vista, vida del comandante visible y curación de día, dron
+   artillero y **Laboratorio** con la investigación, primera versión (Muestras).
+9. Mapa del planeta + R2 (The Mire): Biomass → Refinería → Fuel → Generador, Spitter,
    Flak y Flamer.
-9. Investigación, primera versión.
 10. Balance con simulador, vídeos de 15-30 s y prueba cerrada en Play Console (antes:
     comprobar la marca y fijar el identificador de la app, 16) → decisión go/no-go.
 
@@ -1082,6 +1111,12 @@ invertir en captación.
 | 16 | Construir | Las zonas grandes piden **Créditos y materiales**; Arsenal y Radar, edificios de R1 (16/10/2026) | 6.2, 9.1 |
 | 17 | Duración de R1 | **~25 min**, por ahora (16/10/2026) | 6.4 |
 | 18 | Pruebas | **Sin prueba con 5 personas**: se prueba en la prueba cerrada de Play Console. El prototipo suma R2 e investigación (16/10/2026) | 21 |
+| 19 | Balance | Los ajustes (curva de precios y duración de R1) se **posponen** para equilibrar varias facetas a la vez (27/10/2026) | 6.3, 6.4 |
+| 20 | Mejoras de máquinas | **Nivel 3 en todas**, y el cartel dice lo que da; las bandejas enseñan «12/30» (28/10/2026) | 6.2, 18 |
+| 21 | Laboratorio | **Edificio** que se construye y se abre al pisarlo; se paga con **Muestras** (28/10/2026) | 10.3 |
+| 22 | Dron artillero | En **R1**, comprado **en cada torreta**; de noche se refugia (28/10/2026) | 7 |
+| 23 | Vida del comandante | Barra **visible de noche**; **se cura de día** (28/10/2026) | 4.3 |
+| 24 | Orden del prototipo | Mejoras y Laboratorio **antes** que la región 2 (28/10/2026) | 21 |
 
 ### 24.2 Abiertas
 Ninguna por ahora. Las próximas saldrán del simulador (hito 1) y de la primera prueba

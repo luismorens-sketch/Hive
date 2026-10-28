@@ -218,6 +218,13 @@ if (HB) {
         const nestZ = d.zones.find(function (z) { return z.kind === 'nest'; });
         if (nestZ && !HB.Night.field(R, false)) bad(rid + ': sin campo de flujo');
       }
+      // Todas las máquinas llegan al nivel 3 con sus mejoras (funcional v0.5, 6.2)
+      for (const e of ents) {
+        const m = HB.MACHINES[e.type];
+        if (m.kind !== 'proc' && m.kind !== 'export') continue;
+        const ups = d.zones.filter(function (z) { return z.kind === 'upgrade' && z.target === e.id; }).length;
+        if (ups !== m.levels.length - 1) bad(rid + ': ' + e.id + ' tiene ' + ups + ' mejoras y debería llegar al nivel ' + m.levels.length);
+      }
       if (failed === before) ok(rid + ': ' + d.zones.length + ' zonas, ' + pads.length + ' sitios que se pisan, nada se solapa, los bichos llegan desde cada flanco');
     }
   }
@@ -226,7 +233,7 @@ if (HB) {
   {
     try {
       const { run } = require('./sim_balance');
-      // La región 1 dura unos 30 min del robot (0.12.0); 90 deja margen.
+      // La región 1 dura unos 38 min del robot (0.13.0); 90 deja margen.
       const LIMIT = 90;
       const r = run({ minutos: LIMIT, seed: 777 });
       if (r.zones.length === 0) bad('el robot no ha comprado ninguna zona');

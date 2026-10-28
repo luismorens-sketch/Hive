@@ -9,8 +9,8 @@
   'use strict';
 
   HB.CONFIG = {
-    version: '0.12.0',      // sube con cada versión que se publica para probar
-    hito: 7,               // hito del funcional 21 en el que estamos
+    version: '0.13.0',      // sube con cada versión que se publica para probar
+    hito: 8,               // hito del funcional 21 en el que estamos
     tickHz: 30,            // movimiento, combate y acciones (funcional 20: paso fijo 30 Hz)
     econEvery: 3,          // la economía corre 1 de cada 3 pasos = 10 Hz
     viewTiles: 10,         // casillas que caben a lo ancho de la pantalla (en un móvil en vertical)
@@ -31,6 +31,7 @@
       dmg: 10, rate: 3, range: 4,
       stillBonus: 1.3,     // quieto, +30 % de cadencia
       respawn: 5,          // reaparece en la Torre de mando a los 5 s
+      heal: 5,             // de día se cura solo: 5 de vida por segundo (funcional v0.5, 4.3)
       magnet: 2.0,         // radio de imán del botín
       repairEvery: 0.25,   // reparar: una placa cada 0,25 s...
       repairHp: 30,        // ...arregla 30 puntos de vida
@@ -323,6 +324,12 @@
         { id: 'turret_s2_l2',  kind: 'upgrade',   x: 9.6,  y: 43.9, target: 'turret_s2', req: ['turret_s2'] },
         { id: 'smelter_2_l2',  kind: 'upgrade',   x: 6.6,  y: 24.45, target: 'smelter_2', mats: { plate: 10 }, req: ['smelter_2'] },
         { id: 'dissipator_1',  kind: 'machine',   x: 11.0, y: 34.8, type: 'dissipator', mats: { plate: 10 } },
+        // nivel 3 para todas las máquinas (funcional v0.5, 6.2); piden más energía: un quinto panel
+        { id: 'ammo_fab_l3',   kind: 'upgrade',   x: 9.9,  y: 30.6, target: 'ammo_fab', mats: { plate: 10 }, req: ['ammo_fab_l2'] },
+        { id: 'winder_l3',     kind: 'upgrade',   x: 6.6,  y: 14.25, target: 'winder', mats: { coil: 10 }, req: ['winder_l2'] },
+        { id: 'solar_5',       kind: 'machine',   x: 5.0,  y: 26.6, type: 'solar', mats: { coil: 6 }, req: ['winder_l3'] },
+        { id: 'smelter_2_l3',  kind: 'upgrade',   x: 6.6,  y: 24.45, target: 'smelter_2', mats: { coil: 8 }, req: ['smelter_2_l2'] },
+        { id: 'cell_works_l3', kind: 'upgrade',   x: 6.6,  y: 19.05, target: 'cell_works', mats: { cell: 6 }, req: ['cell_works_l2'] },
         { id: 'nest',          kind: 'nest',      x: 6.0,  y: 50.8, mult: 1.5 },
       ],
     },
