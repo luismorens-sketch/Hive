@@ -426,6 +426,23 @@ defiende sin dudar: una persona perderá más. El simulador también dice cuánd
 cada paso del tutorial, cuántas cajas de suministro caen y las Gemas que gana (150: los dos
 cofres).
 
+## Propuestas del autor (28/10/2026), pendientes de decidir los detalles
+
+1. **Más capacidad en las bandejas de entrada y salida.** Ya existe a medias: mejorar una
+   máquina sube su almacén (20 → 30 → 40) y su velocidad, pero el cartel solo dice «LV 2», y
+   en la región 1 casi todas las máquinas tienen un solo nivel de mejora (solo la Fundición 1
+   y la Exportación llegan al 3). Propuesta: que el cartel diga lo que da, ver «12/30» al
+   acercarse a una bandeja, y nivel 3 para todas (alarga la región).
+2. **Un laboratorio** para mejorar al comandante (pila, vida, daño…): es la Investigación del
+   funcional (10.3, hito 9). El comandante ya tiene vida (100), pero la barra solo sale cuando
+   está herido y no se cura hasta que cae. Por decidir: edificio en la base o pantalla de la
+   Torre de mando; Muestras + tiempo o dinero; barra de vida visible y curarse de día.
+3. **Minidrones que rellenan cada torreta**: es el «dron artillero» del funcional 7, que estaba
+   para la fase 3. Propuesta: una obra junto a cada torreta; el dron va y viene entre la
+   fábrica y su torreta, y de noche se refugia como los demás.
+
+Orden propuesto: 1 → 3 → 2, antes de la región 2. Preguntado al autor.
+
 ## Lo siguiente
 
 1. **Hito 8**: el mapa del planeta y la región 2 (The Mire), con su material nuevo (funcional
